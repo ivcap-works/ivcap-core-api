@@ -3,13 +3,13 @@
 // order HTTP client types
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
-	order "cayp/api_gateway/gen/order"
-	orderviews "cayp/api_gateway/gen/order/views"
+	order "github.com/reinventingscience/ivcap-core-api/gen/order"
+	orderviews "github.com/reinventingscience/ivcap-core-api/gen/order/views"
 
 	goa "goa.design/goa/v3/pkg"
 )

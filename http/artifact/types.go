@@ -3,13 +3,13 @@
 // artifact HTTP client types
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
-	artifact "cayp/api_gateway/gen/artifact"
-	artifactviews "cayp/api_gateway/gen/artifact/views"
+	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
+	artifactviews "github.com/reinventingscience/ivcap-core-api/gen/artifact/views"
 
 	goa "goa.design/goa/v3/pkg"
 )

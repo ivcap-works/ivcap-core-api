@@ -3,12 +3,12 @@
 // session HTTP client CLI support package
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
-	session "cayp/api_gateway/gen/session"
+	session "github.com/reinventingscience/ivcap-core-api/gen/session"
 	"encoding/json"
 	"fmt"
 )

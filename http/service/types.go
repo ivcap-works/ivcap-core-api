@@ -3,13 +3,13 @@
 // service HTTP client types
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
-	service "cayp/api_gateway/gen/service"
-	serviceviews "cayp/api_gateway/gen/service/views"
+	service "github.com/reinventingscience/ivcap-core-api/gen/service"
+	serviceviews "github.com/reinventingscience/ivcap-core-api/gen/service/views"
 
 	goa "goa.design/goa/v3/pkg"
 )

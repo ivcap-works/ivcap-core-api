@@ -3,7 +3,7 @@
 // HTTP request path constructors for the order service.
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 

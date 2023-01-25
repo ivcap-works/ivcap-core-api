@@ -3,13 +3,13 @@
 // metadata HTTP client types
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
-	metadata "cayp/api_gateway/gen/metadata"
-	metadataviews "cayp/api_gateway/gen/metadata/views"
+	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
+	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
 
 	goa "goa.design/goa/v3/pkg"
 )

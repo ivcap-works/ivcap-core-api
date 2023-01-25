@@ -3,12 +3,12 @@
 // artifact HTTP client CLI support package
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
-	artifact "cayp/api_gateway/gen/artifact"
+	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
 	"encoding/json"
 	"fmt"
 	"strconv"

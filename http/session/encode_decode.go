@@ -3,13 +3,13 @@
 // session HTTP client encoders and decoders
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	session "cayp/api_gateway/gen/session"
+	session "github.com/reinventingscience/ivcap-core-api/gen/session"
 	"context"
 	"io"
 	"net/http"

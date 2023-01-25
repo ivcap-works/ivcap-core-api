@@ -3,14 +3,14 @@
 // metadata HTTP client encoders and decoders
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	metadata "cayp/api_gateway/gen/metadata"
-	metadataviews "cayp/api_gateway/gen/metadata/views"
+	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
+	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
 	"context"
 	"io"
 	"net/http"

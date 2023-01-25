@@ -3,14 +3,14 @@
 // service HTTP client encoders and decoders
 //
 // Command:
-// $ goa gen cayp/api_gateway/design
+// $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	service "cayp/api_gateway/gen/service"
-	serviceviews "cayp/api_gateway/gen/service/views"
+	service "github.com/reinventingscience/ivcap-core-api/gen/service"
+	serviceviews "github.com/reinventingscience/ivcap-core-api/gen/service/views"
 	"context"
 	"fmt"
 	"io"
