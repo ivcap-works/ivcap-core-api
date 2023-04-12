@@ -87,7 +87,11 @@ type ArtifactListItem struct {
 	Name *string
 	// Artifact status
 	Status *string
-	Links  *SelfT
+	// Size of aritfact in bytes
+	Size *int64
+	// Mime (content) type of artifact
+	MimeType *string
+	Links    *SelfT
 }
 
 // ArtifactListRT is the result type of the artifact service list method.
@@ -519,9 +523,11 @@ func transformArtifactviewsArtifactListItemViewToArtifactListItem(v *artifactvie
 		return nil
 	}
 	res := &ArtifactListItem{
-		ID:     v.ID,
-		Name:   v.Name,
-		Status: v.Status,
+		ID:       v.ID,
+		Name:     v.Name,
+		Status:   v.Status,
+		Size:     v.Size,
+		MimeType: v.MimeType,
 	}
 	if v.Links != nil {
 		res.Links = transformArtifactviewsSelfTViewToSelfT(v.Links)
@@ -577,9 +583,11 @@ func transformArtifactviewsNavTViewToNavT(v *artifactviews.NavTView) *NavT {
 // *ArtifactListItem.
 func transformArtifactListItemToArtifactviewsArtifactListItemView(v *ArtifactListItem) *artifactviews.ArtifactListItemView {
 	res := &artifactviews.ArtifactListItemView{
-		ID:     v.ID,
-		Name:   v.Name,
-		Status: v.Status,
+		ID:       v.ID,
+		Name:     v.Name,
+		Status:   v.Status,
+		Size:     v.Size,
+		MimeType: v.MimeType,
 	}
 	if v.Links != nil {
 		res.Links = transformSelfTToArtifactviewsSelfTView(v.Links)

@@ -541,3 +541,12 @@ func transformNavTToMetadataviewsNavTView(v *NavT) *metadataviews.NavTView {
 
 	return res
 }
+
+// AddRequestData holds both the payload and the HTTP request body reader of
+// the add method.
+type AddRequestData struct {
+        // Payload is the method payload.
+        Payload *AddPayload
+        // Body streams the HTTP request body.
+        Body io.ReadCloser
+}

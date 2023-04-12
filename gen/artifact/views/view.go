@@ -52,7 +52,11 @@ type ArtifactListItemView struct {
 	Name *string
 	// Artifact status
 	Status *string
-	Links  *SelfTView
+	// Size of aritfact in bytes
+	Size *int64
+	// Mime (content) type of artifact
+	MimeType *string
+	Links    *SelfTView
 }
 
 // SelfTView is a type that runs validations on a projected type.

@@ -270,8 +270,12 @@ type ArtifactListItemResponseBody struct {
 	// Optional name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Artifact status
-	Status *string            `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	Links  *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	// Size of aritfact in bytes
+	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
+	// Mime (content) type of artifact
+	MimeType *string            `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
+	Links    *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // SelfTResponseBody is used to define fields on response body types.

@@ -1026,9 +1026,11 @@ func DecodeAddMetadataResponse(decoder func(*http.Response) goahttp.Decoder, res
 // type *ArtifactListItemResponseBody.
 func unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView(v *ArtifactListItemResponseBody) *artifactviews.ArtifactListItemView {
 	res := &artifactviews.ArtifactListItemView{
-		ID:     v.ID,
-		Name:   v.Name,
-		Status: v.Status,
+		ID:       v.ID,
+		Name:     v.Name,
+		Status:   v.Status,
+		Size:     v.Size,
+		MimeType: v.MimeType,
 	}
 	res.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v.Links)
 
