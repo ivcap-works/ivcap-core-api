@@ -44,8 +44,3 @@ func UpdateServicePath(id string) string {
 func DeleteServicePath(id string) string {
 	return fmt.Sprintf("/1/services/%v", id)
 }
-
-// ListOrdersServicePath returns the URL path to the service service listOrders HTTP endpoint.
-func ListOrdersServicePath(id string) string {
-	return fmt.Sprintf("/1/services/%v/orders", id)
-}

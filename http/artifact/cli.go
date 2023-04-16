@@ -18,7 +18,6 @@ package client
 
 import (
 	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -258,84 +257,4 @@ func BuildReadPayload(artifactReadID string, artifactReadJWT string) (*artifact.
 	v.JWT = jwt
 
 	return v, nil
-}
-
-// BuildAddCollectionPayload builds the payload for the artifact addCollection
-// endpoint from CLI flags.
-func BuildAddCollectionPayload(artifactAddCollectionID string, artifactAddCollectionName string, artifactAddCollectionJWT string) (*artifact.AddCollectionPayload, error) {
-	var id string
-	{
-		id = artifactAddCollectionID
-	}
-	var name string
-	{
-		name = artifactAddCollectionName
-	}
-	var jwt string
-	{
-		jwt = artifactAddCollectionJWT
-	}
-	v := &artifact.AddCollectionPayload{}
-	v.ID = id
-	v.Name = name
-	v.JWT = jwt
-
-	return v, nil
-}
-
-// BuildRemoveCollectionPayload builds the payload for the artifact
-// removeCollection endpoint from CLI flags.
-func BuildRemoveCollectionPayload(artifactRemoveCollectionID string, artifactRemoveCollectionName string, artifactRemoveCollectionJWT string) (*artifact.RemoveCollectionPayload, error) {
-	var id string
-	{
-		id = artifactRemoveCollectionID
-	}
-	var name string
-	{
-		name = artifactRemoveCollectionName
-	}
-	var jwt string
-	{
-		jwt = artifactRemoveCollectionJWT
-	}
-	v := &artifact.RemoveCollectionPayload{}
-	v.ID = id
-	v.Name = name
-	v.JWT = jwt
-
-	return v, nil
-}
-
-// BuildAddMetadataPayload builds the payload for the artifact addMetadata
-// endpoint from CLI flags.
-func BuildAddMetadataPayload(artifactAddMetadataBody string, artifactAddMetadataID string, artifactAddMetadataSchema string, artifactAddMetadataJWT string) (*artifact.AddMetadataPayload, error) {
-	var err error
-	var body interface{}
-	{
-		err = json.Unmarshal([]byte(artifactAddMetadataBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"Rerum aut.\"")
-		}
-	}
-	var id string
-	{
-		id = artifactAddMetadataID
-	}
-	var schema string
-	{
-		schema = artifactAddMetadataSchema
-	}
-	var jwt string
-	{
-		jwt = artifactAddMetadataJWT
-	}
-	v := body
-	res := &artifact.AddMetadataPayload{
-		Meta: v,
-	}
-	res.ID = id
-	res.Schema = schema
-	res.JWT = jwt
-
-	return res, nil
 }

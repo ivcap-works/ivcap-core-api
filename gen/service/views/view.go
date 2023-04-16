@@ -36,14 +36,6 @@ type ServiceStatusRT struct {
 	View string
 }
 
-// OrderListRT is the viewed result type that is projected based on a view.
-type OrderListRT struct {
-	// Type to project
-	Projected *OrderListRTView
-	// View to render
-	View string
-}
-
 // ServiceListRTView is a type that runs validations on a projected type.
 type ServiceListRTView struct {
 	// Services
@@ -141,35 +133,6 @@ type ParameterOptTView struct {
 	Description *string
 }
 
-// OrderListRTView is a type that runs validations on a projected type.
-type OrderListRTView struct {
-	// Orders
-	Orders []*OrderListItemView
-	// Navigation links
-	Links *NavTView
-}
-
-// OrderListItemView is a type that runs validations on a projected type.
-type OrderListItemView struct {
-	// Order ID
-	ID *string
-	// Optional customer provided name
-	Name *string
-	// Order status
-	Status *string
-	// DateTime order was placed
-	OrderedAt *string
-	// DateTime processing of order started
-	StartedAt *string
-	// DateTime order was finished
-	FinishedAt *string
-	// ID of ordered service
-	ServiceID *string
-	// ID of ordered service
-	AccountID *string
-	Links     *SelfTView
-}
-
 var (
 	// ServiceListRTMap is a map indexing the attribute names of ServiceListRT by
 	// view name.
@@ -198,14 +161,6 @@ var (
 			"links",
 		},
 	}
-	// OrderListRTMap is a map indexing the attribute names of OrderListRT by view
-	// name.
-	OrderListRTMap = map[string][]string{
-		"default": {
-			"orders",
-			"links",
-		},
-	}
 )
 
 // ValidateServiceListRT runs the validations defined on the viewed result type
@@ -230,18 +185,6 @@ func ValidateServiceStatusRT(result *ServiceStatusRT) (err error) {
 		err = ValidateServiceStatusRTViewTiny(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default", "tiny"})
-	}
-	return
-}
-
-// ValidateOrderListRT runs the validations defined on the viewed result type
-// OrderListRT.
-func ValidateOrderListRT(result *OrderListRT) (err error) {
-	switch result.View {
-	case "default", "":
-		err = ValidateOrderListRTView(result.Projected)
-	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
 	}
 	return
 }
@@ -393,47 +336,5 @@ func ValidateParameterDefTView(result *ParameterDefTView) (err error) {
 // ValidateParameterOptTView runs the validations defined on ParameterOptTView.
 func ValidateParameterOptTView(result *ParameterOptTView) (err error) {
 
-	return
-}
-
-// ValidateOrderListRTView runs the validations defined on OrderListRTView
-// using the "default" view.
-func ValidateOrderListRTView(result *OrderListRTView) (err error) {
-	if result.Orders == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("orders", "result"))
-	}
-	if result.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
-	}
-	for _, e := range result.Orders {
-		if e != nil {
-			if err2 := ValidateOrderListItemView(e); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
-	if result.Links != nil {
-		if err2 := ValidateNavTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateOrderListItemView runs the validations defined on OrderListItemView.
-func ValidateOrderListItemView(result *OrderListItemView) (err error) {
-	if result.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
-	}
-	if result.Status != nil {
-		if !(*result.Status == "pending" || *result.Status == "executing" || *result.Status == "finished" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "executing", "finished", "error"}))
-		}
-	}
-	if result.Links != nil {
-		if err2 := ValidateSelfTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
 	return
 }

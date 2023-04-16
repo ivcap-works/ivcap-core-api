@@ -34,18 +34,3 @@ func UploadArtifactPath() string {
 func ReadArtifactPath(id string) string {
 	return fmt.Sprintf("/1/artifacts/%v", id)
 }
-
-// AddCollectionArtifactPath returns the URL path to the artifact service addCollection HTTP endpoint.
-func AddCollectionArtifactPath(id string, name string) string {
-	return fmt.Sprintf("/1/artifacts/%v/.collections/%v", id, name)
-}
-
-// RemoveCollectionArtifactPath returns the URL path to the artifact service removeCollection HTTP endpoint.
-func RemoveCollectionArtifactPath(id string, name string) string {
-	return fmt.Sprintf("/1/artifacts/%v/.collections/%v", id, name)
-}
-
-// AddMetadataArtifactPath returns the URL path to the artifact service addMetadata HTTP endpoint.
-func AddMetadataArtifactPath(id string, schema string) string {
-	return fmt.Sprintf("/1/artifacts/%v/.metadata/%v", id, schema)
-}

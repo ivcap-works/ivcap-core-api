@@ -242,7 +242,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		err = json.Unmarshal([]byte(serviceUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"cayp:account:acme\",\n      \"banner\": \"http://greenfelderwhite.biz/imelda_wyman\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Sed natus ut.\",\n            \"value\": \"Qui eos id iure soluta voluptates.\"\n         },\n         {\n            \"name\": \"Sed natus ut.\",\n            \"value\": \"Qui eos id iure soluta voluptates.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"provider-id\": \"cayp:provider:acme\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Repellendus molestias culpa aut assumenda quia.\",\n            \"uri\": \"http://dooley.net/noble\"\n         },\n         {\n            \"title\": \"Repellendus molestias culpa aut assumenda quia.\",\n            \"uri\": \"http://dooley.net/noble\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Vel iste doloremque voluptatem similique.\",\n         \"basic\": {\n            \"command\": [\n               \"Beatae libero.\",\n               \"Culpa nulla facilis voluptatem.\"\n            ],\n            \"cpu\": {\n               \"limit\": \"Eos officiis.\",\n               \"request\": \"Non eius perferendis culpa voluptates fuga.\"\n            },\n            \"image\": \"Distinctio consequatur aut voluptas deserunt et vel.\",\n            \"memory\": {\n               \"limit\": \"Eos officiis.\",\n               \"request\": \"Non eius perferendis culpa voluptates fuga.\"\n            }\n         },\n         \"opts\": \"Saepe repellendus.\",\n         \"type\": \"Eos quaerat voluptas distinctio ea sed ut.\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"cayp:account:acme\",\n      \"banner\": \"http://harber.org/guiseppe\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         },\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         },\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"provider-id\": \"cayp:provider:acme\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         },\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         },\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Reprehenderit molestiae cupiditate voluptas et voluptatibus illum.\",\n         \"basic\": {\n            \"command\": [\n               \"Aut voluptas.\",\n               \"Ut officiis consequatur corporis autem odit.\",\n               \"Unde fuga sed veniam.\"\n            ],\n            \"cpu\": {\n               \"limit\": \"Quidem nulla quae provident dolor amet nulla.\",\n               \"request\": \"Et aut autem deserunt sit architecto.\"\n            },\n            \"image\": \"Voluptatem explicabo aut adipisci.\",\n            \"memory\": {\n               \"limit\": \"Quidem nulla quae provident dolor amet nulla.\",\n               \"request\": \"Et aut autem deserunt sit architecto.\"\n            }\n         },\n         \"opts\": \"Deserunt fugiat hic eos quaerat voluptas distinctio.\",\n         \"type\": \"Pariatur aut.\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -342,24 +342,6 @@ func BuildDeletePayload(serviceDeleteID string, serviceDeleteJWT string) (*servi
 		jwt = serviceDeleteJWT
 	}
 	v := &service.DeletePayload{}
-	v.ID = id
-	v.JWT = jwt
-
-	return v, nil
-}
-
-// BuildListOrdersPayload builds the payload for the service listOrders
-// endpoint from CLI flags.
-func BuildListOrdersPayload(serviceListOrdersID string, serviceListOrdersJWT string) (*service.ListOrdersPayload, error) {
-	var id string
-	{
-		id = serviceListOrdersID
-	}
-	var jwt string
-	{
-		jwt = serviceListOrdersJWT
-	}
-	v := &service.ListOrdersPayload{}
 	v.ID = id
 	v.JWT = jwt
 

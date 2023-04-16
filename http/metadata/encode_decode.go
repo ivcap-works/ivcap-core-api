@@ -375,7 +375,7 @@ func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Requ
 	}
 	body = rd.Body
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AddMetadataPath()}
-	req, err := http.NewRequest("PUT", u.String(), body)
+	req, err := http.NewRequest("POST", u.String(), body)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("metadata", "add", u.String(), err)
 	}
@@ -541,6 +541,188 @@ func BuildAddStreamPayload(payload interface{}, fpath string) (*metadata.AddRequ
 	}
 	return &metadata.AddRequestData{
 		Payload: payload.(*metadata.AddPayload),
+		Body:    f,
+	}, nil
+}
+
+// BuildUpdateRequest instantiates a HTTP request object with method and path
+// set to call the "metadata" service "update" endpoint
+func (c *Client) BuildUpdateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		body io.Reader
+	)
+	rd, ok := v.(*metadata.UpdateRequestData)
+	if !ok {
+		return nil, goahttp.ErrInvalidType("metadata", "update", "metadata.UpdateRequestData", v)
+	}
+	body = rd.Body
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateMetadataPath()}
+	req, err := http.NewRequest("PUT", u.String(), body)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("metadata", "update", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeUpdateRequest returns an encoder for requests sent to the metadata
+// update server.
+func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		data, ok := v.(*metadata.UpdateRequestData)
+		if !ok {
+			return goahttp.ErrInvalidType("metadata", "update", "*metadata.UpdateRequestData", v)
+		}
+		p := data.Payload
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		if p.ContentType != nil {
+			head := *p.ContentType
+			req.Header.Set("Content-Type", head)
+		}
+		values := req.URL.Query()
+		values.Add("entity-id", p.EntityID)
+		values.Add("schema", p.Schema)
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeUpdateResponse returns a decoder for responses returned by the
+// metadata update endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+// DecodeUpdateResponse may return the following errors:
+//   - "bad-request" (type *metadata.BadRequestT): http.StatusBadRequest
+//   - "invalid-credential" (type *metadata.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-parameter" (type *metadata.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *metadata.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *metadata.NotImplementedT): http.StatusNotImplemented
+//   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body UpdateResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("metadata", "update", err)
+			}
+			p := NewUpdateAddMetaRTOK(&body)
+			view := "default"
+			vres := &metadataviews.AddMetaRT{Projected: p, View: view}
+			if err = metadataviews.ValidateAddMetaRT(vres); err != nil {
+				return nil, goahttp.ErrValidationError("metadata", "update", err)
+			}
+			res := metadata.NewAddMetaRT(vres)
+			return res, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body UpdateBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("metadata", "update", err)
+				}
+				err = ValidateUpdateBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("metadata", "update", err)
+				}
+				return nil, NewUpdateBadRequest(&body)
+			case "invalid-credential":
+				return nil, NewUpdateInvalidCredential()
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("metadata", "update", resp.StatusCode, string(body))
+			}
+		case http.StatusUnprocessableEntity:
+			var (
+				body UpdateInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("metadata", "update", err)
+			}
+			err = ValidateUpdateInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("metadata", "update", err)
+			}
+			return nil, NewUpdateInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body UpdateInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("metadata", "update", err)
+			}
+			err = ValidateUpdateInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("metadata", "update", err)
+			}
+			return nil, NewUpdateInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body UpdateNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("metadata", "update", err)
+			}
+			err = ValidateUpdateNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("metadata", "update", err)
+			}
+			return nil, NewUpdateNotImplemented(&body)
+		case http.StatusUnauthorized:
+			return nil, NewUpdateNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("metadata", "update", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// // BuildUpdateStreamPayload creates a streaming endpoint request payload from
+// the method payload and the path to the file to be streamed
+func BuildUpdateStreamPayload(payload interface{}, fpath string) (*metadata.UpdateRequestData, error) {
+	f, err := os.Open(fpath)
+	if err != nil {
+		return nil, err
+	}
+	return &metadata.UpdateRequestData{
+		Payload: payload.(*metadata.UpdatePayload),
 		Body:    f,
 	}, nil
 }

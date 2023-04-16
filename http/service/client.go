@@ -41,10 +41,6 @@ type Client struct {
 	// Delete Doer is the HTTP client used to make requests to the delete endpoint.
 	DeleteDoer goahttp.Doer
 
-	// ListOrders Doer is the HTTP client used to make requests to the listOrders
-	// endpoint.
-	ListOrdersDoer goahttp.Doer
-
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
 
@@ -73,7 +69,6 @@ func NewClient(
 		ReadDoer:            doer,
 		UpdateDoer:          doer,
 		DeleteDoer:          doer,
-		ListOrdersDoer:      doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -193,30 +188,6 @@ func (c *Client) Delete() goa.Endpoint {
 		resp, err := c.DeleteDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("service", "delete", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// ListOrders returns an endpoint that makes HTTP requests to the service
-// service listOrders server.
-func (c *Client) ListOrders() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeListOrdersRequest(c.encoder)
-		decodeResponse = DecodeListOrdersResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildListOrdersRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.ListOrdersDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "listOrders", err)
 		}
 		return decodeResponse(resp)
 	}

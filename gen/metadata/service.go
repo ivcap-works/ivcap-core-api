@@ -32,6 +32,10 @@ type Service interface {
 	Read(context.Context, *ReadPayload) (res *MetadataRecordRT, err error)
 	// Attach new metadata to an entity.
 	Add(context.Context, *AddPayload, io.ReadCloser) (res *AddMetaRT, err error)
+	// Revoke a previous record for the same entity and same schema with
+	// this new aspect. ONLY works if there is only one active record for the
+	// entity/schema pair.
+	Update(context.Context, *UpdatePayload, io.ReadCloser) (res *AddMetaRT, err error)
 	// Retract a previously created statement.
 	Revoke(context.Context, *RevokePayload) (err error)
 }
@@ -50,11 +54,11 @@ const ServiceName = "metadata"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [4]string{"list", "read", "add", "revoke"}
+var MethodNames = [5]string{"list", "read", "add", "update", "revoke"}
 
 // AddMetaRT is the result type of the metadata service add method.
 type AddMetaRT struct {
-	// Reference to service requested
+	// Reference to record created
 	RecordID string
 }
 
@@ -160,6 +164,14 @@ type MetadataRecordRT struct {
 	Schema *string
 	// Attached metadata aspect
 	Aspect interface{}
+	// Time this record was asserted
+	ValidFrom *string
+	// Time this record was revoked
+	ValidTo *string
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter *string
+	// Entity revoking this record at 'valid-to'
+	Revoker *string
 }
 
 type NavT struct {
@@ -206,6 +218,18 @@ type ServiceNotAvailableT struct {
 
 // Unauthorized access to resource
 type UnauthorizedT struct {
+}
+
+// UpdatePayload is the payload type of the metadata service update method.
+type UpdatePayload struct {
+	// Entity to which attach metadata
+	EntityID string
+	// Schema of metadata
+	Schema string
+	// Content-Type header, MUST be of application/json.
+	ContentType *string
+	// JWT used for authentication
+	JWT string
 }
 
 // Error returns an error description.
@@ -453,14 +477,32 @@ func newMetadataListItemRTView(res *MetadataListItemRT) *metadataviews.MetadataL
 // newMetadataRecordRT converts projected type MetadataRecordRT to service type
 // MetadataRecordRT.
 func newMetadataRecordRT(vres *metadataviews.MetadataRecordRTView) *MetadataRecordRT {
-	res := &MetadataRecordRT{}
+	res := &MetadataRecordRT{
+		RecordID:  vres.RecordID,
+		Entity:    vres.Entity,
+		Schema:    vres.Schema,
+		Aspect:    vres.Aspect,
+		ValidFrom: vres.ValidFrom,
+		ValidTo:   vres.ValidTo,
+		Asserter:  vres.Asserter,
+		Revoker:   vres.Revoker,
+	}
 	return res
 }
 
 // newMetadataRecordRTView projects result type MetadataRecordRT to projected
 // type MetadataRecordRTView using the "default" view.
 func newMetadataRecordRTView(res *MetadataRecordRT) *metadataviews.MetadataRecordRTView {
-	vres := &metadataviews.MetadataRecordRTView{}
+	vres := &metadataviews.MetadataRecordRTView{
+		RecordID:  res.RecordID,
+		Entity:    res.Entity,
+		Schema:    res.Schema,
+		Aspect:    res.Aspect,
+		ValidFrom: res.ValidFrom,
+		ValidTo:   res.ValidTo,
+		Asserter:  res.Asserter,
+		Revoker:   res.Revoker,
+	}
 	return vres
 }
 

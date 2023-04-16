@@ -44,8 +44,6 @@ type Service interface {
 	Update(context.Context, *UpdatePayload) (res *ServiceStatusRT, view string, err error)
 	// Delete an existing services.
 	Delete(context.Context, *DeletePayload) (err error)
-	// List all orders for a services by ID
-	ListOrders(context.Context, *ListOrdersPayload) (res *OrderListRT, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -62,7 +60,7 @@ const ServiceName = "service"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [6]string{"list", "create", "read", "update", "delete", "listOrders"}
+var MethodNames = [5]string{"list", "create", "read", "update", "delete"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -127,15 +125,6 @@ type InvalidScopesT struct {
 	Message string
 }
 
-// ListOrdersPayload is the payload type of the service service listOrders
-// method.
-type ListOrdersPayload struct {
-	// ID of services to show
-	ID string
-	// JWT used for authentication
-	JWT string
-}
-
 // ListPayload is the payload type of the service service list method.
 type ListPayload struct {
 	// The $filter system query option allows clients to filter a collection of
@@ -181,34 +170,6 @@ type NavT struct {
 type NotImplementedT struct {
 	// Information message
 	Message string
-}
-
-type OrderListItem struct {
-	// Order ID
-	ID *string
-	// Optional customer provided name
-	Name *string
-	// Order status
-	Status *string
-	// DateTime order was placed
-	OrderedAt *string
-	// DateTime processing of order started
-	StartedAt *string
-	// DateTime order was finished
-	FinishedAt *string
-	// ID of ordered service
-	ServiceID *string
-	// ID of ordered service
-	AccountID *string
-	Links     *SelfT
-}
-
-// OrderListRT is the result type of the service service listOrders method.
-type OrderListRT struct {
-	// Orders
-	Orders []*OrderListItem
-	// Navigation links
-	Links *NavT
 }
 
 type ParameterDefT struct {
@@ -567,19 +528,6 @@ func NewViewedServiceStatusRT(res *ServiceStatusRT, view string) *serviceviews.S
 	return vres
 }
 
-// NewOrderListRT initializes result type OrderListRT from viewed result type
-// OrderListRT.
-func NewOrderListRT(vres *serviceviews.OrderListRT) *OrderListRT {
-	return newOrderListRT(vres.Projected)
-}
-
-// NewViewedOrderListRT initializes viewed result type OrderListRT from result
-// type OrderListRT using the given view.
-func NewViewedOrderListRT(res *OrderListRT, view string) *serviceviews.OrderListRT {
-	p := newOrderListRTView(res)
-	return &serviceviews.OrderListRT{Projected: p, View: "default"}
-}
-
 // newServiceListRT converts projected type ServiceListRT to service type
 // ServiceListRT.
 func newServiceListRT(vres *serviceviews.ServiceListRTView) *ServiceListRT {
@@ -710,38 +658,6 @@ func newServiceStatusRTViewTiny(res *ServiceStatusRT) *serviceviews.ServiceStatu
 	}
 	if res.Links != nil {
 		vres.Links = transformSelfTToServiceviewsSelfTView(res.Links)
-	}
-	return vres
-}
-
-// newOrderListRT converts projected type OrderListRT to service type
-// OrderListRT.
-func newOrderListRT(vres *serviceviews.OrderListRTView) *OrderListRT {
-	res := &OrderListRT{}
-	if vres.Orders != nil {
-		res.Orders = make([]*OrderListItem, len(vres.Orders))
-		for i, val := range vres.Orders {
-			res.Orders[i] = transformServiceviewsOrderListItemViewToOrderListItem(val)
-		}
-	}
-	if vres.Links != nil {
-		res.Links = transformServiceviewsNavTViewToNavT(vres.Links)
-	}
-	return res
-}
-
-// newOrderListRTView projects result type OrderListRT to projected type
-// OrderListRTView using the "default" view.
-func newOrderListRTView(res *OrderListRT) *serviceviews.OrderListRTView {
-	vres := &serviceviews.OrderListRTView{}
-	if res.Orders != nil {
-		vres.Orders = make([]*serviceviews.OrderListItemView, len(res.Orders))
-		for i, val := range res.Orders {
-			vres.Orders[i] = transformOrderListItemToServiceviewsOrderListItemView(val)
-		}
-	}
-	if res.Links != nil {
-		vres.Links = transformNavTToServiceviewsNavTView(res.Links)
 	}
 	return vres
 }
@@ -1004,49 +920,6 @@ func transformParameterOptTToServiceviewsParameterOptTView(v *ParameterOptT) *se
 	res := &serviceviews.ParameterOptTView{
 		Value:       v.Value,
 		Description: v.Description,
-	}
-
-	return res
-}
-
-// transformServiceviewsOrderListItemViewToOrderListItem builds a value of type
-// *OrderListItem from a value of type *serviceviews.OrderListItemView.
-func transformServiceviewsOrderListItemViewToOrderListItem(v *serviceviews.OrderListItemView) *OrderListItem {
-	if v == nil {
-		return nil
-	}
-	res := &OrderListItem{
-		ID:         v.ID,
-		Name:       v.Name,
-		Status:     v.Status,
-		OrderedAt:  v.OrderedAt,
-		StartedAt:  v.StartedAt,
-		FinishedAt: v.FinishedAt,
-		ServiceID:  v.ServiceID,
-		AccountID:  v.AccountID,
-	}
-	if v.Links != nil {
-		res.Links = transformServiceviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformOrderListItemToServiceviewsOrderListItemView builds a value of type
-// *serviceviews.OrderListItemView from a value of type *OrderListItem.
-func transformOrderListItemToServiceviewsOrderListItemView(v *OrderListItem) *serviceviews.OrderListItemView {
-	res := &serviceviews.OrderListItemView{
-		ID:         v.ID,
-		Name:       v.Name,
-		Status:     v.Status,
-		OrderedAt:  v.OrderedAt,
-		StartedAt:  v.StartedAt,
-		FinishedAt: v.FinishedAt,
-		ServiceID:  v.ServiceID,
-		AccountID:  v.AccountID,
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToServiceviewsSelfTView(v.Links)
 	}
 
 	return res

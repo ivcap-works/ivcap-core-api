@@ -35,18 +35,6 @@ type Client struct {
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
 
-	// AddCollection Doer is the HTTP client used to make requests to the
-	// addCollection endpoint.
-	AddCollectionDoer goahttp.Doer
-
-	// RemoveCollection Doer is the HTTP client used to make requests to the
-	// removeCollection endpoint.
-	RemoveCollectionDoer goahttp.Doer
-
-	// AddMetadata Doer is the HTTP client used to make requests to the addMetadata
-	// endpoint.
-	AddMetadataDoer goahttp.Doer
-
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
 
@@ -70,18 +58,15 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ListDoer:             doer,
-		UploadDoer:           doer,
-		ReadDoer:             doer,
-		AddCollectionDoer:    doer,
-		RemoveCollectionDoer: doer,
-		AddMetadataDoer:      doer,
-		CORSDoer:             doer,
-		RestoreResponseBody:  restoreBody,
-		scheme:               scheme,
-		host:                 host,
-		decoder:              dec,
-		encoder:              enc,
+		ListDoer:            doer,
+		UploadDoer:          doer,
+		ReadDoer:            doer,
+		CORSDoer:            doer,
+		RestoreResponseBody: restoreBody,
+		scheme:              scheme,
+		host:                host,
+		decoder:             dec,
+		encoder:             enc,
 	}
 }
 
@@ -152,78 +137,6 @@ func (c *Client) Read() goa.Endpoint {
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("artifact", "read", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// AddCollection returns an endpoint that makes HTTP requests to the artifact
-// service addCollection server.
-func (c *Client) AddCollection() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeAddCollectionRequest(c.encoder)
-		decodeResponse = DecodeAddCollectionResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildAddCollectionRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.AddCollectionDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("artifact", "addCollection", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// RemoveCollection returns an endpoint that makes HTTP requests to the
-// artifact service removeCollection server.
-func (c *Client) RemoveCollection() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeRemoveCollectionRequest(c.encoder)
-		decodeResponse = DecodeRemoveCollectionResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildRemoveCollectionRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.RemoveCollectionDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("artifact", "removeCollection", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// AddMetadata returns an endpoint that makes HTTP requests to the artifact
-// service addMetadata server.
-func (c *Client) AddMetadata() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeAddMetadataRequest(c.encoder)
-		decodeResponse = DecodeAddMetadataResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildAddMetadataRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.AddMetadataDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("artifact", "addMetadata", err)
 		}
 		return decodeResponse(resp)
 	}

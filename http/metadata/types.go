@@ -35,7 +35,7 @@ type ListResponseBody struct {
 	// Optional json path to further filter on returned list
 	AspectPath *string `form:"aspect-path,omitempty" json:"aspect-path,omitempty" xml:"aspect-path,omitempty"`
 	// Time at which this list was valid
-	AtTime *string `form:"$at-time,omitempty" json:"$at-time,omitempty" xml:"$at-time,omitempty"`
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
 	// Navigation links
 	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
@@ -51,12 +51,27 @@ type ReadResponseBody struct {
 	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
 	// Attached metadata aspect
 	Aspect interface{} `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
+	// Time this record was asserted
+	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
+	// Time this record was revoked
+	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter *string `form:"asserter,omitempty" json:"asserter,omitempty" xml:"asserter,omitempty"`
+	// Entity revoking this record at 'valid-to'
+	Revoker *string `form:"revoker,omitempty" json:"revoker,omitempty" xml:"revoker,omitempty"`
 }
 
 // AddResponseBody is the type of the "metadata" service "add" endpoint HTTP
 // response body.
 type AddResponseBody struct {
-	// Reference to service requested
+	// Reference to record created
+	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
+}
+
+// UpdateResponseBody is the type of the "metadata" service "update" endpoint
+// HTTP response body.
+type UpdateResponseBody struct {
+	// Reference to record created
 	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
 }
 
@@ -156,6 +171,40 @@ type AddInvalidScopesResponseBody struct {
 // AddNotImplementedResponseBody is the type of the "metadata" service "add"
 // endpoint HTTP response body for the "not-implemented" error.
 type AddNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateBadRequestResponseBody is the type of the "metadata" service "update"
+// endpoint HTTP response body for the "bad-request" error.
+type UpdateBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateInvalidParameterResponseBody is the type of the "metadata" service
+// "update" endpoint HTTP response body for the "invalid-parameter" error.
+type UpdateInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// UpdateInvalidScopesResponseBody is the type of the "metadata" service
+// "update" endpoint HTTP response body for the "invalid-scopes" error.
+type UpdateInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateNotImplementedResponseBody is the type of the "metadata" service
+// "update" endpoint HTTP response body for the "not-implemented" error.
+type UpdateNotImplementedResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
@@ -296,10 +345,14 @@ func NewListNotAuthorized() *metadata.UnauthorizedT {
 // from a HTTP "OK" response.
 func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadataviews.MetadataRecordRTView {
 	v := &metadataviews.MetadataRecordRTView{
-		RecordID: body.RecordID,
-		Entity:   body.Entity,
-		Schema:   body.Schema,
-		Aspect:   body.Aspect,
+		RecordID:  body.RecordID,
+		Entity:    body.Entity,
+		Schema:    body.Schema,
+		Aspect:    body.Aspect,
+		ValidFrom: body.ValidFrom,
+		ValidTo:   body.ValidTo,
+		Asserter:  body.Asserter,
+		Revoker:   body.Revoker,
 	}
 
 	return v
@@ -424,6 +477,75 @@ func NewAddNotImplemented(body *AddNotImplementedResponseBody) *metadata.NotImpl
 // NewAddNotAuthorized builds a metadata service add endpoint not-authorized
 // error.
 func NewAddNotAuthorized() *metadata.UnauthorizedT {
+	v := &metadata.UnauthorizedT{}
+
+	return v
+}
+
+// NewUpdateAddMetaRTOK builds a "metadata" service "update" endpoint result
+// from a HTTP "OK" response.
+func NewUpdateAddMetaRTOK(body *UpdateResponseBody) *metadataviews.AddMetaRTView {
+	v := &metadataviews.AddMetaRTView{
+		RecordID: body.RecordID,
+	}
+
+	return v
+}
+
+// NewUpdateBadRequest builds a metadata service update endpoint bad-request
+// error.
+func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *metadata.BadRequestT {
+	v := &metadata.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateInvalidCredential builds a metadata service update endpoint
+// invalid-credential error.
+func NewUpdateInvalidCredential() *metadata.InvalidCredentialsT {
+	v := &metadata.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewUpdateInvalidParameter builds a metadata service update endpoint
+// invalid-parameter error.
+func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *metadata.InvalidParameterValue {
+	v := &metadata.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewUpdateInvalidScopes builds a metadata service update endpoint
+// invalid-scopes error.
+func NewUpdateInvalidScopes(body *UpdateInvalidScopesResponseBody) *metadata.InvalidScopesT {
+	v := &metadata.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateNotImplemented builds a metadata service update endpoint
+// not-implemented error.
+func NewUpdateNotImplemented(body *UpdateNotImplementedResponseBody) *metadata.NotImplementedT {
+	v := &metadata.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateNotAuthorized builds a metadata service update endpoint
+// not-authorized error.
+func NewUpdateNotAuthorized() *metadata.UnauthorizedT {
 	v := &metadata.UnauthorizedT{}
 
 	return v
@@ -611,6 +733,48 @@ func ValidateAddInvalidScopesResponseBody(body *AddInvalidScopesResponseBody) (e
 // ValidateAddNotImplementedResponseBody runs the validations defined on
 // add_not-implemented_response_body
 func ValidateAddNotImplementedResponseBody(body *AddNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateBadRequestResponseBody runs the validations defined on
+// update_bad-request_response_body
+func ValidateUpdateBadRequestResponseBody(body *UpdateBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateInvalidParameterResponseBody runs the validations defined on
+// update_invalid-parameter_response_body
+func ValidateUpdateInvalidParameterResponseBody(body *UpdateInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateInvalidScopesResponseBody runs the validations defined on
+// update_invalid-scopes_response_body
+func ValidateUpdateInvalidScopesResponseBody(body *UpdateInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateUpdateNotImplementedResponseBody runs the validations defined on
+// update_not-implemented_response_body
+func ValidateUpdateNotImplementedResponseBody(body *UpdateNotImplementedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

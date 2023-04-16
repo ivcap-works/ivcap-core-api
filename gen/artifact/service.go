@@ -32,12 +32,6 @@ type Service interface {
 	Upload(context.Context, *UploadPayload, io.ReadCloser) (res *ArtifactStatusRT, err error)
 	// Show artifacts by ID
 	Read(context.Context, *ReadPayload) (res *ArtifactStatusRT, err error)
-	// Add artifacts to a collection.
-	AddCollection(context.Context, *AddCollectionPayload) (err error)
-	// Remove artifacts from a collection.
-	RemoveCollection(context.Context, *RemoveCollectionPayload) (err error)
-	// Add metadata of a partiular schema to artifacts.
-	AddMetadata(context.Context, *AddMetadataPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -54,31 +48,7 @@ const ServiceName = "artifact"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [6]string{"list", "upload", "read", "addCollection", "removeCollection", "addMetadata"}
-
-// AddCollectionPayload is the payload type of the artifact service
-// addCollection method.
-type AddCollectionPayload struct {
-	// Artifact ID
-	ID string
-	// Name of collection to add this artifacts.
-	Name string
-	// JWT used for authentication
-	JWT string
-}
-
-// AddMetadataPayload is the payload type of the artifact service addMetadata
-// method.
-type AddMetadataPayload struct {
-	// Artifact ID
-	ID string
-	// Schema of metadata. This will replace any existing metadata with this schema.
-	Schema string
-	// Metadata of a specific schema.
-	Meta interface{}
-	// JWT used for authentication
-	JWT string
-}
+var MethodNames = [3]string{"list", "upload", "read"}
 
 type ArtifactListItem struct {
 	// Artifact ID
@@ -219,17 +189,6 @@ type ReadPayload struct {
 type RefT struct {
 	ID    *string
 	Links *SelfT
-}
-
-// RemoveCollectionPayload is the payload type of the artifact service
-// removeCollection method.
-type RemoveCollectionPayload struct {
-	// Artifact ID
-	ID string
-	// Name of collection to remove this artifacts from.
-	Name string
-	// JWT used for authentication
-	JWT string
 }
 
 // NotFound is the type returned when attempting to manage a resource that does

@@ -91,11 +91,19 @@ type MetadataRecordRTView struct {
 	Schema *string
 	// Attached metadata aspect
 	Aspect interface{}
+	// Time this record was asserted
+	ValidFrom *string
+	// Time this record was revoked
+	ValidTo *string
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter *string
+	// Entity revoking this record at 'valid-to'
+	Revoker *string
 }
 
 // AddMetaRTView is a type that runs validations on a projected type.
 type AddMetaRTView struct {
-	// Reference to service requested
+	// Reference to record created
 	RecordID *string
 }
 
@@ -108,14 +116,23 @@ var (
 			"entity-id",
 			"schema",
 			"aspect-path",
-			"$at-time",
+			"at-time",
 			"links",
 		},
 	}
 	// MetadataRecordRTMap is a map indexing the attribute names of
 	// MetadataRecordRT by view name.
 	MetadataRecordRTMap = map[string][]string{
-		"default": {},
+		"default": {
+			"record-id",
+			"entity",
+			"schema",
+			"aspect",
+			"valid-from",
+			"valid-to",
+			"asserter",
+			"revoker",
+		},
 	}
 	// AddMetaRTMap is a map indexing the attribute names of AddMetaRT by view name.
 	AddMetaRTMap = map[string][]string{
@@ -195,7 +212,7 @@ func ValidateListMetaRTView(result *ListMetaRTView) (err error) {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
 	}
 	if result.AtTime != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.$at-time", *result.AtTime, goa.FormatDateTime))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
 	}
 	if result.Links != nil {
 		if err2 := ValidateNavTView(result.Links); err2 != nil {
@@ -237,7 +254,24 @@ func ValidateNavTView(result *NavTView) (err error) {
 // ValidateMetadataRecordRTView runs the validations defined on
 // MetadataRecordRTView using the "default" view.
 func ValidateMetadataRecordRTView(result *MetadataRecordRTView) (err error) {
-
+	if result.RecordID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.record-id", *result.RecordID, goa.FormatURI))
+	}
+	if result.Entity != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.entity", *result.Entity, goa.FormatURI))
+	}
+	if result.Schema != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
+	}
+	if result.ValidFrom != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-from", *result.ValidFrom, goa.FormatDateTime))
+	}
+	if result.ValidTo != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-to", *result.ValidTo, goa.FormatDateTime))
+	}
+	if result.Revoker != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.revoker", *result.Revoker, goa.FormatDateTime))
+	}
 	return
 }
 

@@ -163,6 +163,45 @@ func BuildAddPayload(metadataAddEntityID string, metadataAddSchema string, metad
 	return v, nil
 }
 
+// BuildUpdatePayload builds the payload for the metadata update endpoint from
+// CLI flags.
+func BuildUpdatePayload(metadataUpdateEntityID string, metadataUpdateSchema string, metadataUpdateJWT string, metadataUpdateContentType string) (*metadata.UpdatePayload, error) {
+	var err error
+	var entityID string
+	{
+		entityID = metadataUpdateEntityID
+		err = goa.MergeErrors(err, goa.ValidateFormat("entityID", entityID, goa.FormatURI))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var schema string
+	{
+		schema = metadataUpdateSchema
+		err = goa.MergeErrors(err, goa.ValidateFormat("schema", schema, goa.FormatURI))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var jwt string
+	{
+		jwt = metadataUpdateJWT
+	}
+	var contentType *string
+	{
+		if metadataUpdateContentType != "" {
+			contentType = &metadataUpdateContentType
+		}
+	}
+	v := &metadata.UpdatePayload{}
+	v.EntityID = entityID
+	v.Schema = schema
+	v.JWT = jwt
+	v.ContentType = contentType
+
+	return v, nil
+}
+
 // BuildRevokePayload builds the payload for the metadata revoke endpoint from
 // CLI flags.
 func BuildRevokePayload(metadataRevokeID string, metadataRevokeJWT string) (*metadata.RevokePayload, error) {

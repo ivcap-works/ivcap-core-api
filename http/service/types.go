@@ -169,15 +169,6 @@ type UpdateResponseBody struct {
 	Parameters []*ParameterDefTResponseBody `form:"parameters,omitempty" json:"parameters,omitempty" xml:"parameters,omitempty"`
 }
 
-// ListOrdersResponseBody is the type of the "service" service "listOrders"
-// endpoint HTTP response body.
-type ListOrdersResponseBody struct {
-	// Orders
-	Orders []*OrderListItemResponseBody `form:"orders,omitempty" json:"orders,omitempty" xml:"orders,omitempty"`
-	// Navigation links
-	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
 // ListBadRequestResponseBody is the type of the "service" service "list"
 // endpoint HTTP response body for the "bad-request" error.
 type ListBadRequestResponseBody struct {
@@ -333,38 +324,6 @@ type DeleteNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// ListOrdersBadRequestResponseBody is the type of the "service" service
-// "listOrders" endpoint HTTP response body for the "bad-request" error.
-type ListOrdersBadRequestResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ListOrdersInvalidScopesResponseBody is the type of the "service" service
-// "listOrders" endpoint HTTP response body for the "invalid-scopes" error.
-type ListOrdersInvalidScopesResponseBody struct {
-	// ID of involved resource
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message of error
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ListOrdersNotImplementedResponseBody is the type of the "service" service
-// "listOrders" endpoint HTTP response body for the "not-implemented" error.
-type ListOrdersNotImplementedResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ListOrdersNotFoundResponseBody is the type of the "service" service
-// "listOrders" endpoint HTTP response body for the "not-found" error.
-type ListOrdersNotFoundResponseBody struct {
-	// ID of missing resource
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message of error
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
 // ServiceListItemResponseBody is used to define fields on response body types.
 type ServiceListItemResponseBody struct {
 	// Service ID
@@ -499,27 +458,6 @@ type ParameterDefTResponseBody struct {
 type ParameterOptTResponseBody struct {
 	Value       *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
-}
-
-// OrderListItemResponseBody is used to define fields on response body types.
-type OrderListItemResponseBody struct {
-	// Order ID
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Optional customer provided name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// Order status
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// DateTime order was placed
-	OrderedAt *string `form:"ordered_at,omitempty" json:"ordered_at,omitempty" xml:"ordered_at,omitempty"`
-	// DateTime processing of order started
-	StartedAt *string `form:"started_at,omitempty" json:"started_at,omitempty" xml:"started_at,omitempty"`
-	// DateTime order was finished
-	FinishedAt *string `form:"finished_at,omitempty" json:"finished_at,omitempty" xml:"finished_at,omitempty"`
-	// ID of ordered service
-	ServiceID *string `form:"service_id,omitempty" json:"service_id,omitempty" xml:"service_id,omitempty"`
-	// ID of ordered service
-	AccountID *string            `form:"account_id,omitempty" json:"account_id,omitempty" xml:"account_id,omitempty"`
-	Links     *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // NewCreateRequestBody builds the HTTP request body from the payload of the
@@ -1004,77 +942,6 @@ func NewDeleteNotAuthorized() *service.UnauthorizedT {
 	return v
 }
 
-// NewListOrdersOrderListRTOK builds a "service" service "listOrders" endpoint
-// result from a HTTP "OK" response.
-func NewListOrdersOrderListRTOK(body *ListOrdersResponseBody) *serviceviews.OrderListRTView {
-	v := &serviceviews.OrderListRTView{}
-	v.Orders = make([]*serviceviews.OrderListItemView, len(body.Orders))
-	for i, val := range body.Orders {
-		v.Orders[i] = unmarshalOrderListItemResponseBodyToServiceviewsOrderListItemView(val)
-	}
-	v.Links = unmarshalNavTResponseBodyToServiceviewsNavTView(body.Links)
-
-	return v
-}
-
-// NewListOrdersBadRequest builds a service service listOrders endpoint
-// bad-request error.
-func NewListOrdersBadRequest(body *ListOrdersBadRequestResponseBody) *service.BadRequestT {
-	v := &service.BadRequestT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewListOrdersInvalidCredential builds a service service listOrders endpoint
-// invalid-credential error.
-func NewListOrdersInvalidCredential() *service.InvalidCredentialsT {
-	v := &service.InvalidCredentialsT{}
-
-	return v
-}
-
-// NewListOrdersInvalidScopes builds a service service listOrders endpoint
-// invalid-scopes error.
-func NewListOrdersInvalidScopes(body *ListOrdersInvalidScopesResponseBody) *service.InvalidScopesT {
-	v := &service.InvalidScopesT{
-		ID:      body.ID,
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewListOrdersNotImplemented builds a service service listOrders endpoint
-// not-implemented error.
-func NewListOrdersNotImplemented(body *ListOrdersNotImplementedResponseBody) *service.NotImplementedT {
-	v := &service.NotImplementedT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewListOrdersNotFound builds a service service listOrders endpoint not-found
-// error.
-func NewListOrdersNotFound(body *ListOrdersNotFoundResponseBody) *service.ResourceNotFoundT {
-	v := &service.ResourceNotFoundT{
-		ID:      *body.ID,
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewListOrdersNotAuthorized builds a service service listOrders endpoint
-// not-authorized error.
-func NewListOrdersNotAuthorized() *service.UnauthorizedT {
-	v := &service.UnauthorizedT{}
-
-	return v
-}
-
 // ValidateListBadRequestResponseBody runs the validations defined on
 // list_bad-request_response_body
 func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
@@ -1285,51 +1152,6 @@ func ValidateDeleteNotImplementedResponseBody(body *DeleteNotImplementedResponse
 	return
 }
 
-// ValidateListOrdersBadRequestResponseBody runs the validations defined on
-// listOrders_bad-request_response_body
-func ValidateListOrdersBadRequestResponseBody(body *ListOrdersBadRequestResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateListOrdersInvalidScopesResponseBody runs the validations defined on
-// listOrders_invalid-scopes_response_body
-func ValidateListOrdersInvalidScopesResponseBody(body *ListOrdersInvalidScopesResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
-	}
-	return
-}
-
-// ValidateListOrdersNotImplementedResponseBody runs the validations defined on
-// listOrders_not-implemented_response_body
-func ValidateListOrdersNotImplementedResponseBody(body *ListOrdersNotImplementedResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateListOrdersNotFoundResponseBody runs the validations defined on
-// listOrders_not-found_response_body
-func ValidateListOrdersNotFoundResponseBody(body *ListOrdersNotFoundResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
-	}
-	return
-}
-
 // ValidateServiceListItemResponseBody runs the validations defined on
 // ServiceListItemResponseBody
 func ValidateServiceListItemResponseBody(body *ServiceListItemResponseBody) (err error) {
@@ -1400,25 +1222,6 @@ func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
 func ValidateReferenceTRequestBodyRequestBody(body *ReferenceTRequestBodyRequestBody) (err error) {
 	if body.URI != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.uri", *body.URI, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateOrderListItemResponseBody runs the validations defined on
-// OrderListItemResponseBody
-func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err error) {
-	if body.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
-	}
-	if body.Status != nil {
-		if !(*body.Status == "pending" || *body.Status == "executing" || *body.Status == "finished" || *body.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"pending", "executing", "finished", "error"}))
-		}
-	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
 	}
 	return
 }

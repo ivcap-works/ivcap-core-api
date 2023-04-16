@@ -35,6 +35,11 @@ func AddMetadataPath() string {
 	return "/1/metadata"
 }
 
+// UpdateMetadataPath returns the URL path to the metadata service update HTTP endpoint.
+func UpdateMetadataPath() string {
+	return "/1/metadata"
+}
+
 // RevokeMetadataPath returns the URL path to the metadata service revoke HTTP endpoint.
 func RevokeMetadataPath(id string) string {
 	return fmt.Sprintf("/1/metadata/%v", id)
