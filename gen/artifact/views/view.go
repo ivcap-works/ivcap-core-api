@@ -84,33 +84,33 @@ type ArtifactStatusRTView struct {
 	ID *string
 	// Optional name
 	Name *string
-	// List of collections this artifact is part of
-	Collections []string
-	// Link to retrieve the artifact data
-	Data *SelfTView
 	// Artifact status
 	Status *string
 	// Mime-type of data
 	MimeType *string
 	// Size of data
 	Size *int64
-	// List of metadata records associated with this artifact
-	Metadata []*MetadataTView
+	// URL of object this artifact is caching
+	CacheOf *string
+	// ETAG of artifact
+	Etag *string
+	// DateTime artifact was created
+	CreatedAt *string
+	// DateTime artifact was last modified
+	LastModifiedAt *string
+	// Reference to policy controlling access
+	Policy *RefTView
 	// Reference to billable account
 	Account *RefTView
-	Links   *SelfTView
+	// Link to retrieve the artifact data
+	Data  *SelfTView
+	Links *SelfTView
 	// link back to record
 	Location *string
 	// indicate version of TUS supported
 	TusResumable *string
 	// TUS offset for partially uploaded content
 	TusOffset *int64
-}
-
-// MetadataTView is a type that runs validations on a projected type.
-type MetadataTView struct {
-	Schema *string
-	Data   interface{}
 }
 
 // RefTView is a type that runs validations on a projected type.
@@ -134,13 +134,16 @@ var (
 		"default": {
 			"id",
 			"name",
-			"collections",
-			"data",
 			"status",
 			"mime-type",
 			"size",
-			"metadata",
+			"cache-of",
+			"etag",
+			"created-at",
+			"last-modified-at",
+			"policy",
 			"account",
+			"data",
 			"links",
 			"location",
 			"tus_resumable",
@@ -260,18 +263,23 @@ func ValidateArtifactStatusRTView(result *ArtifactStatusRTView) (err error) {
 	if result.Links == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
 	}
-	if result.Data != nil {
-		if err2 := ValidateSelfTView(result.Data); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
 	if result.Status != nil {
 		if !(*result.Status == "pending" || *result.Status == "complete" || *result.Status == "error") {
 			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "complete", "error"}))
 		}
 	}
+	if result.Policy != nil {
+		if err2 := ValidateRefTView(result.Policy); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
 	if result.Account != nil {
 		if err2 := ValidateRefTView(result.Account); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if result.Data != nil {
+		if err2 := ValidateSelfTView(result.Data); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
 	}
@@ -280,12 +288,6 @@ func ValidateArtifactStatusRTView(result *ArtifactStatusRTView) (err error) {
 			err = goa.MergeErrors(err, err2)
 		}
 	}
-	return
-}
-
-// ValidateMetadataTView runs the validations defined on MetadataTView.
-func ValidateMetadataTView(result *MetadataTView) (err error) {
-
 	return
 }
 

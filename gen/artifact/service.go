@@ -78,21 +78,27 @@ type ArtifactStatusRT struct {
 	ID string
 	// Optional name
 	Name *string
-	// List of collections this artifact is part of
-	Collections []string
-	// Link to retrieve the artifact data
-	Data *SelfT
 	// Artifact status
 	Status string
 	// Mime-type of data
 	MimeType *string
 	// Size of data
 	Size *int64
-	// List of metadata records associated with this artifact
-	Metadata []*MetadataT
+	// URL of object this artifact is caching
+	CacheOf *string
+	// ETAG of artifact
+	Etag *string
+	// DateTime artifact was created
+	CreatedAt *string
+	// DateTime artifact was last modified
+	LastModifiedAt *string
+	// Reference to policy controlling access
+	Policy *RefT
 	// Reference to billable account
 	Account *RefT
-	Links   *SelfT
+	// Link to retrieve the artifact data
+	Data  *SelfT
+	Links *SelfT
 	// link back to record
 	Location *string
 	// indicate version of TUS supported
@@ -159,11 +165,6 @@ type ListPayload struct {
 	PageToken string
 	// JWT used for authentication
 	JWT string
-}
-
-type MetadataT struct {
-	Schema *string
-	Data   interface{}
 }
 
 type NavT struct {
@@ -400,12 +401,16 @@ func newArtifactListRTView(res *ArtifactListRT) *artifactviews.ArtifactListRTVie
 // ArtifactStatusRT.
 func newArtifactStatusRT(vres *artifactviews.ArtifactStatusRTView) *ArtifactStatusRT {
 	res := &ArtifactStatusRT{
-		Name:         vres.Name,
-		MimeType:     vres.MimeType,
-		Size:         vres.Size,
-		Location:     vres.Location,
-		TusResumable: vres.TusResumable,
-		TusOffset:    vres.TusOffset,
+		Name:           vres.Name,
+		MimeType:       vres.MimeType,
+		Size:           vres.Size,
+		CacheOf:        vres.CacheOf,
+		Etag:           vres.Etag,
+		CreatedAt:      vres.CreatedAt,
+		LastModifiedAt: vres.LastModifiedAt,
+		Location:       vres.Location,
+		TusResumable:   vres.TusResumable,
+		TusOffset:      vres.TusOffset,
 	}
 	if vres.ID != nil {
 		res.ID = *vres.ID
@@ -413,23 +418,14 @@ func newArtifactStatusRT(vres *artifactviews.ArtifactStatusRTView) *ArtifactStat
 	if vres.Status != nil {
 		res.Status = *vres.Status
 	}
-	if vres.Collections != nil {
-		res.Collections = make([]string, len(vres.Collections))
-		for i, val := range vres.Collections {
-			res.Collections[i] = val
-		}
-	}
-	if vres.Data != nil {
-		res.Data = transformArtifactviewsSelfTViewToSelfT(vres.Data)
-	}
-	if vres.Metadata != nil {
-		res.Metadata = make([]*MetadataT, len(vres.Metadata))
-		for i, val := range vres.Metadata {
-			res.Metadata[i] = transformArtifactviewsMetadataTViewToMetadataT(val)
-		}
+	if vres.Policy != nil {
+		res.Policy = transformArtifactviewsRefTViewToRefT(vres.Policy)
 	}
 	if vres.Account != nil {
 		res.Account = transformArtifactviewsRefTViewToRefT(vres.Account)
+	}
+	if vres.Data != nil {
+		res.Data = transformArtifactviewsSelfTViewToSelfT(vres.Data)
 	}
 	if vres.Links != nil {
 		res.Links = transformArtifactviewsSelfTViewToSelfT(vres.Links)
@@ -441,32 +437,27 @@ func newArtifactStatusRT(vres *artifactviews.ArtifactStatusRTView) *ArtifactStat
 // type ArtifactStatusRTView using the "default" view.
 func newArtifactStatusRTView(res *ArtifactStatusRT) *artifactviews.ArtifactStatusRTView {
 	vres := &artifactviews.ArtifactStatusRTView{
-		ID:           &res.ID,
-		Name:         res.Name,
-		Status:       &res.Status,
-		MimeType:     res.MimeType,
-		Size:         res.Size,
-		Location:     res.Location,
-		TusResumable: res.TusResumable,
-		TusOffset:    res.TusOffset,
+		ID:             &res.ID,
+		Name:           res.Name,
+		Status:         &res.Status,
+		MimeType:       res.MimeType,
+		Size:           res.Size,
+		CacheOf:        res.CacheOf,
+		Etag:           res.Etag,
+		CreatedAt:      res.CreatedAt,
+		LastModifiedAt: res.LastModifiedAt,
+		Location:       res.Location,
+		TusResumable:   res.TusResumable,
+		TusOffset:      res.TusOffset,
 	}
-	if res.Collections != nil {
-		vres.Collections = make([]string, len(res.Collections))
-		for i, val := range res.Collections {
-			vres.Collections[i] = val
-		}
-	}
-	if res.Data != nil {
-		vres.Data = transformSelfTToArtifactviewsSelfTView(res.Data)
-	}
-	if res.Metadata != nil {
-		vres.Metadata = make([]*artifactviews.MetadataTView, len(res.Metadata))
-		for i, val := range res.Metadata {
-			vres.Metadata[i] = transformMetadataTToArtifactviewsMetadataTView(val)
-		}
+	if res.Policy != nil {
+		vres.Policy = transformRefTToArtifactviewsRefTView(res.Policy)
 	}
 	if res.Account != nil {
 		vres.Account = transformRefTToArtifactviewsRefTView(res.Account)
+	}
+	if res.Data != nil {
+		vres.Data = transformSelfTToArtifactviewsSelfTView(res.Data)
 	}
 	if res.Links != nil {
 		vres.Links = transformSelfTToArtifactviewsSelfTView(res.Links)
@@ -594,20 +585,6 @@ func transformNavTToArtifactviewsNavTView(v *NavT) *artifactviews.NavTView {
 	return res
 }
 
-// transformArtifactviewsMetadataTViewToMetadataT builds a value of type
-// *MetadataT from a value of type *artifactviews.MetadataTView.
-func transformArtifactviewsMetadataTViewToMetadataT(v *artifactviews.MetadataTView) *MetadataT {
-	if v == nil {
-		return nil
-	}
-	res := &MetadataT{
-		Schema: v.Schema,
-		Data:   v.Data,
-	}
-
-	return res
-}
-
 // transformArtifactviewsRefTViewToRefT builds a value of type *RefT from a
 // value of type *artifactviews.RefTView.
 func transformArtifactviewsRefTViewToRefT(v *artifactviews.RefTView) *RefT {
@@ -619,20 +596,6 @@ func transformArtifactviewsRefTViewToRefT(v *artifactviews.RefTView) *RefT {
 	}
 	if v.Links != nil {
 		res.Links = transformArtifactviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformMetadataTToArtifactviewsMetadataTView builds a value of type
-// *artifactviews.MetadataTView from a value of type *MetadataT.
-func transformMetadataTToArtifactviewsMetadataTView(v *MetadataT) *artifactviews.MetadataTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.MetadataTView{
-		Schema: v.Schema,
-		Data:   v.Data,
 	}
 
 	return res

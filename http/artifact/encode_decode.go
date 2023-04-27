@@ -626,21 +626,6 @@ func unmarshalNavTResponseBodyToArtifactviewsNavTView(v *NavTResponseBody) *arti
 	return res
 }
 
-// unmarshalMetadataTResponseBodyToArtifactviewsMetadataTView builds a value of
-// type *artifactviews.MetadataTView from a value of type
-// *MetadataTResponseBody.
-func unmarshalMetadataTResponseBodyToArtifactviewsMetadataTView(v *MetadataTResponseBody) *artifactviews.MetadataTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.MetadataTView{
-		Schema: v.Schema,
-		Data:   v.Data,
-	}
-
-	return res
-}
-
 // unmarshalRefTResponseBodyToArtifactviewsRefTView builds a value of type
 // *artifactviews.RefTView from a value of type *RefTResponseBody.
 func unmarshalRefTResponseBodyToArtifactviewsRefTView(v *RefTResponseBody) *artifactviews.RefTView {

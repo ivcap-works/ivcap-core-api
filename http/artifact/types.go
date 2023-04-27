@@ -39,21 +39,27 @@ type UploadResponseBody struct {
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Optional name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// List of collections this artifact is part of
-	Collections []string `form:"collections,omitempty" json:"collections,omitempty" xml:"collections,omitempty"`
-	// Link to retrieve the artifact data
-	Data *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
 	// Artifact status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Mime-type of data
 	MimeType *string `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
 	// Size of data
 	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
-	// List of metadata records associated with this artifact
-	Metadata []*MetadataTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
+	// URL of object this artifact is caching
+	CacheOf *string `form:"cache-of,omitempty" json:"cache-of,omitempty" xml:"cache-of,omitempty"`
+	// ETAG of artifact
+	Etag *string `form:"etag,omitempty" json:"etag,omitempty" xml:"etag,omitempty"`
+	// DateTime artifact was created
+	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
+	// DateTime artifact was last modified
+	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
+	// Reference to policy controlling access
+	Policy *RefTResponseBody `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account *RefTResponseBody `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Link to retrieve the artifact data
+	Data  *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ReadResponseBody is the type of the "artifact" service "read" endpoint HTTP
@@ -63,21 +69,27 @@ type ReadResponseBody struct {
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Optional name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// List of collections this artifact is part of
-	Collections []string `form:"collections,omitempty" json:"collections,omitempty" xml:"collections,omitempty"`
-	// Link to retrieve the artifact data
-	Data *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
 	// Artifact status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Mime-type of data
 	MimeType *string `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
 	// Size of data
 	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
-	// List of metadata records associated with this artifact
-	Metadata []*MetadataTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
+	// URL of object this artifact is caching
+	CacheOf *string `form:"cache-of,omitempty" json:"cache-of,omitempty" xml:"cache-of,omitempty"`
+	// ETAG of artifact
+	Etag *string `form:"etag,omitempty" json:"etag,omitempty" xml:"etag,omitempty"`
+	// DateTime artifact was created
+	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
+	// DateTime artifact was last modified
+	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
+	// Reference to policy controlling access
+	Policy *RefTResponseBody `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account *RefTResponseBody `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Link to retrieve the artifact data
+	Data  *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// link back to record
 	Location *string `form:"location,omitempty" json:"location,omitempty" xml:"location,omitempty"`
 	// indicate version of TUS supported
@@ -198,12 +210,6 @@ type NavTResponseBody struct {
 	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
 }
 
-// MetadataTResponseBody is used to define fields on response body types.
-type MetadataTResponseBody struct {
-	Schema *string     `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
-	Data   interface{} `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
-}
-
 // RefTResponseBody is used to define fields on response body types.
 type RefTResponseBody struct {
 	ID    *string            `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
@@ -273,29 +279,24 @@ func NewListNotAuthorized() *artifact.UnauthorizedT {
 // endpoint result from a HTTP "Created" response.
 func NewUploadArtifactStatusRTCreated(body *UploadResponseBody, location *string, tusResumable *string, tusOffset *int64) *artifactviews.ArtifactStatusRTView {
 	v := &artifactviews.ArtifactStatusRTView{
-		ID:       body.ID,
-		Name:     body.Name,
-		Status:   body.Status,
-		MimeType: body.MimeType,
-		Size:     body.Size,
+		ID:             body.ID,
+		Name:           body.Name,
+		Status:         body.Status,
+		MimeType:       body.MimeType,
+		Size:           body.Size,
+		CacheOf:        body.CacheOf,
+		Etag:           body.Etag,
+		CreatedAt:      body.CreatedAt,
+		LastModifiedAt: body.LastModifiedAt,
 	}
-	if body.Collections != nil {
-		v.Collections = make([]string, len(body.Collections))
-		for i, val := range body.Collections {
-			v.Collections[i] = val
-		}
-	}
-	if body.Data != nil {
-		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
-	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*artifactviews.MetadataTView, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = unmarshalMetadataTResponseBodyToArtifactviewsMetadataTView(val)
-		}
+	if body.Policy != nil {
+		v.Policy = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Policy)
 	}
 	if body.Account != nil {
 		v.Account = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Account)
+	}
+	if body.Data != nil {
+		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
 	}
 	v.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Links)
 	v.Location = location
@@ -356,32 +357,27 @@ func NewUploadNotAuthorized() *artifact.UnauthorizedT {
 // from a HTTP "OK" response.
 func NewReadArtifactStatusRTOK(body *ReadResponseBody) *artifactviews.ArtifactStatusRTView {
 	v := &artifactviews.ArtifactStatusRTView{
-		ID:           body.ID,
-		Name:         body.Name,
-		Status:       body.Status,
-		MimeType:     body.MimeType,
-		Size:         body.Size,
-		Location:     body.Location,
-		TusResumable: body.TusResumable,
-		TusOffset:    body.TusOffset,
+		ID:             body.ID,
+		Name:           body.Name,
+		Status:         body.Status,
+		MimeType:       body.MimeType,
+		Size:           body.Size,
+		CacheOf:        body.CacheOf,
+		Etag:           body.Etag,
+		CreatedAt:      body.CreatedAt,
+		LastModifiedAt: body.LastModifiedAt,
+		Location:       body.Location,
+		TusResumable:   body.TusResumable,
+		TusOffset:      body.TusOffset,
 	}
-	if body.Collections != nil {
-		v.Collections = make([]string, len(body.Collections))
-		for i, val := range body.Collections {
-			v.Collections[i] = val
-		}
-	}
-	if body.Data != nil {
-		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
-	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*artifactviews.MetadataTView, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = unmarshalMetadataTResponseBodyToArtifactviewsMetadataTView(val)
-		}
+	if body.Policy != nil {
+		v.Policy = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Policy)
 	}
 	if body.Account != nil {
 		v.Account = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Account)
+	}
+	if body.Data != nil {
+		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
 	}
 	v.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Links)
 
