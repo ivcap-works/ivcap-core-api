@@ -26,106 +26,63 @@ import (
 
 // BuildListPayload builds the payload for the artifact list endpoint from CLI
 // flags.
-func BuildListPayload(artifactListFilter string, artifactListOrderby string, artifactListTop string, artifactListSkip string, artifactListSelect string, artifactListOffset string, artifactListLimit string, artifactListPageToken string, artifactListJWT string) (*artifact.ListPayload, error) {
+func BuildListPayload(artifactListLimit string, artifactListPage string, artifactListFilter string, artifactListOrderBy string, artifactListOrderDesc string, artifactListAtTime string, artifactListJWT string) (*artifact.ListPayload, error) {
 	var err error
-	var filter string
-	{
-		if artifactListFilter != "" {
-			filter = artifactListFilter
-		}
-	}
-	var orderby string
-	{
-		if artifactListOrderby != "" {
-			orderby = artifactListOrderby
-		}
-	}
-	var top int
-	{
-		if artifactListTop != "" {
-			var v int64
-			v, err = strconv.ParseInt(artifactListTop, 10, strconv.IntSize)
-			top = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for top, must be INT")
-			}
-			if top < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("top", top, 1, true))
-			}
-			if top > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("top", top, 50, false))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var skip int
-	{
-		if artifactListSkip != "" {
-			var v int64
-			v, err = strconv.ParseInt(artifactListSkip, 10, strconv.IntSize)
-			skip = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for skip, must be INT")
-			}
-			if skip < 0 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("skip", skip, 0, true))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var select_ string
-	{
-		if artifactListSelect != "" {
-			select_ = artifactListSelect
-		}
-	}
-	var offset *int
-	{
-		if artifactListOffset != "" {
-			var v int64
-			v, err = strconv.ParseInt(artifactListOffset, 10, strconv.IntSize)
-			val := int(v)
-			offset = &val
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for offset, must be INT")
-			}
-			if *offset < 0 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("offset", *offset, 0, true))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var limit *int
+	var limit int
 	{
 		if artifactListLimit != "" {
 			var v int64
 			v, err = strconv.ParseInt(artifactListLimit, 10, strconv.IntSize)
-			val := int(v)
-			limit = &val
+			limit = int(v)
 			if err != nil {
 				return nil, fmt.Errorf("invalid value for limit, must be INT")
 			}
-			if *limit < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 1, true))
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
 			}
-			if *limit > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 50, false))
+			if limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
 			}
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-	var pageToken string
+	var page *string
 	{
-		if artifactListPageToken != "" {
-			pageToken = artifactListPageToken
+		if artifactListPage != "" {
+			page = &artifactListPage
+		}
+	}
+	var filter *string
+	{
+		if artifactListFilter != "" {
+			filter = &artifactListFilter
+		}
+	}
+	var orderBy *string
+	{
+		if artifactListOrderBy != "" {
+			orderBy = &artifactListOrderBy
+		}
+	}
+	var orderDesc bool
+	{
+		if artifactListOrderDesc != "" {
+			orderDesc, err = strconv.ParseBool(artifactListOrderDesc)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+			}
+		}
+	}
+	var atTime *string
+	{
+		if artifactListAtTime != "" {
+			atTime = &artifactListAtTime
+			err = goa.MergeErrors(err, goa.ValidateFormat("atTime", *atTime, goa.FormatDateTime))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	var jwt string
@@ -133,14 +90,12 @@ func BuildListPayload(artifactListFilter string, artifactListOrderby string, art
 		jwt = artifactListJWT
 	}
 	v := &artifact.ListPayload{}
-	v.Filter = filter
-	v.Orderby = orderby
-	v.Top = top
-	v.Skip = skip
-	v.Select = select_
-	v.Offset = offset
 	v.Limit = limit
-	v.PageToken = pageToken
+	v.Page = page
+	v.Filter = filter
+	v.OrderBy = orderBy
+	v.OrderDesc = orderDesc
+	v.AtTime = atTime
 	v.JWT = jwt
 
 	return v, nil

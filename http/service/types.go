@@ -84,6 +84,8 @@ type UpdateRequestBody struct {
 type ListResponseBody struct {
 	// Services
 	Services []*ServiceListItemResponseBody `form:"services,omitempty" json:"services,omitempty" xml:"services,omitempty"`
+	// Time at which this list was valid
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
 	// Navigation links
 	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
@@ -174,6 +176,17 @@ type UpdateResponseBody struct {
 type ListBadRequestResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListInvalidParameterResponseBody is the type of the "service" service "list"
+// endpoint HTTP response body for the "invalid-parameter" error.
+type ListInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
 // ListNotImplementedResponseBody is the type of the "service" service "list"
@@ -545,7 +558,9 @@ func NewUpdateRequestBody(p *service.UpdatePayload) *UpdateRequestBody {
 // NewListServiceListRTOK builds a "service" service "list" endpoint result
 // from a HTTP "OK" response.
 func NewListServiceListRTOK(body *ListResponseBody) *serviceviews.ServiceListRTView {
-	v := &serviceviews.ServiceListRTView{}
+	v := &serviceviews.ServiceListRTView{
+		AtTime: body.AtTime,
+	}
 	v.Services = make([]*serviceviews.ServiceListItemView, len(body.Services))
 	for i, val := range body.Services {
 		v.Services[i] = unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(val)
@@ -568,6 +583,18 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *service.BadRequestT {
 // invalid-credential error.
 func NewListInvalidCredential() *service.InvalidCredentialsT {
 	v := &service.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewListInvalidParameter builds a service service list endpoint
+// invalid-parameter error.
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *service.InvalidParameterValue {
+	v := &service.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
 
 	return v
 }
@@ -945,6 +972,18 @@ func NewDeleteNotAuthorized() *service.UnauthorizedT {
 // ValidateListBadRequestResponseBody runs the validations defined on
 // list_bad-request_response_body
 func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListInvalidParameterResponseBody runs the validations defined on
+// list_invalid-parameter_response_body
+func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

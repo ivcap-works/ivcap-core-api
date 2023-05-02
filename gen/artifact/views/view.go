@@ -40,6 +40,8 @@ type ArtifactStatusRT struct {
 type ArtifactListRTView struct {
 	// Artifacts
 	Artifacts []*ArtifactListItemView
+	// Time at which this list was valid
+	AtTime *string
 	// Navigation links
 	Links *NavTView
 }
@@ -125,6 +127,7 @@ var (
 	ArtifactListRTMap = map[string][]string{
 		"default": {
 			"artifacts",
+			"at-time",
 			"links",
 		},
 	}
@@ -191,6 +194,9 @@ func ValidateArtifactListRTView(result *ArtifactListRTView) (err error) {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
+	}
+	if result.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
 	}
 	if result.Links != nil {
 		if err2 := ValidateNavTView(result.Links); err2 != nil {

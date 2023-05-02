@@ -27,117 +27,72 @@ import (
 
 // BuildListPayload builds the payload for the service list endpoint from CLI
 // flags.
-func BuildListPayload(serviceListFilter string, serviceListOrderby string, serviceListTop string, serviceListSkip string, serviceListSelect string, serviceListOffset string, serviceListLimit string, serviceListPageToken string) (*service.ListPayload, error) {
+func BuildListPayload(serviceListLimit string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string) (*service.ListPayload, error) {
 	var err error
-	var filter string
-	{
-		if serviceListFilter != "" {
-			filter = serviceListFilter
-		}
-	}
-	var orderby string
-	{
-		if serviceListOrderby != "" {
-			orderby = serviceListOrderby
-		}
-	}
-	var top int
-	{
-		if serviceListTop != "" {
-			var v int64
-			v, err = strconv.ParseInt(serviceListTop, 10, strconv.IntSize)
-			top = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for top, must be INT")
-			}
-			if top < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("top", top, 1, true))
-			}
-			if top > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("top", top, 50, false))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var skip int
-	{
-		if serviceListSkip != "" {
-			var v int64
-			v, err = strconv.ParseInt(serviceListSkip, 10, strconv.IntSize)
-			skip = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for skip, must be INT")
-			}
-			if skip < 0 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("skip", skip, 0, true))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var select_ string
-	{
-		if serviceListSelect != "" {
-			select_ = serviceListSelect
-		}
-	}
-	var offset *int
-	{
-		if serviceListOffset != "" {
-			var v int64
-			v, err = strconv.ParseInt(serviceListOffset, 10, strconv.IntSize)
-			val := int(v)
-			offset = &val
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for offset, must be INT")
-			}
-			if *offset < 0 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("offset", *offset, 0, true))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var limit *int
+	var limit int
 	{
 		if serviceListLimit != "" {
 			var v int64
 			v, err = strconv.ParseInt(serviceListLimit, 10, strconv.IntSize)
-			val := int(v)
-			limit = &val
+			limit = int(v)
 			if err != nil {
 				return nil, fmt.Errorf("invalid value for limit, must be INT")
 			}
-			if *limit < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 1, true))
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
 			}
-			if *limit > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 50, false))
+			if limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
 			}
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-	var pageToken string
+	var page *string
 	{
-		if serviceListPageToken != "" {
-			pageToken = serviceListPageToken
+		if serviceListPage != "" {
+			page = &serviceListPage
+		}
+	}
+	var filter *string
+	{
+		if serviceListFilter != "" {
+			filter = &serviceListFilter
+		}
+	}
+	var orderBy *string
+	{
+		if serviceListOrderBy != "" {
+			orderBy = &serviceListOrderBy
+		}
+	}
+	var orderDesc bool
+	{
+		if serviceListOrderDesc != "" {
+			orderDesc, err = strconv.ParseBool(serviceListOrderDesc)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+			}
+		}
+	}
+	var atTime *string
+	{
+		if serviceListAtTime != "" {
+			atTime = &serviceListAtTime
+			err = goa.MergeErrors(err, goa.ValidateFormat("atTime", *atTime, goa.FormatDateTime))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	v := &service.ListPayload{}
-	v.Filter = filter
-	v.Orderby = orderby
-	v.Top = top
-	v.Skip = skip
-	v.Select = select_
-	v.Offset = offset
 	v.Limit = limit
-	v.PageToken = pageToken
+	v.Page = page
+	v.Filter = filter
+	v.OrderBy = orderBy
+	v.OrderDesc = orderDesc
+	v.AtTime = atTime
 
 	return v, nil
 }
@@ -242,7 +197,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		err = json.Unmarshal([]byte(serviceUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"cayp:account:acme\",\n      \"banner\": \"http://dickenshayes.net/joesph\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Nulla ea ut amet ut ullam.\",\n            \"value\": \"Perferendis eos.\"\n         },\n         {\n            \"name\": \"Nulla ea ut amet ut ullam.\",\n            \"value\": \"Perferendis eos.\"\n         },\n         {\n            \"name\": \"Nulla ea ut amet ut ullam.\",\n            \"value\": \"Perferendis eos.\"\n         },\n         {\n            \"name\": \"Nulla ea ut amet ut ullam.\",\n            \"value\": \"Perferendis eos.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"provider-id\": \"cayp:provider:acme\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Corrupti doloribus perferendis assumenda beatae voluptatem reprehenderit.\",\n            \"uri\": \"http://hudson.net/cordie.jacobs\"\n         },\n         {\n            \"title\": \"Corrupti doloribus perferendis assumenda beatae voluptatem reprehenderit.\",\n            \"uri\": \"http://hudson.net/cordie.jacobs\"\n         },\n         {\n            \"title\": \"Corrupti doloribus perferendis assumenda beatae voluptatem reprehenderit.\",\n            \"uri\": \"http://hudson.net/cordie.jacobs\"\n         },\n         {\n            \"title\": \"Corrupti doloribus perferendis assumenda beatae voluptatem reprehenderit.\",\n            \"uri\": \"http://hudson.net/cordie.jacobs\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Rem incidunt dolorum vitae magni.\",\n         \"basic\": {\n            \"command\": [\n               \"Perspiciatis esse rerum.\",\n               \"Et commodi dolores ea.\",\n               \"Laboriosam consequatur sed natus ut soluta qui.\",\n               \"Id iure soluta.\"\n            ],\n            \"cpu\": {\n               \"limit\": \"Quia quis aut quia veniam est dignissimos.\",\n               \"request\": \"Beatae qui repellendus molestias culpa aut.\"\n            },\n            \"image\": \"Rerum nemo quidem.\",\n            \"memory\": {\n               \"limit\": \"Quia quis aut quia veniam est dignissimos.\",\n               \"request\": \"Beatae qui repellendus molestias culpa aut.\"\n            }\n         },\n         \"opts\": \"Dolore et soluta.\",\n         \"type\": \"Reiciendis est incidunt.\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"cayp:account:acme\",\n      \"banner\": \"http://harber.org/guiseppe\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         },\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         },\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"provider-id\": \"cayp:provider:acme\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         },\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         },\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Reprehenderit molestiae cupiditate voluptas et voluptatibus illum.\",\n         \"basic\": {\n            \"command\": [\n               \"Aut voluptas.\",\n               \"Ut officiis consequatur corporis autem odit.\",\n               \"Unde fuga sed veniam.\"\n            ],\n            \"cpu\": {\n               \"limit\": \"Quidem nulla quae provident dolor amet nulla.\",\n               \"request\": \"Et aut autem deserunt sit architecto.\"\n            },\n            \"image\": \"Voluptatem explicabo aut adipisci.\",\n            \"memory\": {\n               \"limit\": \"Quidem nulla quae provident dolor amet nulla.\",\n               \"request\": \"Et aut autem deserunt sit architecto.\"\n            }\n         },\n         \"opts\": \"Deserunt fugiat hic eos quaerat voluptas distinctio.\",\n         \"type\": \"Pariatur aut.\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))

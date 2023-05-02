@@ -68,6 +68,8 @@ type ArtifactListItem struct {
 type ArtifactListRT struct {
 	// Artifacts
 	Artifacts []*ArtifactListItem
+	// Time at which this list was valid
+	AtTime *string
 	// Navigation links
 	Links *NavT
 }
@@ -122,6 +124,17 @@ type DescribedByT struct {
 type InvalidCredentialsT struct {
 }
 
+// InvalidParameterValue is the error returned when a parameter has the wrong
+// value.
+type InvalidParameterValue struct {
+	// message describing expected type or pattern.
+	Message string
+	// name of parameter.
+	Name string
+	// provided parameter value.
+	Value *string
+}
+
 // Caller not authorized to access required scope.
 type InvalidScopesT struct {
 	// ID of involved resource
@@ -132,37 +145,30 @@ type InvalidScopesT struct {
 
 // ListPayload is the payload type of the artifact service list method.
 type ListPayload struct {
-	// The $filter system query option allows clients to filter a collection of
+	// The $limit system query option requests the number of items in the queried
+	// collection to be included in the result.
+	Limit int
+	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
-	// $filter
+	// 'filter'
 	// is evaluated for each resource in the collection, and only items where the
 	// expression
 	// evaluates to true are included in the response.
-	Filter string
-	// The $orderby query option allows clients to request resources in either
+	Filter *string
+	// The 'orderby' query option allows clients to request resources in either
 	// ascending order using asc or descending order using desc. If asc or desc not
 	// specified,
 	// then the resources will be ordered in ascending order. The request below
 	// orders Trips on
 	// property EndsAt in descending order.
-	Orderby string
-	// The $top system query option requests the number of items in the queried
-	// collection to be included in the result.
-	Top int
-	// The $skip query option requests the number of items in the queried collection
-	// that are to be skipped and not included in the result.
-	Skip int
-	// The $select system query option allows the clients to requests a limited set
-	// of properties for each entity or complex type. The example returns Name and
-	// IcaoCode
-	// of all Airports.
-	Select string
-	// DEPRECATED: List offset. Use '$skip' instead
-	Offset *int
-	// DEPRECATED: Max. number of records to return. Use '$top' instead
-	Limit *int
-	// DEPRECATED: Page token
-	PageToken string
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the default.
+	OrderDesc bool
+	// Return the state of the respective resources at that time [now]
+	AtTime *string
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
 	// JWT used for authentication
 	JWT string
 }
@@ -272,6 +278,23 @@ func (e *InvalidCredentialsT) GoaErrorName() string {
 }
 
 // Error returns an error description.
+func (e *InvalidParameterValue) Error() string {
+	return "InvalidParameterValue is the error returned when a parameter has the wrong value."
+}
+
+// ErrorName returns "InvalidParameterValue".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *InvalidParameterValue) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "InvalidParameterValue".
+func (e *InvalidParameterValue) GoaErrorName() string {
+	return "invalid-parameter"
+}
+
+// Error returns an error description.
 func (e *InvalidScopesT) Error() string {
 	return "Caller not authorized to access required scope."
 }
@@ -368,7 +391,9 @@ func NewViewedArtifactStatusRT(res *ArtifactStatusRT, view string) *artifactview
 // newArtifactListRT converts projected type ArtifactListRT to service type
 // ArtifactListRT.
 func newArtifactListRT(vres *artifactviews.ArtifactListRTView) *ArtifactListRT {
-	res := &ArtifactListRT{}
+	res := &ArtifactListRT{
+		AtTime: vres.AtTime,
+	}
 	if vres.Artifacts != nil {
 		res.Artifacts = make([]*ArtifactListItem, len(vres.Artifacts))
 		for i, val := range vres.Artifacts {
@@ -384,7 +409,9 @@ func newArtifactListRT(vres *artifactviews.ArtifactListRTView) *ArtifactListRT {
 // newArtifactListRTView projects result type ArtifactListRT to projected type
 // ArtifactListRTView using the "default" view.
 func newArtifactListRTView(res *ArtifactListRT) *artifactviews.ArtifactListRTView {
-	vres := &artifactviews.ArtifactListRTView{}
+	vres := &artifactviews.ArtifactListRTView{
+		AtTime: res.AtTime,
+	}
 	if res.Artifacts != nil {
 		vres.Artifacts = make([]*artifactviews.ArtifactListItemView, len(res.Artifacts))
 		for i, val := range res.Artifacts {

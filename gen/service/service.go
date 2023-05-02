@@ -127,37 +127,30 @@ type InvalidScopesT struct {
 
 // ListPayload is the payload type of the service service list method.
 type ListPayload struct {
-	// The $filter system query option allows clients to filter a collection of
+	// The $limit system query option requests the number of items in the queried
+	// collection to be included in the result.
+	Limit int
+	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
-	// $filter
+	// 'filter'
 	// is evaluated for each resource in the collection, and only items where the
 	// expression
 	// evaluates to true are included in the response.
-	Filter string
-	// The $orderby query option allows clients to request resources in either
+	Filter *string
+	// The 'orderby' query option allows clients to request resources in either
 	// ascending order using asc or descending order using desc. If asc or desc not
 	// specified,
 	// then the resources will be ordered in ascending order. The request below
 	// orders Trips on
 	// property EndsAt in descending order.
-	Orderby string
-	// The $top system query option requests the number of items in the queried
-	// collection to be included in the result.
-	Top int
-	// The $skip query option requests the number of items in the queried collection
-	// that are to be skipped and not included in the result.
-	Skip int
-	// The $select system query option allows the clients to requests a limited set
-	// of properties for each entity or complex type. The example returns Name and
-	// IcaoCode
-	// of all Airports.
-	Select string
-	// DEPRECATED: List offset. Use '$skip' instead
-	Offset *int
-	// DEPRECATED: Max. number of records to return. Use '$top' instead
-	Limit *int
-	// DEPRECATED: Page token
-	PageToken string
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the default.
+	OrderDesc bool
+	// Return the state of the respective resources at that time [now]
+	AtTime *string
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
 }
 
 type NavT struct {
@@ -288,6 +281,8 @@ type ServiceListItem struct {
 type ServiceListRT struct {
 	// Services
 	Services []*ServiceListItem
+	// Time at which this list was valid
+	AtTime string
 	// Navigation links
 	Links *NavT
 }
@@ -532,6 +527,9 @@ func NewViewedServiceStatusRT(res *ServiceStatusRT, view string) *serviceviews.S
 // ServiceListRT.
 func newServiceListRT(vres *serviceviews.ServiceListRTView) *ServiceListRT {
 	res := &ServiceListRT{}
+	if vres.AtTime != nil {
+		res.AtTime = *vres.AtTime
+	}
 	if vres.Services != nil {
 		res.Services = make([]*ServiceListItem, len(vres.Services))
 		for i, val := range vres.Services {
@@ -547,7 +545,9 @@ func newServiceListRT(vres *serviceviews.ServiceListRTView) *ServiceListRT {
 // newServiceListRTView projects result type ServiceListRT to projected type
 // ServiceListRTView using the "default" view.
 func newServiceListRTView(res *ServiceListRT) *serviceviews.ServiceListRTView {
-	vres := &serviceviews.ServiceListRTView{}
+	vres := &serviceviews.ServiceListRTView{
+		AtTime: &res.AtTime,
+	}
 	if res.Services != nil {
 		vres.Services = make([]*serviceviews.ServiceListItemView, len(res.Services))
 		for i, val := range res.Services {

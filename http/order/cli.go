@@ -27,106 +27,63 @@ import (
 
 // BuildListPayload builds the payload for the order list endpoint from CLI
 // flags.
-func BuildListPayload(orderListFilter string, orderListOrderby string, orderListTop string, orderListSkip string, orderListSelect string, orderListOffset string, orderListLimit string, orderListPageToken string, orderListJWT string) (*order.ListPayload, error) {
+func BuildListPayload(orderListLimit string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
 	var err error
-	var filter string
-	{
-		if orderListFilter != "" {
-			filter = orderListFilter
-		}
-	}
-	var orderby string
-	{
-		if orderListOrderby != "" {
-			orderby = orderListOrderby
-		}
-	}
-	var top int
-	{
-		if orderListTop != "" {
-			var v int64
-			v, err = strconv.ParseInt(orderListTop, 10, strconv.IntSize)
-			top = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for top, must be INT")
-			}
-			if top < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("top", top, 1, true))
-			}
-			if top > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("top", top, 50, false))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var skip int
-	{
-		if orderListSkip != "" {
-			var v int64
-			v, err = strconv.ParseInt(orderListSkip, 10, strconv.IntSize)
-			skip = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for skip, must be INT")
-			}
-			if skip < 0 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("skip", skip, 0, true))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var select_ string
-	{
-		if orderListSelect != "" {
-			select_ = orderListSelect
-		}
-	}
-	var offset *int
-	{
-		if orderListOffset != "" {
-			var v int64
-			v, err = strconv.ParseInt(orderListOffset, 10, strconv.IntSize)
-			val := int(v)
-			offset = &val
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for offset, must be INT")
-			}
-			if *offset < 0 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("offset", *offset, 0, true))
-			}
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var limit *int
+	var limit int
 	{
 		if orderListLimit != "" {
 			var v int64
 			v, err = strconv.ParseInt(orderListLimit, 10, strconv.IntSize)
-			val := int(v)
-			limit = &val
+			limit = int(v)
 			if err != nil {
 				return nil, fmt.Errorf("invalid value for limit, must be INT")
 			}
-			if *limit < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 1, true))
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
 			}
-			if *limit > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 50, false))
+			if limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
 			}
 			if err != nil {
 				return nil, err
 			}
 		}
 	}
-	var pageToken string
+	var page *string
 	{
-		if orderListPageToken != "" {
-			pageToken = orderListPageToken
+		if orderListPage != "" {
+			page = &orderListPage
+		}
+	}
+	var filter *string
+	{
+		if orderListFilter != "" {
+			filter = &orderListFilter
+		}
+	}
+	var orderBy *string
+	{
+		if orderListOrderBy != "" {
+			orderBy = &orderListOrderBy
+		}
+	}
+	var orderDesc bool
+	{
+		if orderListOrderDesc != "" {
+			orderDesc, err = strconv.ParseBool(orderListOrderDesc)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+			}
+		}
+	}
+	var atTime *string
+	{
+		if orderListAtTime != "" {
+			atTime = &orderListAtTime
+			err = goa.MergeErrors(err, goa.ValidateFormat("atTime", *atTime, goa.FormatDateTime))
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 	var jwt string
@@ -134,14 +91,12 @@ func BuildListPayload(orderListFilter string, orderListOrderby string, orderList
 		jwt = orderListJWT
 	}
 	v := &order.ListPayload{}
-	v.Filter = filter
-	v.Orderby = orderby
-	v.Top = top
-	v.Skip = skip
-	v.Select = select_
-	v.Offset = offset
 	v.Limit = limit
-	v.PageToken = pageToken
+	v.Page = page
+	v.Filter = filter
+	v.OrderBy = orderBy
+	v.OrderDesc = orderDesc
+	v.AtTime = atTime
 	v.JWT = jwt
 
 	return v, nil

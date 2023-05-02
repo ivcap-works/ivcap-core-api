@@ -76,6 +76,11 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 			values.Add("at-time", *p.AtTime)
 		}
 		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		values.Add("filter", p.Filter)
+		values.Add("order-by", p.OrderBy)
+		if p.OrderDesc != nil {
+			values.Add("order-desc", fmt.Sprintf("%v", *p.OrderDesc))
+		}
 		if p.Page != nil {
 			values.Add("page", *p.Page)
 		}

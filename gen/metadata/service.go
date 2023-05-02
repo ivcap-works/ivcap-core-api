@@ -133,9 +133,25 @@ type ListPayload struct {
 	// The $limit system query option requests the number of items in the queried
 	// collection to be included in the result.
 	Limit int
+	// The 'filter' system query option allows clients to filter a collection of
+	// resources that are addressed by a request URL. The expression specified with
+	// 'filter'
+	// is evaluated for each resource in the collection, and only items where the
+	// expression
+	// evaluates to true are included in the response.
+	Filter string
+	// The 'orderby' query option allows clients to request resources in either
+	// ascending order using asc or descending order using desc. If asc or desc not
+	// specified,
+	// then the resources will be ordered in ascending order. The request below
+	// orders Trips on
+	// property EndsAt in descending order.
+	OrderBy string
+	// When set order result in descending order. Ascending order is the default.
+	OrderDesc *bool
 	// The content of '$page' is returned in the 'links' part of a previous query
 	// and
-	// will when set, ALL other parameters, except for '$limit' are ignored.
+	// will when set, ALL other parameters, except for 'limit' are ignored.
 	Page *string
 	// JWT used for authentication
 	JWT string

@@ -65,18 +65,20 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 			}
 		}
 		values := req.URL.Query()
-		values.Add("$filter", p.Filter)
-		values.Add("$orderby", p.Orderby)
-		values.Add("$top", fmt.Sprintf("%v", p.Top))
-		values.Add("$skip", fmt.Sprintf("%v", p.Skip))
-		values.Add("$select", p.Select)
-		if p.Offset != nil {
-			values.Add("offset", fmt.Sprintf("%v", *p.Offset))
+		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		if p.Page != nil {
+			values.Add("page", *p.Page)
 		}
-		if p.Limit != nil {
-			values.Add("limit", fmt.Sprintf("%v", *p.Limit))
+		if p.Filter != nil {
+			values.Add("filter", *p.Filter)
 		}
-		values.Add("pageToken", p.PageToken)
+		if p.OrderBy != nil {
+			values.Add("order-by", *p.OrderBy)
+		}
+		values.Add("order-desc", fmt.Sprintf("%v", p.OrderDesc))
+		if p.AtTime != nil {
+			values.Add("at-time", *p.AtTime)
+		}
 		req.URL.RawQuery = values.Encode()
 		return nil
 	}
@@ -88,6 +90,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // DecodeListResponse may return the following errors:
 //   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
 //   - "invalid-credential" (type *artifact.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-parameter" (type *artifact.InvalidParameterValue): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
@@ -147,6 +150,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				body, _ := io.ReadAll(resp.Body)
 				return nil, goahttp.ErrInvalidResponse("artifact", "list", resp.StatusCode, string(body))
 			}
+		case http.StatusUnprocessableEntity:
+			var (
+				body ListInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "list", err)
+			}
+			err = ValidateListInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "list", err)
+			}
+			return nil, NewListInvalidParameter(&body)
 		case http.StatusForbidden:
 			var (
 				body ListInvalidScopesResponseBody

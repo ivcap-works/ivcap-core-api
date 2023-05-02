@@ -26,7 +26,7 @@ import (
 
 // BuildListPayload builds the payload for the metadata list endpoint from CLI
 // flags.
-func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
+func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListFilter string, metadataListOrderBy string, metadataListOrderDesc string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
 	var err error
 	var entityID *string
 	{
@@ -84,6 +84,29 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 			}
 		}
 	}
+	var filter string
+	{
+		if metadataListFilter != "" {
+			filter = metadataListFilter
+		}
+	}
+	var orderBy string
+	{
+		if metadataListOrderBy != "" {
+			orderBy = metadataListOrderBy
+		}
+	}
+	var orderDesc *bool
+	{
+		if metadataListOrderDesc != "" {
+			var val bool
+			val, err = strconv.ParseBool(metadataListOrderDesc)
+			orderDesc = &val
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+			}
+		}
+	}
 	var page *string
 	{
 		if metadataListPage != "" {
@@ -100,6 +123,9 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	v.AspectPath = aspectPath
 	v.AtTime = atTime
 	v.Limit = limit
+	v.Filter = filter
+	v.OrderBy = orderBy
+	v.OrderDesc = orderDesc
 	v.Page = page
 	v.JWT = jwt
 

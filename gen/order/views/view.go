@@ -40,6 +40,8 @@ type OrderStatusRT struct {
 type OrderListRTView struct {
 	// Orders
 	Orders []*OrderListItemView
+	// Time at which this list was valid
+	AtTime *string
 	// Navigation links
 	Links *NavTView
 }
@@ -144,6 +146,7 @@ var (
 	OrderListRTMap = map[string][]string{
 		"default": {
 			"orders",
+			"at-time",
 			"links",
 		},
 	}
@@ -203,6 +206,9 @@ func ValidateOrderListRTView(result *OrderListRTView) (err error) {
 	if result.Orders == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("orders", "result"))
 	}
+	if result.AtTime == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("at-time", "result"))
+	}
 	if result.Links == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
 	}
@@ -212,6 +218,9 @@ func ValidateOrderListRTView(result *OrderListRTView) (err error) {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
+	}
+	if result.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
 	}
 	if result.Links != nil {
 		if err2 := ValidateNavTView(result.Links); err2 != nil {

@@ -99,37 +99,30 @@ type InvalidScopesT struct {
 
 // ListPayload is the payload type of the order service list method.
 type ListPayload struct {
-	// The $filter system query option allows clients to filter a collection of
+	// The $limit system query option requests the number of items in the queried
+	// collection to be included in the result.
+	Limit int
+	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
-	// $filter
+	// 'filter'
 	// is evaluated for each resource in the collection, and only items where the
 	// expression
 	// evaluates to true are included in the response.
-	Filter string
-	// The $orderby query option allows clients to request resources in either
+	Filter *string
+	// The 'orderby' query option allows clients to request resources in either
 	// ascending order using asc or descending order using desc. If asc or desc not
 	// specified,
 	// then the resources will be ordered in ascending order. The request below
 	// orders Trips on
 	// property EndsAt in descending order.
-	Orderby string
-	// The $top system query option requests the number of items in the queried
-	// collection to be included in the result.
-	Top int
-	// The $skip query option requests the number of items in the queried collection
-	// that are to be skipped and not included in the result.
-	Skip int
-	// The $select system query option allows the clients to requests a limited set
-	// of properties for each entity or complex type. The example returns Name and
-	// IcaoCode
-	// of all Airports.
-	Select string
-	// DEPRECATED: List offset. Use '$skip' instead
-	Offset *int
-	// DEPRECATED: Max. number of records to return. Use '$top' instead
-	Limit *int
-	// DEPRECATED: Page token
-	PageToken string
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the default.
+	OrderDesc bool
+	// Return the state of the respective resources at that time [now]
+	AtTime *string
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
 	// JWT used for authentication
 	JWT string
 }
@@ -170,6 +163,8 @@ type OrderListItem struct {
 type OrderListRT struct {
 	// Orders
 	Orders []*OrderListItem
+	// Time at which this list was valid
+	AtTime string
 	// Navigation links
 	Links *NavT
 }
@@ -447,6 +442,9 @@ func NewViewedOrderStatusRT(res *OrderStatusRT, view string) *orderviews.OrderSt
 // OrderListRT.
 func newOrderListRT(vres *orderviews.OrderListRTView) *OrderListRT {
 	res := &OrderListRT{}
+	if vres.AtTime != nil {
+		res.AtTime = *vres.AtTime
+	}
 	if vres.Orders != nil {
 		res.Orders = make([]*OrderListItem, len(vres.Orders))
 		for i, val := range vres.Orders {
@@ -462,7 +460,9 @@ func newOrderListRT(vres *orderviews.OrderListRTView) *OrderListRT {
 // newOrderListRTView projects result type OrderListRT to projected type
 // OrderListRTView using the "default" view.
 func newOrderListRTView(res *OrderListRT) *orderviews.OrderListRTView {
-	vres := &orderviews.OrderListRTView{}
+	vres := &orderviews.OrderListRTView{
+		AtTime: &res.AtTime,
+	}
 	if res.Orders != nil {
 		vres.Orders = make([]*orderviews.OrderListItemView, len(res.Orders))
 		for i, val := range res.Orders {

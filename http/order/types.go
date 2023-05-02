@@ -41,6 +41,8 @@ type CreateRequestBody struct {
 type ListResponseBody struct {
 	// Orders
 	Orders []*OrderListItemResponseBody `form:"orders,omitempty" json:"orders,omitempty" xml:"orders,omitempty"`
+	// Time at which this list was valid
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
 	// Navigation links
 	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
@@ -102,6 +104,17 @@ type ReadResponseBody struct {
 type ListBadRequestResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListInvalidParameterResponseBody is the type of the "order" service "list"
+// endpoint HTTP response body for the "invalid-parameter" error.
+type ListInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
 // ListInvalidScopesResponseBody is the type of the "order" service "list"
@@ -290,7 +303,9 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 // NewListOrderListRTOK builds a "order" service "list" endpoint result from a
 // HTTP "OK" response.
 func NewListOrderListRTOK(body *ListResponseBody) *orderviews.OrderListRTView {
-	v := &orderviews.OrderListRTView{}
+	v := &orderviews.OrderListRTView{
+		AtTime: body.AtTime,
+	}
 	v.Orders = make([]*orderviews.OrderListItemView, len(body.Orders))
 	for i, val := range body.Orders {
 		v.Orders[i] = unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(val)
@@ -313,6 +328,18 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *order.BadRequestT {
 // invalid-credential error.
 func NewListInvalidCredential() *order.InvalidCredentialsT {
 	v := &order.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewListInvalidParameter builds a order service list endpoint
+// invalid-parameter error.
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *order.InvalidParameterValue {
+	v := &order.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
 
 	return v
 }
@@ -549,6 +576,18 @@ func NewReadNotAuthorized() *order.UnauthorizedT {
 // ValidateListBadRequestResponseBody runs the validations defined on
 // list_bad-request_response_body
 func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListInvalidParameterResponseBody runs the validations defined on
+// list_invalid-parameter_response_body
+func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
