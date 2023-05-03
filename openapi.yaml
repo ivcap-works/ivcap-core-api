@@ -2387,11 +2387,18 @@ definitions:
             status:
                 type: string
                 description: Order status
+<<<<<<< Updated upstream
                 example: executing
+=======
+                example: scheduled
+>>>>>>> Stashed changes
                 enum:
+                    - unknown
                     - pending
+                    - scheduled
                     - executing
-                    - finished
+                    - succeeded
+                    - failed
                     - error
         description: CreateResponseBody result type (default view)
         example:
@@ -2429,7 +2436,7 @@ definitions:
                         type: application/openapi3+json
                     self: Provident sapiente dolores.
             started_at: "2023-03-17T04:57:00Z"
-            status: finished
+            status: failed
         required:
             - id
             - parameters
@@ -2782,9 +2789,12 @@ definitions:
                 description: Order status
                 example: pending
                 enum:
+                    - unknown
                     - pending
+                    - scheduled
                     - executing
-                    - finished
+                    - succeeded
+                    - failed
                     - error
         description: ReadResponseBody result type (default view)
         example:
@@ -2822,7 +2832,7 @@ definitions:
                         type: application/openapi3+json
                     self: Provident sapiente dolores.
             started_at: "2023-03-17T04:57:00Z"
-            status: executing
+            status: pending
         required:
             - id
             - parameters

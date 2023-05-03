@@ -1128,7 +1128,11 @@ paths:
                                             type: application/openapi3+json
                                         self: Provident sapiente dolores.
                                 started_at: "2023-03-17T04:57:00Z"
+<<<<<<< Updated upstream
                                 status: executing
+=======
+                                status: unknown
+>>>>>>> Stashed changes
                 "400":
                     description: 'invalid-credential: Provided credential is not valid'
                 "401":
@@ -1995,11 +1999,18 @@ components:
                 status:
                     type: string
                     description: Order status
+<<<<<<< Updated upstream
                     example: pending
+=======
+                    example: unknown
+>>>>>>> Stashed changes
                     enum:
+                        - unknown
                         - pending
+                        - scheduled
                         - executing
-                        - finished
+                        - succeeded
+                        - failed
                         - error
             description: CreateResponseBody result type (tiny view)
             example:
@@ -2009,7 +2020,11 @@ components:
                         type: application/openapi3+json
                     self: Provident sapiente dolores.
                 name: Fire risk for Lot2
+<<<<<<< Updated upstream
                 status: error
+=======
+                status: scheduled
+>>>>>>> Stashed changes
         CreateResponseBodyTiny2:
             type: object
             properties:
@@ -2540,11 +2555,18 @@ components:
                 status:
                     type: string
                     description: Order status
+<<<<<<< Updated upstream
                     example: pending
+=======
+                    example: succeeded
+>>>>>>> Stashed changes
                     enum:
+                        - unknown
                         - pending
+                        - scheduled
                         - executing
-                        - finished
+                        - succeeded
+                        - failed
                         - error
             example:
                 account:

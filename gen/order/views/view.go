@@ -293,8 +293,8 @@ func ValidateOrderStatusRTView(result *OrderStatusRTView) (err error) {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
 	}
 	if result.Status != nil {
-		if !(*result.Status == "pending" || *result.Status == "executing" || *result.Status == "finished" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "executing", "finished", "error"}))
+		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
 		}
 	}
 	for _, e := range result.Products {
@@ -326,8 +326,8 @@ func ValidateOrderStatusRTView(result *OrderStatusRTView) (err error) {
 // OrderStatusRTView using the "tiny" view.
 func ValidateOrderStatusRTViewTiny(result *OrderStatusRTView) (err error) {
 	if result.Status != nil {
-		if !(*result.Status == "pending" || *result.Status == "executing" || *result.Status == "finished" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "executing", "finished", "error"}))
+		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
 		}
 	}
 	if result.Links != nil {
