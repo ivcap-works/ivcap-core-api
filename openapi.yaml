@@ -2387,11 +2387,7 @@ definitions:
             status:
                 type: string
                 description: Order status
-<<<<<<< Updated upstream
-                example: executing
-=======
                 example: scheduled
->>>>>>> Stashed changes
                 enum:
                     - unknown
                     - pending
