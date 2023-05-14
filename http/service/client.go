@@ -130,10 +130,15 @@ func (c *Client) Create() goa.Endpoint {
 // read server.
 func (c *Client) Read() goa.Endpoint {
 	var (
+		encodeRequest  = EncodeReadRequest(c.encoder)
 		decodeResponse = DecodeReadResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
 		req, err := c.BuildReadRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
 		if err != nil {
 			return nil, err
 		}

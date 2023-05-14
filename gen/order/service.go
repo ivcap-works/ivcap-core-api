@@ -174,6 +174,8 @@ type OrderRequestT struct {
 	ServiceID string
 	// Reference to billable account
 	AccountID string
+	// Policy to control access to record an all generated artifacts
+	PolicyID *string
 	// Optional customer provided name
 	Name *string
 	// Service parameters

@@ -43,6 +43,8 @@ type CreateRequestBody struct {
 	Banner *string `form:"banner,omitempty" json:"banner,omitempty" xml:"banner,omitempty"`
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
+	// Reference to policy controlling access
+	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -71,6 +73,8 @@ type UpdateRequestBody struct {
 	Banner *string `form:"banner,omitempty" json:"banner,omitempty" xml:"banner,omitempty"`
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
+	// Reference to policy controlling access
+	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -189,6 +193,15 @@ type ListInvalidParameterResponseBody struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
+// ListInvalidScopesResponseBody is the type of the "service" service "list"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type ListInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ListNotImplementedResponseBody is the type of the "service" service "list"
 // endpoint HTTP response body for the "not-implemented" error.
 type ListNotImplementedResponseBody struct {
@@ -252,6 +265,15 @@ type CreateNotFoundResponseBody struct {
 // endpoint HTTP response body for the "bad-request" error.
 type ReadBadRequestResponseBody struct {
 	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ReadInvalidScopesResponseBody is the type of the "service" service "read"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type ReadInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -482,6 +504,7 @@ func NewCreateRequestBody(p *service.CreatePayload) *CreateRequestBody {
 		Description: p.Services.Description,
 		AccountID:   p.Services.AccountID,
 		Banner:      p.Services.Banner,
+		PolicyID:    p.Services.PolicyID,
 		Name:        p.Services.Name,
 	}
 	if p.Services.Metadata != nil {
@@ -523,6 +546,7 @@ func NewUpdateRequestBody(p *service.UpdatePayload) *UpdateRequestBody {
 		Description: p.Services.Description,
 		AccountID:   p.Services.AccountID,
 		Banner:      p.Services.Banner,
+		PolicyID:    p.Services.PolicyID,
 		Name:        p.Services.Name,
 	}
 	if p.Services.Metadata != nil {
@@ -594,6 +618,17 @@ func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *service.In
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewListInvalidScopes builds a service service list endpoint invalid-scopes
+// error.
+func NewListInvalidScopes(body *ListInvalidScopesResponseBody) *service.InvalidScopesT {
+	v := &service.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
 	}
 
 	return v
@@ -784,6 +819,17 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *service.BadRequestT {
 // invalid-credential error.
 func NewReadInvalidCredential() *service.InvalidCredentialsT {
 	v := &service.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewReadInvalidScopes builds a service service read endpoint invalid-scopes
+// error.
+func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *service.InvalidScopesT {
+	v := &service.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
 
 	return v
 }
@@ -990,6 +1036,18 @@ func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponse
 	return
 }
 
+// ValidateListInvalidScopesResponseBody runs the validations defined on
+// list_invalid-scopes_response_body
+func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
 // ValidateListNotImplementedResponseBody runs the validations defined on
 // list_not-implemented_response_body
 func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody) (err error) {
@@ -1076,6 +1134,18 @@ func ValidateCreateNotFoundResponseBody(body *CreateNotFoundResponseBody) (err e
 func ValidateReadBadRequestResponseBody(body *ReadBadRequestResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateReadInvalidScopesResponseBody runs the validations defined on
+// read_invalid-scopes_response_body
+func ValidateReadInvalidScopesResponseBody(body *ReadInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
 	}
 	return
 }

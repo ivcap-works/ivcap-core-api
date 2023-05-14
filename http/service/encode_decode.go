@@ -53,6 +53,14 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		if !ok {
 			return goahttp.ErrInvalidType("service", "list", "*service.ListPayload", v)
 		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
 		values := req.URL.Query()
 		values.Add("limit", fmt.Sprintf("%v", p.Limit))
 		if p.Page != nil {
@@ -80,6 +88,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
 //   - "invalid-parameter" (type *service.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
@@ -152,6 +161,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("service", "list", err)
 			}
 			return nil, NewListInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body ListInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "list", err)
+			}
+			err = ValidateListInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "list", err)
+			}
+			return nil, NewListInvalidScopes(&body)
 		case http.StatusNotImplemented:
 			var (
 				body ListNotImplementedResponseBody
@@ -386,12 +409,33 @@ func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Req
 	return req, nil
 }
 
+// EncodeReadRequest returns an encoder for requests sent to the service read
+// server.
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*service.ReadPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("service", "read", "*service.ReadPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
 // DecodeReadResponse returns a decoder for responses returned by the service
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
 //   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
@@ -451,6 +495,20 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				body, _ := io.ReadAll(resp.Body)
 				return nil, goahttp.ErrInvalidResponse("service", "read", resp.StatusCode, string(body))
 			}
+		case http.StatusForbidden:
+			var (
+				body ReadInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "read", err)
+			}
+			err = ValidateReadInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "read", err)
+			}
+			return nil, NewReadInvalidScopes(&body)
 		case http.StatusNotImplemented:
 			var (
 				body ReadNotImplementedResponseBody

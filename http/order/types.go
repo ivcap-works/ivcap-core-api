@@ -30,6 +30,8 @@ type CreateRequestBody struct {
 	ServiceID string `form:"serviceID" json:"serviceID" xml:"serviceID"`
 	// Reference to billable account
 	AccountID string `form:"accountID" json:"accountID" xml:"accountID"`
+	// Policy to control access to record an all generated artifacts
+	PolicyID *string `form:"policyID,omitempty" json:"policyID,omitempty" xml:"policyID,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Service parameters
@@ -289,6 +291,7 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 	body := &CreateRequestBody{
 		ServiceID: p.Orders.ServiceID,
 		AccountID: p.Orders.AccountID,
+		PolicyID:  p.Orders.PolicyID,
 		Name:      p.Orders.Name,
 	}
 	if p.Orders.Parameters != nil {

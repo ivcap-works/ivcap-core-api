@@ -151,6 +151,8 @@ type ListPayload struct {
 	// The content of 'page' is returned in the 'links' part of a previous query and
 	// will when set, ALL other parameters, except for 'limit' are ignored.
 	Page *string
+	// JWT used for authentication
+	JWT string
 }
 
 type NavT struct {
@@ -191,6 +193,8 @@ type ParameterT struct {
 type ReadPayload struct {
 	// ID of services to show
 	ID string
+	// JWT used for authentication
+	JWT string
 }
 
 type RefT struct {
@@ -257,6 +261,8 @@ type ServiceDescriptionT struct {
 	Banner *string
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowT
+	// Reference to policy controlling access
+	PolicyID *string
 	// Optional provider provided name
 	Name *string
 	// Optional provider provided tags

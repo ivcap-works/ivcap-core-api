@@ -27,7 +27,7 @@ import (
 
 // BuildListPayload builds the payload for the service list endpoint from CLI
 // flags.
-func BuildListPayload(serviceListLimit string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string) (*service.ListPayload, error) {
+func BuildListPayload(serviceListLimit string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string, serviceListJWT string) (*service.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -86,6 +86,10 @@ func BuildListPayload(serviceListLimit string, serviceListPage string, serviceLi
 			}
 		}
 	}
+	var jwt string
+	{
+		jwt = serviceListJWT
+	}
 	v := &service.ListPayload{}
 	v.Limit = limit
 	v.Page = page
@@ -93,6 +97,7 @@ func BuildListPayload(serviceListLimit string, serviceListPage string, serviceLi
 	v.OrderBy = orderBy
 	v.OrderDesc = orderDesc
 	v.AtTime = atTime
+	v.JWT = jwt
 
 	return v, nil
 }
@@ -105,7 +110,7 @@ func BuildCreatePayload(serviceCreateBody string, serviceCreateJWT string) (*ser
 	{
 		err = json.Unmarshal([]byte(serviceCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"accountID\": \"123e4567-e89b-12d3-a456-426614174000\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": 10\n         }\n      ],\n      \"serviceID\": \"123e4567-e89b-12d3-a456-426614174000\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"accountID\": \"urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": 10\n         }\n      ],\n      \"policyID\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"serviceID\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -139,6 +144,7 @@ func BuildCreatePayload(serviceCreateBody string, serviceCreateJWT string) (*ser
 		Description: body.Description,
 		AccountID:   body.AccountID,
 		Banner:      body.Banner,
+		PolicyID:    body.PolicyID,
 		Name:        body.Name,
 	}
 	if body.Metadata != nil {
@@ -178,13 +184,18 @@ func BuildCreatePayload(serviceCreateBody string, serviceCreateJWT string) (*ser
 
 // BuildReadPayload builds the payload for the service read endpoint from CLI
 // flags.
-func BuildReadPayload(serviceReadID string) (*service.ReadPayload, error) {
+func BuildReadPayload(serviceReadID string, serviceReadJWT string) (*service.ReadPayload, error) {
 	var id string
 	{
 		id = serviceReadID
 	}
+	var jwt string
+	{
+		jwt = serviceReadJWT
+	}
 	v := &service.ReadPayload{}
 	v.ID = id
+	v.JWT = jwt
 
 	return v, nil
 }
@@ -197,7 +208,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		err = json.Unmarshal([]byte(serviceUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"cayp:account:acme\",\n      \"banner\": \"http://harber.org/guiseppe\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         },\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         },\n         {\n            \"name\": \"Quis rerum dignissimos.\",\n            \"value\": \"Expedita quia deserunt veritatis sequi voluptas.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"provider-id\": \"cayp:provider:acme\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         },\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         },\n         {\n            \"title\": \"Quod nihil aperiam eligendi ut.\",\n            \"uri\": \"http://schowaltercrist.net/reynold\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Reprehenderit molestiae cupiditate voluptas et voluptatibus illum.\",\n         \"basic\": {\n            \"command\": [\n               \"Aut voluptas.\",\n               \"Ut officiis consequatur corporis autem odit.\",\n               \"Unde fuga sed veniam.\"\n            ],\n            \"cpu\": {\n               \"limit\": \"Quidem nulla quae provident dolor amet nulla.\",\n               \"request\": \"Et aut autem deserunt sit architecto.\"\n            },\n            \"image\": \"Voluptatem explicabo aut adipisci.\",\n            \"memory\": {\n               \"limit\": \"Quidem nulla quae provident dolor amet nulla.\",\n               \"request\": \"Et aut autem deserunt sit architecto.\"\n            }\n         },\n         \"opts\": \"Deserunt fugiat hic eos quaerat voluptas distinctio.\",\n         \"type\": \"Pariatur aut.\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"cayp:account:acme\",\n      \"banner\": \"http://schowalter.biz/bria\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Reiciendis est incidunt.\",\n            \"value\": \"Rerum nemo quidem.\"\n         },\n         {\n            \"name\": \"Reiciendis est incidunt.\",\n            \"value\": \"Rerum nemo quidem.\"\n         },\n         {\n            \"name\": \"Reiciendis est incidunt.\",\n            \"value\": \"Rerum nemo quidem.\"\n         },\n         {\n            \"name\": \"Reiciendis est incidunt.\",\n            \"value\": \"Rerum nemo quidem.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Voluptatem natus non eius perferendis culpa.\",\n      \"provider-id\": \"cayp:provider:acme\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Perspiciatis esse rerum.\",\n            \"uri\": \"http://gulgowski.biz/kyle\"\n         },\n         {\n            \"title\": \"Perspiciatis esse rerum.\",\n            \"uri\": \"http://gulgowski.biz/kyle\"\n         },\n         {\n            \"title\": \"Perspiciatis esse rerum.\",\n            \"uri\": \"http://gulgowski.biz/kyle\"\n         },\n         {\n            \"title\": \"Perspiciatis esse rerum.\",\n            \"uri\": \"http://gulgowski.biz/kyle\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Et vel.\",\n         \"basic\": {\n            \"command\": [\n               \"Molestiae cupiditate voluptas.\",\n               \"Voluptatibus illum aut deserunt fugiat hic.\"\n            ],\n            \"cpu\": {\n               \"limit\": \"Sed ut in distinctio consequatur aut voluptas.\",\n               \"request\": \"Quaerat voluptas distinctio.\"\n            },\n            \"image\": \"Quidem nulla quae provident dolor amet nulla.\",\n            \"memory\": {\n               \"limit\": \"Sed ut in distinctio consequatur aut voluptas.\",\n               \"request\": \"Quaerat voluptas distinctio.\"\n            }\n         },\n         \"opts\": \"Iure beatae libero magnam culpa nulla.\",\n         \"type\": \"Et aut autem deserunt sit architecto.\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -246,6 +257,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 		Description: body.Description,
 		AccountID:   body.AccountID,
 		Banner:      body.Banner,
+		PolicyID:    body.PolicyID,
 		Name:        body.Name,
 	}
 	if body.Metadata != nil {
