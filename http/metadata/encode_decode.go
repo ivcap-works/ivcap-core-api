@@ -371,16 +371,8 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 // BuildAddRequest instantiates a HTTP request object with method and path set
 // to call the "metadata" service "add" endpoint
 func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	var (
-		body io.Reader
-	)
-	rd, ok := v.(*metadata.AddRequestData)
-	if !ok {
-		return nil, goahttp.ErrInvalidType("metadata", "add", "metadata.AddRequestData", v)
-	}
-	body = rd.Body
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AddMetadataPath()}
-	req, err := http.NewRequest("POST", u.String(), body)
+	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("metadata", "add", u.String(), err)
 	}
@@ -395,11 +387,10 @@ func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Requ
 // server.
 func EncodeAddRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
-		data, ok := v.(*metadata.AddRequestData)
+		p, ok := v.(*metadata.AddPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("metadata", "add", "*metadata.AddRequestData", v)
+			return goahttp.ErrInvalidType("metadata", "add", "*metadata.AddPayload", v)
 		}
-		p := data.Payload
 		{
 			head := p.JWT
 			if !strings.Contains(head, " ") {
@@ -416,6 +407,10 @@ func EncodeAddRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 		values.Add("entity-id", p.EntityID)
 		values.Add("schema", p.Schema)
 		req.URL.RawQuery = values.Encode()
+		body := p.Metadata
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("metadata", "add", err)
+		}
 		return nil
 	}
 }
@@ -535,19 +530,6 @@ func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 			return nil, goahttp.ErrInvalidResponse("metadata", "add", resp.StatusCode, string(body))
 		}
 	}
-}
-
-// // BuildAddStreamPayload creates a streaming endpoint request payload from the
-// method payload and the path to the file to be streamed
-func BuildAddStreamPayload(payload interface{}, fpath string) (*metadata.AddRequestData, error) {
-	f, err := os.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-	return &metadata.AddRequestData{
-		Payload: payload.(*metadata.AddPayload),
-		Body:    f,
-	}, nil
 }
 
 // BuildUpdateRequest instantiates a HTTP request object with method and path

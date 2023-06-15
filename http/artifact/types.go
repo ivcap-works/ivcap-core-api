@@ -591,8 +591,8 @@ func ValidateArtifactListItemResponseBody(body *ArtifactListItemResponseBody) (e
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
 	}
 	if body.Status != nil {
-		if !(*body.Status == "pending" || *body.Status == "building" || *body.Status == "ready" || *body.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"pending", "building", "ready", "error"}))
+		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	if body.Links != nil {

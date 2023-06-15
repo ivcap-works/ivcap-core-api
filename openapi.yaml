@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
     title: IVCAP
     description: "\n**IVCAP** is for **service providers** to **offer** analytics **services** \nand for **consumers** to **order** customised **products** produced by said services.\n\n### Typical Workflow\n\n1. Obtain an token from the ID Providers listed in the document returned \nby [/1/authinfo.yaml](/1/authinfo.yaml). The token needs to be added\nas a bearer token via the \n<code>Authorization</code> header to every request to this service.\n1. <a href=\"#get-/1/services\">List</a> all available service.\n1. Select appropriate service and retrieve details, like parameters via \n<a href=\"#get-/1/services/-id-\">Read Service</a>.\n1. Create the appropriate json request and POST it to \n<a href=\"#post-/1/orders\">Create Order</a>. (see the example in the\nservice description.)\n1. The reply from the above POST operation contains a link (<code>links/self</code>) to the\nnewly create order record accessible via <a href=\"#get-/1/orders/-id-\">Read Order</a>.\n1. Progress of the order fulfillment can be tracked via repeated calls to \n<a href=\"#get-/1/orders/-id-\">Read Order</a> and the returned <code>status</code>.\n1. Any information products created in the context of an order will be listed under <code>producs</code>\nwhich also include a link to the respective <a href=\"#get-/1/artifacts/-id-\">Read Artifact</a>.\n1. The <a href=\"#get-/1/artifacts/-id-\">Read Artifact</a> service will return more details for \neach artifact, including a <code>data</code> link through which the artifact content can be downloaded. (The\ndownload link is also included in the <code>products</code> list returned by \nthe <a href=\"#get-/1/orders/-id-\">Read Order</a> service ).\n\nPlease note that all schemas in this API are following the [{json:api}](https://jsonapi.org/) specs \nwherever appropriate.\n\n### High-level Architecture\n\nOn receiving an order through this **API**, the internal *Order Dispatcher* is \ncreating a *workflow*, dispatching that to the \n[Argo workflow engine](https://argoproj.github.io/argo-workflows/) \nand create appropriate records in [Magda](https://magda.io/). \nAs the execution of the workflow progresses, appropriate updates are posted to the order record in Magda, \nsuch as data accessed or produced. In addition, any information products created will be\nstored via [Minio](https://min.io/) in a deployment specific object store \nand made accessible through the *Artifact* service.\n\t"
-    version: "0.24"
+    version: "0.25"
 host: localhost:8088
 consumes:
     - application/json
@@ -267,10 +267,9 @@ paths:
                   format: uri
                 - name: schema
                   in: query
-                  description: Optional schema to filter on
+                  description: Schema prefix using '%' as wildcard indicator
                   required: false
                   type: string
-                  format: uri
                 - name: aspect-path
                   in: query
                   description: "To learn more about the supported format, see \n\t\t\t\t\thttps://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH"
@@ -284,7 +283,7 @@ paths:
                   format: date-time
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: "The 'limit' system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
                   required: false
                   type: integer
                   default: 10
@@ -443,6 +442,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: false
                   type: string
+                - name: any
+                  in: body
+                  description: Metadata content
+                  required: true
+                  schema:
+                    type: string
+                    format: binary
             responses:
                 "200":
                     description: OK response.
@@ -1205,9 +1211,10 @@ definitions:
                 example: ready
                 enum:
                     - pending
-                    - building
+                    - partial
                     - ready
                     - error
+                    - unknown
         example:
             id: cayp:artifact:0000-000
             links:
@@ -1443,11 +1450,13 @@ definitions:
             status:
                 type: string
                 description: Artifact status
-                example: complete
+                example: partial
                 enum:
                     - pending
-                    - complete
+                    - partial
+                    - ready
                     - error
+                    - unknown
             tus_offset:
                 type: integer
                 description: TUS offset for partially uploaded content
@@ -1492,7 +1501,7 @@ definitions:
                         type: application/openapi3+json
                     self: Officiis reiciendis incidunt.
             size: 5135540626137398745
-            status: pending
+            status: ready
             tus_offset: 2273662915195330452
             tus_resumable: Ea sapiente quo quo sit est sed.
         required:
@@ -1595,11 +1604,13 @@ definitions:
             status:
                 type: string
                 description: Artifact status
-                example: pending
+                example: unknown
                 enum:
                     - pending
-                    - complete
+                    - partial
+                    - ready
                     - error
+                    - unknown
         description: UploadResponseBody result type (default view)
         example:
             account:
@@ -1634,7 +1645,7 @@ definitions:
                         type: application/openapi3+json
                     self: Officiis reiciendis incidunt.
             size: 8662902299942290645
-            status: pending
+            status: partial
         required:
             - id
             - status
@@ -2585,11 +2596,14 @@ definitions:
             status:
                 type: string
                 description: Order status
-                example: finished
+                example: scheduled
                 enum:
+                    - unknown
                     - pending
+                    - scheduled
                     - executing
-                    - finished
+                    - succeeded
+                    - failed
                     - error
         example:
             account_id: "2022-01-01"
@@ -2604,7 +2618,7 @@ definitions:
             ordered_at: "2022-01-01"
             service_id: "2022-01-01"
             started_at: "2022-01-01"
-            status: executing
+            status: failed
         required:
             - links
     OrderListNotImplementedResponseBody:
@@ -2650,7 +2664,7 @@ definitions:
                       ordered_at: "2022-01-01"
                       service_id: "2022-01-01"
                       started_at: "2022-01-01"
-                      status: finished
+                      status: executing
                     - account_id: "2022-01-01"
                       finished_at: "2022-01-01"
                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
@@ -2663,7 +2677,7 @@ definitions:
                       ordered_at: "2022-01-01"
                       service_id: "2022-01-01"
                       started_at: "2022-01-01"
-                      status: finished
+                      status: executing
         description: ListResponseBody result type (default view)
         example:
             at-time: "1996-12-19T16:39:57-08:00"
@@ -2684,7 +2698,7 @@ definitions:
                   ordered_at: "2022-01-01"
                   service_id: "2022-01-01"
                   started_at: "2022-01-01"
-                  status: finished
+                  status: executing
                 - account_id: "2022-01-01"
                   finished_at: "2022-01-01"
                   id: cayp:order:123e4567-e89b-12d3-a456-426614174000
@@ -2697,7 +2711,7 @@ definitions:
                   ordered_at: "2022-01-01"
                   service_id: "2022-01-01"
                   started_at: "2022-01-01"
-                  status: finished
+                  status: executing
         required:
             - orders
             - at-time

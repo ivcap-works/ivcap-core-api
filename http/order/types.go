@@ -727,8 +727,8 @@ func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err err
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
 	}
 	if body.Status != nil {
-		if !(*body.Status == "pending" || *body.Status == "executing" || *body.Status == "finished" || *body.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"pending", "executing", "finished", "error"}))
+		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
 		}
 	}
 	if body.Links != nil {

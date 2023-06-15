@@ -18,6 +18,7 @@ package client
 
 import (
 	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -42,10 +43,6 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	{
 		if metadataListSchema != "" {
 			schema = &metadataListSchema
-			err = goa.MergeErrors(err, goa.ValidateFormat("schema", *schema, goa.FormatURI))
-			if err != nil {
-				return nil, err
-			}
 		}
 	}
 	var aspectPath *string
@@ -152,8 +149,15 @@ func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.
 
 // BuildAddPayload builds the payload for the metadata add endpoint from CLI
 // flags.
-func BuildAddPayload(metadataAddEntityID string, metadataAddSchema string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
+func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
 	var err error
+	var body interface{}
+	{
+		err = json.Unmarshal([]byte(metadataAddBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
+		}
+	}
 	var entityID string
 	{
 		entityID = metadataAddEntityID
@@ -180,13 +184,16 @@ func BuildAddPayload(metadataAddEntityID string, metadataAddSchema string, metad
 			contentType = &metadataAddContentType
 		}
 	}
-	v := &metadata.AddPayload{}
-	v.EntityID = entityID
-	v.Schema = schema
-	v.JWT = jwt
-	v.ContentType = contentType
+	v := body
+	res := &metadata.AddPayload{
+		Metadata: &v,
+	}
+	res.EntityID = entityID
+	res.Schema = schema
+	res.JWT = jwt
+	res.ContentType = contentType
 
-	return v, nil
+	return res, nil
 }
 
 // BuildUpdatePayload builds the payload for the metadata update endpoint from

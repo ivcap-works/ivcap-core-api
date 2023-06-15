@@ -213,8 +213,8 @@ func ValidateArtifactListItemView(result *ArtifactListItemView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
 	}
 	if result.Status != nil {
-		if !(*result.Status == "pending" || *result.Status == "building" || *result.Status == "ready" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "building", "ready", "error"}))
+		if !(*result.Status == "pending" || *result.Status == "partial" || *result.Status == "ready" || *result.Status == "error" || *result.Status == "unknown") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	if result.Links != nil {
@@ -270,8 +270,8 @@ func ValidateArtifactStatusRTView(result *ArtifactStatusRTView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
 	}
 	if result.Status != nil {
-		if !(*result.Status == "pending" || *result.Status == "complete" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "complete", "error"}))
+		if !(*result.Status == "pending" || *result.Status == "partial" || *result.Status == "ready" || *result.Status == "error" || *result.Status == "unknown") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	if result.Policy != nil {

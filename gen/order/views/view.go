@@ -236,8 +236,8 @@ func ValidateOrderListItemView(result *OrderListItemView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
 	}
 	if result.Status != nil {
-		if !(*result.Status == "pending" || *result.Status == "executing" || *result.Status == "finished" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "executing", "finished", "error"}))
+		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
 		}
 	}
 	if result.Links != nil {

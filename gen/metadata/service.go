@@ -31,7 +31,7 @@ type Service interface {
 	// Show metadata by ID
 	Read(context.Context, *ReadPayload) (res *MetadataRecordRT, err error)
 	// Attach new metadata to an entity.
-	Add(context.Context, *AddPayload, io.ReadCloser) (res *AddMetaRT, err error)
+	Add(context.Context, *AddPayload) (res *AddMetaRT, err error)
 	// Revoke a previous record for the same entity and same schema with
 	// this new aspect. ONLY works if there is only one active record for the
 	// entity/schema pair.
@@ -68,6 +68,8 @@ type AddPayload struct {
 	EntityID string
 	// Schema of metadata
 	Schema string
+	// Metadata content
+	Metadata interface{}
 	// Content-Type header, MUST be of application/json.
 	ContentType *string
 	// JWT used for authentication
@@ -123,14 +125,14 @@ type ListMetaRT struct {
 type ListPayload struct {
 	// Entity for which to request metadata
 	EntityID *string
-	// Optional schema to filter on
+	// Schema prefix using '%' as wildcard indicator
 	Schema *string
 	// To learn more about the supported format, see
 	// https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
 	AspectPath *string
 	// Return metadata which where valid at that time [now]
 	AtTime *string
-	// The $limit system query option requests the number of items in the queried
+	// The 'limit' system query option requests the number of items in the queried
 	// collection to be included in the result.
 	Limit int
 	// The 'filter' system query option allows clients to filter a collection of
