@@ -43,8 +43,8 @@ paths:
                   schema:
                     type: string
                     description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
-                    example: filter=FirstName eq 'Scott'
-                  example: filter=FirstName eq 'Scott'
+                    example: name ~= 'Scott%'
+                  example: name ~= 'Scott%'
                 - name: order-by
                   in: query
                   description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
@@ -868,8 +868,8 @@ paths:
                   schema:
                     type: string
                     description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
-                    example: filter=FirstName eq 'Scott'
-                  example: filter=FirstName eq 'Scott'
+                    example: name ~= 'Scott%'
+                  example: name ~= 'Scott%'
                 - name: order-by
                   in: query
                   description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
@@ -1189,8 +1189,8 @@ paths:
                   schema:
                     type: string
                     description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
-                    example: filter=FirstName eq 'Scott'
-                  example: filter=FirstName eq 'Scott'
+                    example: name ~= 'Scott%'
+                  example: name ~= 'Scott%'
                 - name: order-by
                   in: query
                   description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
