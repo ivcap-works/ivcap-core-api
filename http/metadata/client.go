@@ -35,8 +35,13 @@ type Client struct {
 	// Add Doer is the HTTP client used to make requests to the add endpoint.
 	AddDoer goahttp.Doer
 
-	// Update Doer is the HTTP client used to make requests to the update endpoint.
-	UpdateDoer goahttp.Doer
+	// UpdateOne Doer is the HTTP client used to make requests to the update_one
+	// endpoint.
+	UpdateOneDoer goahttp.Doer
+
+	// UpdateRecord Doer is the HTTP client used to make requests to the
+	// update_record endpoint.
+	UpdateRecordDoer goahttp.Doer
 
 	// Revoke Doer is the HTTP client used to make requests to the revoke endpoint.
 	RevokeDoer goahttp.Doer
@@ -67,7 +72,8 @@ func NewClient(
 		ListDoer:            doer,
 		ReadDoer:            doer,
 		AddDoer:             doer,
-		UpdateDoer:          doer,
+		UpdateOneDoer:       doer,
+		UpdateRecordDoer:    doer,
 		RevokeDoer:          doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
@@ -150,15 +156,15 @@ func (c *Client) Add() goa.Endpoint {
 	}
 }
 
-// Update returns an endpoint that makes HTTP requests to the metadata service
-// update server.
-func (c *Client) Update() goa.Endpoint {
+// UpdateOne returns an endpoint that makes HTTP requests to the metadata
+// service update_one server.
+func (c *Client) UpdateOne() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeUpdateRequest(c.encoder)
-		decodeResponse = DecodeUpdateResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeUpdateOneRequest(c.encoder)
+		decodeResponse = DecodeUpdateOneResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildUpdateRequest(ctx, v)
+		req, err := c.BuildUpdateOneRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -166,9 +172,33 @@ func (c *Client) Update() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.UpdateDoer.Do(req)
+		resp, err := c.UpdateOneDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "update", err)
+			return nil, goahttp.ErrRequestError("metadata", "update_one", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// UpdateRecord returns an endpoint that makes HTTP requests to the metadata
+// service update_record server.
+func (c *Client) UpdateRecord() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeUpdateRecordRequest(c.encoder)
+		decodeResponse = DecodeUpdateRecordResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildUpdateRecordRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.UpdateRecordDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("metadata", "update_record", err)
 		}
 		return decodeResponse(resp)
 	}

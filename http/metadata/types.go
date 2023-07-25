@@ -68,9 +68,16 @@ type AddResponseBody struct {
 	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
 }
 
-// UpdateResponseBody is the type of the "metadata" service "update" endpoint
-// HTTP response body.
-type UpdateResponseBody struct {
+// UpdateOneResponseBody is the type of the "metadata" service "update_one"
+// endpoint HTTP response body.
+type UpdateOneResponseBody struct {
+	// Reference to record created
+	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
+}
+
+// UpdateRecordResponseBody is the type of the "metadata" service
+// "update_record" endpoint HTTP response body.
+type UpdateRecordResponseBody struct {
 	// Reference to record created
 	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
 }
@@ -175,16 +182,16 @@ type AddNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// UpdateBadRequestResponseBody is the type of the "metadata" service "update"
-// endpoint HTTP response body for the "bad-request" error.
-type UpdateBadRequestResponseBody struct {
+// UpdateOneBadRequestResponseBody is the type of the "metadata" service
+// "update_one" endpoint HTTP response body for the "bad-request" error.
+type UpdateOneBadRequestResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// UpdateInvalidParameterResponseBody is the type of the "metadata" service
-// "update" endpoint HTTP response body for the "invalid-parameter" error.
-type UpdateInvalidParameterResponseBody struct {
+// UpdateOneInvalidParameterResponseBody is the type of the "metadata" service
+// "update_one" endpoint HTTP response body for the "invalid-parameter" error.
+type UpdateOneInvalidParameterResponseBody struct {
 	// message describing expected type or pattern.
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 	// name of parameter.
@@ -193,18 +200,53 @@ type UpdateInvalidParameterResponseBody struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
-// UpdateInvalidScopesResponseBody is the type of the "metadata" service
-// "update" endpoint HTTP response body for the "invalid-scopes" error.
-type UpdateInvalidScopesResponseBody struct {
+// UpdateOneInvalidScopesResponseBody is the type of the "metadata" service
+// "update_one" endpoint HTTP response body for the "invalid-scopes" error.
+type UpdateOneInvalidScopesResponseBody struct {
 	// ID of involved resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// UpdateNotImplementedResponseBody is the type of the "metadata" service
-// "update" endpoint HTTP response body for the "not-implemented" error.
-type UpdateNotImplementedResponseBody struct {
+// UpdateOneNotImplementedResponseBody is the type of the "metadata" service
+// "update_one" endpoint HTTP response body for the "not-implemented" error.
+type UpdateOneNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateRecordBadRequestResponseBody is the type of the "metadata" service
+// "update_record" endpoint HTTP response body for the "bad-request" error.
+type UpdateRecordBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateRecordInvalidParameterResponseBody is the type of the "metadata"
+// service "update_record" endpoint HTTP response body for the
+// "invalid-parameter" error.
+type UpdateRecordInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// UpdateRecordInvalidScopesResponseBody is the type of the "metadata" service
+// "update_record" endpoint HTTP response body for the "invalid-scopes" error.
+type UpdateRecordInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateRecordNotImplementedResponseBody is the type of the "metadata" service
+// "update_record" endpoint HTTP response body for the "not-implemented" error.
+type UpdateRecordNotImplementedResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
@@ -482,9 +524,9 @@ func NewAddNotAuthorized() *metadata.UnauthorizedT {
 	return v
 }
 
-// NewUpdateAddMetaRTOK builds a "metadata" service "update" endpoint result
-// from a HTTP "OK" response.
-func NewUpdateAddMetaRTOK(body *UpdateResponseBody) *metadataviews.AddMetaRTView {
+// NewUpdateOneAddMetaRTOK builds a "metadata" service "update_one" endpoint
+// result from a HTTP "OK" response.
+func NewUpdateOneAddMetaRTOK(body *UpdateOneResponseBody) *metadataviews.AddMetaRTView {
 	v := &metadataviews.AddMetaRTView{
 		RecordID: body.RecordID,
 	}
@@ -492,9 +534,9 @@ func NewUpdateAddMetaRTOK(body *UpdateResponseBody) *metadataviews.AddMetaRTView
 	return v
 }
 
-// NewUpdateBadRequest builds a metadata service update endpoint bad-request
-// error.
-func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *metadata.BadRequestT {
+// NewUpdateOneBadRequest builds a metadata service update_one endpoint
+// bad-request error.
+func NewUpdateOneBadRequest(body *UpdateOneBadRequestResponseBody) *metadata.BadRequestT {
 	v := &metadata.BadRequestT{
 		Message: *body.Message,
 	}
@@ -502,17 +544,17 @@ func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *metadata.BadReques
 	return v
 }
 
-// NewUpdateInvalidCredential builds a metadata service update endpoint
+// NewUpdateOneInvalidCredential builds a metadata service update_one endpoint
 // invalid-credential error.
-func NewUpdateInvalidCredential() *metadata.InvalidCredentialsT {
+func NewUpdateOneInvalidCredential() *metadata.InvalidCredentialsT {
 	v := &metadata.InvalidCredentialsT{}
 
 	return v
 }
 
-// NewUpdateInvalidParameter builds a metadata service update endpoint
+// NewUpdateOneInvalidParameter builds a metadata service update_one endpoint
 // invalid-parameter error.
-func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *metadata.InvalidParameterValue {
+func NewUpdateOneInvalidParameter(body *UpdateOneInvalidParameterResponseBody) *metadata.InvalidParameterValue {
 	v := &metadata.InvalidParameterValue{
 		Message: *body.Message,
 		Name:    *body.Name,
@@ -522,9 +564,9 @@ func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *metada
 	return v
 }
 
-// NewUpdateInvalidScopes builds a metadata service update endpoint
+// NewUpdateOneInvalidScopes builds a metadata service update_one endpoint
 // invalid-scopes error.
-func NewUpdateInvalidScopes(body *UpdateInvalidScopesResponseBody) *metadata.InvalidScopesT {
+func NewUpdateOneInvalidScopes(body *UpdateOneInvalidScopesResponseBody) *metadata.InvalidScopesT {
 	v := &metadata.InvalidScopesT{
 		ID:      body.ID,
 		Message: *body.Message,
@@ -533,9 +575,9 @@ func NewUpdateInvalidScopes(body *UpdateInvalidScopesResponseBody) *metadata.Inv
 	return v
 }
 
-// NewUpdateNotImplemented builds a metadata service update endpoint
+// NewUpdateOneNotImplemented builds a metadata service update_one endpoint
 // not-implemented error.
-func NewUpdateNotImplemented(body *UpdateNotImplementedResponseBody) *metadata.NotImplementedT {
+func NewUpdateOneNotImplemented(body *UpdateOneNotImplementedResponseBody) *metadata.NotImplementedT {
 	v := &metadata.NotImplementedT{
 		Message: *body.Message,
 	}
@@ -543,9 +585,78 @@ func NewUpdateNotImplemented(body *UpdateNotImplementedResponseBody) *metadata.N
 	return v
 }
 
-// NewUpdateNotAuthorized builds a metadata service update endpoint
+// NewUpdateOneNotAuthorized builds a metadata service update_one endpoint
 // not-authorized error.
-func NewUpdateNotAuthorized() *metadata.UnauthorizedT {
+func NewUpdateOneNotAuthorized() *metadata.UnauthorizedT {
+	v := &metadata.UnauthorizedT{}
+
+	return v
+}
+
+// NewUpdateRecordAddMetaRTOK builds a "metadata" service "update_record"
+// endpoint result from a HTTP "OK" response.
+func NewUpdateRecordAddMetaRTOK(body *UpdateRecordResponseBody) *metadataviews.AddMetaRTView {
+	v := &metadataviews.AddMetaRTView{
+		RecordID: body.RecordID,
+	}
+
+	return v
+}
+
+// NewUpdateRecordBadRequest builds a metadata service update_record endpoint
+// bad-request error.
+func NewUpdateRecordBadRequest(body *UpdateRecordBadRequestResponseBody) *metadata.BadRequestT {
+	v := &metadata.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateRecordInvalidCredential builds a metadata service update_record
+// endpoint invalid-credential error.
+func NewUpdateRecordInvalidCredential() *metadata.InvalidCredentialsT {
+	v := &metadata.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewUpdateRecordInvalidParameter builds a metadata service update_record
+// endpoint invalid-parameter error.
+func NewUpdateRecordInvalidParameter(body *UpdateRecordInvalidParameterResponseBody) *metadata.InvalidParameterValue {
+	v := &metadata.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewUpdateRecordInvalidScopes builds a metadata service update_record
+// endpoint invalid-scopes error.
+func NewUpdateRecordInvalidScopes(body *UpdateRecordInvalidScopesResponseBody) *metadata.InvalidScopesT {
+	v := &metadata.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateRecordNotImplemented builds a metadata service update_record
+// endpoint not-implemented error.
+func NewUpdateRecordNotImplemented(body *UpdateRecordNotImplementedResponseBody) *metadata.NotImplementedT {
+	v := &metadata.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateRecordNotAuthorized builds a metadata service update_record
+// endpoint not-authorized error.
+func NewUpdateRecordNotAuthorized() *metadata.UnauthorizedT {
 	v := &metadata.UnauthorizedT{}
 
 	return v
@@ -739,18 +850,18 @@ func ValidateAddNotImplementedResponseBody(body *AddNotImplementedResponseBody) 
 	return
 }
 
-// ValidateUpdateBadRequestResponseBody runs the validations defined on
-// update_bad-request_response_body
-func ValidateUpdateBadRequestResponseBody(body *UpdateBadRequestResponseBody) (err error) {
+// ValidateUpdateOneBadRequestResponseBody runs the validations defined on
+// update_one_bad-request_response_body
+func ValidateUpdateOneBadRequestResponseBody(body *UpdateOneBadRequestResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
 
-// ValidateUpdateInvalidParameterResponseBody runs the validations defined on
-// update_invalid-parameter_response_body
-func ValidateUpdateInvalidParameterResponseBody(body *UpdateInvalidParameterResponseBody) (err error) {
+// ValidateUpdateOneInvalidParameterResponseBody runs the validations defined
+// on update_one_invalid-parameter_response_body
+func ValidateUpdateOneInvalidParameterResponseBody(body *UpdateOneInvalidParameterResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -760,9 +871,9 @@ func ValidateUpdateInvalidParameterResponseBody(body *UpdateInvalidParameterResp
 	return
 }
 
-// ValidateUpdateInvalidScopesResponseBody runs the validations defined on
-// update_invalid-scopes_response_body
-func ValidateUpdateInvalidScopesResponseBody(body *UpdateInvalidScopesResponseBody) (err error) {
+// ValidateUpdateOneInvalidScopesResponseBody runs the validations defined on
+// update_one_invalid-scopes_response_body
+func ValidateUpdateOneInvalidScopesResponseBody(body *UpdateOneInvalidScopesResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -772,9 +883,51 @@ func ValidateUpdateInvalidScopesResponseBody(body *UpdateInvalidScopesResponseBo
 	return
 }
 
-// ValidateUpdateNotImplementedResponseBody runs the validations defined on
-// update_not-implemented_response_body
-func ValidateUpdateNotImplementedResponseBody(body *UpdateNotImplementedResponseBody) (err error) {
+// ValidateUpdateOneNotImplementedResponseBody runs the validations defined on
+// update_one_not-implemented_response_body
+func ValidateUpdateOneNotImplementedResponseBody(body *UpdateOneNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateRecordBadRequestResponseBody runs the validations defined on
+// update_record_bad-request_response_body
+func ValidateUpdateRecordBadRequestResponseBody(body *UpdateRecordBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateRecordInvalidParameterResponseBody runs the validations
+// defined on update_record_invalid-parameter_response_body
+func ValidateUpdateRecordInvalidParameterResponseBody(body *UpdateRecordInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateRecordInvalidScopesResponseBody runs the validations defined
+// on update_record_invalid-scopes_response_body
+func ValidateUpdateRecordInvalidScopesResponseBody(body *UpdateRecordInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateUpdateRecordNotImplementedResponseBody runs the validations defined
+// on update_record_not-implemented_response_body
+func ValidateUpdateRecordNotImplementedResponseBody(body *UpdateRecordNotImplementedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

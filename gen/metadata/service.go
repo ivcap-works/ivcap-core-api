@@ -19,7 +19,6 @@ package metadata
 import (
 	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
 	"context"
-	"io"
 
 	"goa.design/goa/v3/security"
 )
@@ -32,10 +31,13 @@ type Service interface {
 	Read(context.Context, *ReadPayload) (res *MetadataRecordRT, err error)
 	// Attach new metadata to an entity.
 	Add(context.Context, *AddPayload) (res *AddMetaRT, err error)
-	// Revoke a previous record for the same entity and same schema with
-	// this new aspect. ONLY works if there is only one active record for the
-	// entity/schema pair.
-	Update(context.Context, *UpdatePayload, io.ReadCloser) (res *AddMetaRT, err error)
+	// Revoke a record for the same entity and same schema and create new one
+	// with the provided properties. __NOTE__, this method will fail if there is
+	// more than one active record for the entity/schema pair.
+	UpdateOne(context.Context, *UpdateOnePayload) (res *AddMetaRT, err error)
+	// Revoke this record and create a new one with the information provided.
+	// For any field not provided, the value from the current record is used.
+	UpdateRecord(context.Context, *UpdateRecordPayload) (res *AddMetaRT, err error)
 	// Retract a previously created statement.
 	Revoke(context.Context, *RevokePayload) (err error)
 }
@@ -54,7 +56,7 @@ const ServiceName = "metadata"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [5]string{"list", "read", "add", "update", "revoke"}
+var MethodNames = [6]string{"list", "read", "add", "update_one", "update_record", "revoke"}
 
 // AddMetaRT is the result type of the metadata service add method.
 type AddMetaRT struct {
@@ -68,10 +70,12 @@ type AddPayload struct {
 	EntityID string
 	// Schema of metadata
 	Schema string
-	// Metadata content
-	Metadata interface{}
+	// Aspect content
+	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
-	ContentType *string
+	ContentType string
+	// Policy guiding visibility and actions performed
+	PolicyID *string
 	// JWT used for authentication
 	JWT string
 }
@@ -238,14 +242,40 @@ type ServiceNotAvailableT struct {
 type UnauthorizedT struct {
 }
 
-// UpdatePayload is the payload type of the metadata service update method.
-type UpdatePayload struct {
+// UpdateOnePayload is the payload type of the metadata service update_one
+// method.
+type UpdateOnePayload struct {
+	// Record ID to update
+	ID *string
 	// Entity to which attach metadata
 	EntityID string
 	// Schema of metadata
 	Schema string
+	// Aspect content
+	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
 	ContentType *string
+	// Policy guiding visibility and actions performed
+	PolicyID *string
+	// JWT used for authentication
+	JWT string
+}
+
+// UpdateRecordPayload is the payload type of the metadata service
+// update_record method.
+type UpdateRecordPayload struct {
+	// Record ID to update
+	ID *string
+	// Entity to which attach metadata
+	EntityID *string
+	// Schema of metadata
+	Schema *string
+	// Aspect content
+	Aspect interface{}
+	// Content-Type header, MUST be of application/json.
+	ContentType *string
+	// Policy guiding visibility and actions performed
+	PolicyID *string
 	// JWT used for authentication
 	JWT string
 }

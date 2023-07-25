@@ -149,7 +149,7 @@ func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.
 
 // BuildAddPayload builds the payload for the metadata add endpoint from CLI
 // flags.
-func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
+func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddPolicyID string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
 	var err error
 	var body interface{}
 	{
@@ -174,35 +174,51 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 			return nil, err
 		}
 	}
+	var policyID *string
+	{
+		if metadataAddPolicyID != "" {
+			policyID = &metadataAddPolicyID
+			err = goa.MergeErrors(err, goa.ValidateFormat("policyID", *policyID, goa.FormatURI))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
 	var jwt string
 	{
 		jwt = metadataAddJWT
 	}
-	var contentType *string
+	var contentType string
 	{
-		if metadataAddContentType != "" {
-			contentType = &metadataAddContentType
-		}
+		contentType = metadataAddContentType
 	}
 	v := body
 	res := &metadata.AddPayload{
-		Metadata: &v,
+		Aspect: &v,
 	}
 	res.EntityID = entityID
 	res.Schema = schema
+	res.PolicyID = policyID
 	res.JWT = jwt
 	res.ContentType = contentType
 
 	return res, nil
 }
 
-// BuildUpdatePayload builds the payload for the metadata update endpoint from
-// CLI flags.
-func BuildUpdatePayload(metadataUpdateEntityID string, metadataUpdateSchema string, metadataUpdateJWT string, metadataUpdateContentType string) (*metadata.UpdatePayload, error) {
+// BuildUpdateOnePayload builds the payload for the metadata update_one
+// endpoint from CLI flags.
+func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntityID string, metadataUpdateOneSchema string, metadataUpdateOnePolicyID string, metadataUpdateOneJWT string, metadataUpdateOneContentType string) (*metadata.UpdateOnePayload, error) {
 	var err error
+	var body interface{}
+	{
+		err = json.Unmarshal([]byte(metadataUpdateOneBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
+		}
+	}
 	var entityID string
 	{
-		entityID = metadataUpdateEntityID
+		entityID = metadataUpdateOneEntityID
 		err = goa.MergeErrors(err, goa.ValidateFormat("entityID", entityID, goa.FormatURI))
 		if err != nil {
 			return nil, err
@@ -210,29 +226,116 @@ func BuildUpdatePayload(metadataUpdateEntityID string, metadataUpdateSchema stri
 	}
 	var schema string
 	{
-		schema = metadataUpdateSchema
+		schema = metadataUpdateOneSchema
 		err = goa.MergeErrors(err, goa.ValidateFormat("schema", schema, goa.FormatURI))
 		if err != nil {
 			return nil, err
 		}
 	}
+	var policyID *string
+	{
+		if metadataUpdateOnePolicyID != "" {
+			policyID = &metadataUpdateOnePolicyID
+			err = goa.MergeErrors(err, goa.ValidateFormat("policyID", *policyID, goa.FormatURI))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
 	var jwt string
 	{
-		jwt = metadataUpdateJWT
+		jwt = metadataUpdateOneJWT
 	}
 	var contentType *string
 	{
-		if metadataUpdateContentType != "" {
-			contentType = &metadataUpdateContentType
+		if metadataUpdateOneContentType != "" {
+			contentType = &metadataUpdateOneContentType
 		}
 	}
-	v := &metadata.UpdatePayload{}
-	v.EntityID = entityID
-	v.Schema = schema
-	v.JWT = jwt
-	v.ContentType = contentType
+	v := body
+	res := &metadata.UpdateOnePayload{
+		Aspect: &v,
+	}
+	res.EntityID = entityID
+	res.Schema = schema
+	res.PolicyID = policyID
+	res.JWT = jwt
+	res.ContentType = contentType
 
-	return v, nil
+	return res, nil
+}
+
+// BuildUpdateRecordPayload builds the payload for the metadata update_record
+// endpoint from CLI flags.
+func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRecordID string, metadataUpdateRecordEntityID string, metadataUpdateRecordSchema string, metadataUpdateRecordPolicyID string, metadataUpdateRecordJWT string, metadataUpdateRecordContentType string) (*metadata.UpdateRecordPayload, error) {
+	var err error
+	var body interface{}
+	{
+		err = json.Unmarshal([]byte(metadataUpdateRecordBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
+		}
+	}
+	var id string
+	{
+		id = metadataUpdateRecordID
+		err = goa.MergeErrors(err, goa.ValidateFormat("id", id, goa.FormatURI))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var entityID *string
+	{
+		if metadataUpdateRecordEntityID != "" {
+			entityID = &metadataUpdateRecordEntityID
+			err = goa.MergeErrors(err, goa.ValidateFormat("entityID", *entityID, goa.FormatURI))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var schema *string
+	{
+		if metadataUpdateRecordSchema != "" {
+			schema = &metadataUpdateRecordSchema
+			err = goa.MergeErrors(err, goa.ValidateFormat("schema", *schema, goa.FormatURI))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var policyID *string
+	{
+		if metadataUpdateRecordPolicyID != "" {
+			policyID = &metadataUpdateRecordPolicyID
+			err = goa.MergeErrors(err, goa.ValidateFormat("policyID", *policyID, goa.FormatURI))
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var jwt string
+	{
+		jwt = metadataUpdateRecordJWT
+	}
+	var contentType *string
+	{
+		if metadataUpdateRecordContentType != "" {
+			contentType = &metadataUpdateRecordContentType
+		}
+	}
+	v := body
+	res := &metadata.UpdateRecordPayload{
+		Aspect: v,
+	}
+	res.ID = &id
+	res.EntityID = entityID
+	res.Schema = schema
+	res.PolicyID = policyID
+	res.JWT = jwt
+	res.ContentType = contentType
+
+	return res, nil
 }
 
 // BuildRevokePayload builds the payload for the metadata revoke endpoint from
