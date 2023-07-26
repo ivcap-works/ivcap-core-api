@@ -71,7 +71,7 @@ type AddPayload struct {
 	// Schema of metadata
 	Schema string
 	// Aspect content
-	Aspect interface{}
+	Aspect *string
 	// Content-Type header, MUST be of application/json.
 	ContentType string
 	// Policy guiding visibility and actions performed
@@ -171,9 +171,9 @@ type MetadataListItemRT struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect *string
 	// If aspectPath was defined, this is what matched the query
-	AspectContext interface{}
+	AspectContext *string
 }
 
 // MetadataRecordRT is the result type of the metadata service read method.
@@ -185,7 +185,7 @@ type MetadataRecordRT struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect *string
 	// Time this record was asserted
 	ValidFrom *string
 	// Time this record was revoked
@@ -252,7 +252,7 @@ type UpdateOnePayload struct {
 	// Schema of metadata
 	Schema string
 	// Aspect content
-	Aspect interface{}
+	Aspect *string
 	// Content-Type header, MUST be of application/json.
 	ContentType *string
 	// Policy guiding visibility and actions performed
@@ -271,7 +271,7 @@ type UpdateRecordPayload struct {
 	// Schema of metadata
 	Schema *string
 	// Aspect content
-	Aspect interface{}
+	Aspect string
 	// Content-Type header, MUST be of application/json.
 	ContentType *string
 	// Policy guiding visibility and actions performed

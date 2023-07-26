@@ -18,7 +18,6 @@ package client
 
 import (
 	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
-	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -151,12 +150,9 @@ func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.
 // flags.
 func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddPolicyID string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
 	var err error
-	var body interface{}
+	var body string
 	{
-		err = json.Unmarshal([]byte(metadataAddBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
-		}
+		body = metadataAddBody
 	}
 	var entityID string
 	{
@@ -209,12 +205,9 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 // endpoint from CLI flags.
 func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntityID string, metadataUpdateOneSchema string, metadataUpdateOnePolicyID string, metadataUpdateOneJWT string, metadataUpdateOneContentType string) (*metadata.UpdateOnePayload, error) {
 	var err error
-	var body interface{}
+	var body string
 	{
-		err = json.Unmarshal([]byte(metadataUpdateOneBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
-		}
+		body = metadataUpdateOneBody
 	}
 	var entityID string
 	{
@@ -269,12 +262,9 @@ func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntity
 // endpoint from CLI flags.
 func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRecordID string, metadataUpdateRecordEntityID string, metadataUpdateRecordSchema string, metadataUpdateRecordPolicyID string, metadataUpdateRecordJWT string, metadataUpdateRecordContentType string) (*metadata.UpdateRecordPayload, error) {
 	var err error
-	var body interface{}
+	var body string
 	{
-		err = json.Unmarshal([]byte(metadataUpdateRecordBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
-		}
+		body = metadataUpdateRecordBody
 	}
 	var id string
 	{

@@ -69,9 +69,9 @@ type MetadataListItemRTView struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect *string
 	// If aspectPath was defined, this is what matched the query
-	AspectContext interface{}
+	AspectContext *string
 }
 
 // NavTView is a type that runs validations on a projected type.
@@ -90,7 +90,7 @@ type MetadataRecordRTView struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect *string
 	// Time this record was asserted
 	ValidFrom *string
 	// Time this record was revoked
@@ -234,6 +234,12 @@ func ValidateMetadataListItemRTView(result *MetadataListItemRTView) (err error) 
 	if result.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
 	}
+	if result.Aspect != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.aspect", *result.Aspect, goa.FormatJSON))
+	}
+	if result.AspectContext != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.aspectContext", *result.AspectContext, goa.FormatJSON))
+	}
 	return
 }
 
@@ -262,6 +268,9 @@ func ValidateMetadataRecordRTView(result *MetadataRecordRTView) (err error) {
 	}
 	if result.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
+	}
+	if result.Aspect != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.aspect", *result.Aspect, goa.FormatJSON))
 	}
 	if result.ValidFrom != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-from", *result.ValidFrom, goa.FormatDateTime))

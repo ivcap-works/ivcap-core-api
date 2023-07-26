@@ -50,7 +50,7 @@ type ReadResponseBody struct {
 	// Schema ID
 	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
 	// Attached metadata aspect
-	Aspect interface{} `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
+	Aspect *string `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
 	// Time this record was asserted
 	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
 	// Time this record was revoked
@@ -295,9 +295,9 @@ type MetadataListItemRTResponseBody struct {
 	// Schema ID
 	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
 	// Attached metadata aspect
-	Aspect interface{} `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
+	Aspect *string `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
 	// If aspectPath was defined, this is what matched the query
-	AspectContext interface{} `form:"aspectContext,omitempty" json:"aspectContext,omitempty" xml:"aspectContext,omitempty"`
+	AspectContext *string `form:"aspectContext,omitempty" json:"aspectContext,omitempty" xml:"aspectContext,omitempty"`
 }
 
 // NavTResponseBody is used to define fields on response body types.
@@ -987,6 +987,12 @@ func ValidateMetadataListItemRTResponseBody(body *MetadataListItemRTResponseBody
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
+	}
+	if body.Aspect != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.aspect", *body.Aspect, goa.FormatJSON))
+	}
+	if body.AspectContext != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.aspectContext", *body.AspectContext, goa.FormatJSON))
 	}
 	return
 }

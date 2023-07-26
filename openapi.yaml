@@ -388,13 +388,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: false
                   type: string
-                - name: any
+                - name: string
                   in: body
                   description: Aspect content
                   required: true
                   schema:
                     type: string
-                    format: binary
+                    format: json
             responses:
                 "200":
                     description: OK response.
@@ -466,13 +466,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: true
                   type: string
-                - name: any
+                - name: string
                   in: body
                   description: Aspect content
                   required: true
                   schema:
                     type: string
-                    format: binary
+                    format: json
             responses:
                 "200":
                     description: OK response.
@@ -605,13 +605,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: false
                   type: string
-                - name: any
+                - name: string
                   in: body
                   description: Aspect content
                   required: true
                   schema:
                     type: string
-                    format: binary
+                    format: json
             responses:
                 "200":
                     description: OK response.
@@ -1816,10 +1816,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Et eum aspernatur reprehenderit autem nihil magnam.
+                example: Perspiciatis quod optio aspernatur cumque.
         description: Request contained problematic argument
         example:
-            message: Dolorem quas est in illo repudiandae quos.
+            message: Et eum aspernatur reprehenderit autem nihil magnam.
         required:
             - message
     MetadataAddInvalidParameterResponseBody:
@@ -1829,20 +1829,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Qui nihil molestiae amet.
+                example: Dolorem quas est in illo repudiandae quos.
             name:
                 type: string
                 description: name of parameter.
-                example: Asperiores laudantium qui.
+                example: Qui nihil molestiae amet.
             value:
                 type: string
                 description: provided parameter value.
-                example: Id id officiis est est odit.
+                example: Asperiores laudantium qui.
         description: Invalide parameter value
         example:
-            message: Nulla at.
-            name: Similique rerum illum in in.
-            value: Quia et vitae quia harum minus.
+            message: Id id officiis est est odit.
+            name: Nulla at.
+            value: Similique rerum illum in in.
         required:
             - name
             - message
@@ -1859,11 +1859,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Sint aut sequi rerum.
+                example: Commodi aut ab laudantium et.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Occaecati velit.
+            message: Sint aut sequi rerum.
         required:
             - message
     MetadataAddNotImplementedResponseBody:
@@ -1874,10 +1874,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Voluptatibus maiores.
+                example: Occaecati velit.
         description: Method is not yet implemented
         example:
-            message: Perspiciatis quod optio aspernatur cumque.
+            message: Voluptatibus maiores.
         required:
             - message
     MetadataAddResponseBody:
@@ -1902,10 +1902,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Ea maxime ea non.
+                example: Eligendi sunt ut in nostrum officia perspiciatis.
         description: Request contained problematic argument
         example:
-            message: Ab quaerat non recusandae.
+            message: Animi ea maxime ea non.
         required:
             - message
     MetadataListInvalidParameterResponseBody:
@@ -1915,20 +1915,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Ratione illo qui ut tempora rerum.
+                example: Ab quaerat non recusandae.
             name:
                 type: string
                 description: name of parameter.
-                example: Et aspernatur cumque incidunt.
+                example: Ratione illo qui ut tempora rerum.
             value:
                 type: string
                 description: provided parameter value.
-                example: Totam enim corrupti.
+                example: Et aspernatur cumque incidunt.
         description: Invalide parameter value
         example:
-            message: Fugiat eveniet et.
-            name: Sint nesciunt fugit excepturi.
-            value: Similique ipsa commodi harum beatae provident.
+            message: Totam enim corrupti.
+            name: Fugiat eveniet et.
+            value: Sint nesciunt fugit excepturi.
         required:
             - name
             - message
@@ -1945,11 +1945,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Officia saepe sed et non eligendi.
+                example: Quos voluptas commodi exercitationem qui.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Magnam ut cupiditate blanditiis.
+            message: Neque doloremque ex officia saepe.
         required:
             - message
     MetadataListItemRTResponseBody:
@@ -1960,12 +1960,12 @@ definitions:
                 type: string
                 description: Attached metadata aspect
                 example: '{...}'
-                format: binary
+                format: json
             aspectContext:
                 type: string
                 description: If aspectPath was defined, this is what matched the query
-                example: Ea consequuntur consectetur cupiditate.
-                format: binary
+                example: '{...}'
+                format: json
             entity:
                 type: string
                 description: Entity ID
@@ -1984,7 +1984,7 @@ definitions:
         description: MetadataListItemRTResponseBody result type (default view)
         example:
             aspect: '{...}'
-            aspectContext: Ipsa voluptatum et amet soluta et excepturi.
+            aspectContext: '{...}'
             entity: urn:blue:transect.1
             record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
             schema: urn:blue:schema.image
@@ -1996,10 +1996,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Dolore officia harum dolorem eligendi sunt ut.
+                example: Et non eligendi qui magnam ut cupiditate.
         description: Method is not yet implemented
         example:
-            message: Nostrum officia perspiciatis ipsam.
+            message: Et dolore officia harum.
         required:
             - message
     MetadataListResponseBody:
@@ -2009,7 +2009,7 @@ definitions:
             aspect-path:
                 type: string
                 description: Optional json path to further filter on returned list
-                example: Vel aliquam quos voluptas commodi.
+                example: Consequuntur consectetur cupiditate animi ipsa voluptatum.
             at-time:
                 type: string
                 description: Time at which this list was valid
@@ -2029,17 +2029,22 @@ definitions:
                 description: List of metadata records
                 example:
                     - aspect: '{...}'
-                      aspectContext: Unde soluta alias quibusdam.
+                      aspectContext: '{...}'
                       entity: urn:blue:transect.1
                       record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                       schema: urn:blue:schema.image
                     - aspect: '{...}'
-                      aspectContext: Unde soluta alias quibusdam.
+                      aspectContext: '{...}'
                       entity: urn:blue:transect.1
                       record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                       schema: urn:blue:schema.image
                     - aspect: '{...}'
-                      aspectContext: Unde soluta alias quibusdam.
+                      aspectContext: '{...}'
+                      entity: urn:blue:transect.1
+                      record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
+                      schema: urn:blue:schema.image
+                    - aspect: '{...}'
+                      aspectContext: '{...}'
                       entity: urn:blue:transect.1
                       record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                       schema: urn:blue:schema.image
@@ -2050,7 +2055,7 @@ definitions:
                 format: uri
         description: ListResponseBody result type (default view)
         example:
-            aspect-path: Vero neque doloremque.
+            aspect-path: Soluta et excepturi culpa doloribus vel.
             at-time: "1996-12-19T16:39:57-08:00"
             entity-id: urn:blue:image.collA.12
             links:
@@ -2059,17 +2064,12 @@ definitions:
                 self: https://api.com/foo/...
             records:
                 - aspect: '{...}'
-                  aspectContext: Unde soluta alias quibusdam.
+                  aspectContext: '{...}'
                   entity: urn:blue:transect.1
                   record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                   schema: urn:blue:schema.image
                 - aspect: '{...}'
-                  aspectContext: Unde soluta alias quibusdam.
-                  entity: urn:blue:transect.1
-                  record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
-                  schema: urn:blue:schema.image
-                - aspect: '{...}'
-                  aspectContext: Unde soluta alias quibusdam.
+                  aspectContext: '{...}'
                   entity: urn:blue:transect.1
                   record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                   schema: urn:blue:schema.image
@@ -2085,10 +2085,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Qui voluptatem quasi pariatur totam.
+                example: Iusto et dolores qui vel.
         description: Request contained problematic argument
         example:
-            message: Commodi aut ab laudantium et.
+            message: Qui voluptatem quasi pariatur totam.
         required:
             - message
     MetadataReadInvalidScopesResponseBody:
@@ -2104,11 +2104,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Debitis veniam distinctio ducimus in.
+                example: Similique ipsa commodi harum beatae provident.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Et ut et quae neque provident aspernatur.
+            message: Debitis veniam distinctio ducimus in.
         required:
             - message
     MetadataReadNotFoundResponseBody:
@@ -2139,10 +2139,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Tenetur est veniam et quis perferendis asperiores.
+                example: Et ut et quae neque provident aspernatur.
         description: Method is not yet implemented
         example:
-            message: Iusto et dolores qui vel.
+            message: Tenetur est veniam et quis perferendis asperiores.
         required:
             - message
     MetadataReadResponseBody:
@@ -2153,7 +2153,7 @@ definitions:
                 type: string
                 description: Attached metadata aspect
                 example: '{...}'
-                format: binary
+                format: json
             asserter:
                 type: string
                 description: Entity asserting this metadata record at 'valid-from'
@@ -2206,10 +2206,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Nemo rerum tenetur ut assumenda.
+                example: Fugit commodi unde explicabo quos.
         description: Request contained problematic argument
         example:
-            message: Consequatur et similique et ut.
+            message: Nemo rerum tenetur ut assumenda.
         required:
             - message
     MetadataRevokeInvalidParameterResponseBody:
@@ -2219,20 +2219,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Provident excepturi ratione.
+                example: Consequatur et similique et ut.
             name:
                 type: string
                 description: name of parameter.
-                example: Enim ipsa veniam.
+                example: Provident excepturi ratione.
             value:
                 type: string
                 description: provided parameter value.
-                example: Beatae beatae aliquam.
+                example: Enim ipsa veniam.
         description: Invalide parameter value
         example:
-            message: Reiciendis eligendi quia quisquam.
-            name: Incidunt culpa assumenda recusandae nihil.
-            value: Eum dicta eos quis.
+            message: Beatae beatae aliquam.
+            name: Reiciendis eligendi quia quisquam.
+            value: Incidunt culpa assumenda recusandae nihil.
         required:
             - name
             - message
@@ -2249,11 +2249,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Recusandae molestiae a qui fuga necessitatibus.
+                example: Voluptatem libero dolores.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Nesciunt distinctio deleniti perferendis eos totam.
+            message: Recusandae molestiae a qui fuga necessitatibus.
         required:
             - message
     MetadataRevokeNotImplementedResponseBody:
@@ -2264,10 +2264,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Ab fugiat.
+                example: Nesciunt distinctio deleniti perferendis eos totam.
         description: Method is not yet implemented
         example:
-            message: Fugit commodi unde explicabo quos.
+            message: Ab fugiat.
         required:
             - message
     MetadataUpdateOneBadRequestResponseBody:
@@ -2278,10 +2278,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Unde dolor quis.
+                example: Deserunt quia facilis nobis.
         description: Request contained problematic argument
         example:
-            message: Voluptas quae ut voluptas laudantium possimus blanditiis.
+            message: Unde dolor quis.
         required:
             - message
     MetadataUpdateOneInvalidParameterResponseBody:
@@ -2291,20 +2291,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Ad quibusdam voluptatem dolor quod.
+                example: Voluptas quae ut voluptas laudantium possimus blanditiis.
             name:
                 type: string
                 description: name of parameter.
-                example: Rerum delectus voluptatem unde odio aut.
+                example: Ad quibusdam voluptatem dolor quod.
             value:
                 type: string
                 description: provided parameter value.
-                example: Omnis numquam animi eaque.
+                example: Rerum delectus voluptatem unde odio aut.
         description: Invalide parameter value
         example:
-            message: Animi et.
-            name: Et suscipit eos quos.
-            value: Mollitia quo ea quasi.
+            message: Omnis numquam animi eaque.
+            name: Animi et.
+            value: Et suscipit eos quos.
         required:
             - name
             - message
@@ -2321,11 +2321,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Libero perspiciatis at aut totam.
+                example: Quia et vitae quia harum minus.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Vel odit porro quia tenetur vitae.
+            message: Libero perspiciatis at aut totam.
         required:
             - message
     MetadataUpdateOneNotImplementedResponseBody:
@@ -2336,10 +2336,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Quos et deserunt aut quae adipisci.
+                example: Vel odit porro quia tenetur vitae.
         description: Method is not yet implemented
         example:
-            message: Deserunt quia facilis nobis.
+            message: Quos et deserunt aut quae adipisci.
         required:
             - message
     MetadataUpdateOneResponseBody:
@@ -2364,10 +2364,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Officiis porro vel et qui repellat.
+                example: Velit enim et voluptas asperiores aliquam ut.
         description: Request contained problematic argument
         example:
-            message: Odio aut quia quo repellat.
+            message: Officiis porro vel et qui repellat.
         required:
             - message
     MetadataUpdateRecordInvalidParameterResponseBody:
@@ -2377,20 +2377,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Dolorem aut dolores asperiores.
+                example: Odio aut quia quo repellat.
             name:
                 type: string
                 description: name of parameter.
-                example: Soluta aut doloremque aut maxime dolorum voluptates.
+                example: Dolorem aut dolores asperiores.
             value:
                 type: string
                 description: provided parameter value.
-                example: Quae ipsum sed minus.
+                example: Soluta aut doloremque aut maxime dolorum voluptates.
         description: Invalid parameter value
         example:
-            message: In ad.
-            name: Maxime pariatur a esse.
-            value: Voluptatem libero dolores.
+            message: Quae ipsum sed minus.
+            name: In ad.
+            value: Maxime pariatur a esse.
         required:
             - name
             - message
@@ -2407,11 +2407,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Et architecto quas.
+                example: Mollitia quo ea quasi.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Magnam tempore.
+            message: Et architecto quas.
         required:
             - message
     MetadataUpdateRecordNotImplementedResponseBody:
@@ -2422,10 +2422,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Voluptas rerum quia.
+                example: Magnam tempore.
         description: Method is not yet implemented
         example:
-            message: Velit enim et voluptas asperiores aliquam ut.
+            message: Voluptas rerum quia.
         required:
             - message
     MetadataUpdateRecordResponseBody:
@@ -2755,11 +2755,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Tenetur cumque quam animi praesentium minus quasi.
+                example: Qui veritatis ea veniam debitis tenetur cumque.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Ut quia.
+            message: Animi praesentium minus quasi eius ut quia.
         required:
             - message
     OrderListItemResponseBody:
@@ -2799,7 +2799,7 @@ definitions:
             status:
                 type: string
                 description: Order status
-                example: succeeded
+                example: error
                 enum:
                     - unknown
                     - pending
@@ -2821,7 +2821,7 @@ definitions:
             ordered_at: "2022-01-01"
             service_id: "2022-01-01"
             started_at: "2022-01-01"
-            status: failed
+            status: pending
         required:
             - links
     OrderListNotImplementedResponseBody:
@@ -2867,7 +2867,7 @@ definitions:
                       ordered_at: "2022-01-01"
                       service_id: "2022-01-01"
                       started_at: "2022-01-01"
-                      status: scheduled
+                      status: pending
                     - account_id: "2022-01-01"
                       finished_at: "2022-01-01"
                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
@@ -2880,33 +2880,7 @@ definitions:
                       ordered_at: "2022-01-01"
                       service_id: "2022-01-01"
                       started_at: "2022-01-01"
-                      status: scheduled
-                    - account_id: "2022-01-01"
-                      finished_at: "2022-01-01"
-                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
-                      links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                      name: Fire risk for Lot2
-                      ordered_at: "2022-01-01"
-                      service_id: "2022-01-01"
-                      started_at: "2022-01-01"
-                      status: scheduled
-                    - account_id: "2022-01-01"
-                      finished_at: "2022-01-01"
-                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
-                      links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                      name: Fire risk for Lot2
-                      ordered_at: "2022-01-01"
-                      service_id: "2022-01-01"
-                      started_at: "2022-01-01"
-                      status: scheduled
+                      status: pending
         description: ListResponseBody result type (default view)
         example:
             at-time: "1996-12-19T16:39:57-08:00"
@@ -2927,7 +2901,7 @@ definitions:
                   ordered_at: "2022-01-01"
                   service_id: "2022-01-01"
                   started_at: "2022-01-01"
-                  status: scheduled
+                  status: pending
                 - account_id: "2022-01-01"
                   finished_at: "2022-01-01"
                   id: cayp:order:123e4567-e89b-12d3-a456-426614174000
@@ -2940,7 +2914,7 @@ definitions:
                   ordered_at: "2022-01-01"
                   service_id: "2022-01-01"
                   started_at: "2022-01-01"
-                  status: scheduled
+                  status: pending
                 - account_id: "2022-01-01"
                   finished_at: "2022-01-01"
                   id: cayp:order:123e4567-e89b-12d3-a456-426614174000
@@ -2953,7 +2927,7 @@ definitions:
                   ordered_at: "2022-01-01"
                   service_id: "2022-01-01"
                   started_at: "2022-01-01"
-                  status: scheduled
+                  status: pending
                 - account_id: "2022-01-01"
                   finished_at: "2022-01-01"
                   id: cayp:order:123e4567-e89b-12d3-a456-426614174000
@@ -2966,7 +2940,7 @@ definitions:
                   ordered_at: "2022-01-01"
                   service_id: "2022-01-01"
                   started_at: "2022-01-01"
-                  status: scheduled
+                  status: pending
         required:
             - orders
             - at-time
