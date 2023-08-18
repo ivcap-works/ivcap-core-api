@@ -71,7 +71,7 @@ type AddPayload struct {
 	// Schema of metadata
 	Schema string
 	// Aspect content
-	Aspect *string
+	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
 	ContentType string
 	// Policy guiding visibility and actions performed

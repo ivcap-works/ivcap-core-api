@@ -608,7 +608,7 @@ paths:
                             type: string
                             description: Aspect content
                             example: '{"$schema": ...}'
-                            format: json
+                            format: binary
                         example: '{"$schema": ...}'
             responses:
                 "200":

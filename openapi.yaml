@@ -466,13 +466,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: true
                   type: string
-                - name: string
+                - name: any
                   in: body
                   description: Aspect content
                   required: true
                   schema:
                     type: string
-                    format: json
+                    format: binary
             responses:
                 "200":
                     description: OK response.

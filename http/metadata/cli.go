@@ -18,6 +18,7 @@ package client
 
 import (
 	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -150,9 +151,12 @@ func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.
 // flags.
 func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddPolicyID string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
 	var err error
-	var body string
+	var body interface{}
 	{
-		body = metadataAddBody
+		err = json.Unmarshal([]byte(metadataAddBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
+		}
 	}
 	var entityID string
 	{
