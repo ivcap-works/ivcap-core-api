@@ -26,12 +26,12 @@ import (
 
 // Manage the life cycle of an artifact stored by this deployment.
 type Service interface {
-	// artifacts
+	// list artifacts
 	List(context.Context, *ListPayload) (res *ArtifactListRT, err error)
-	// Upload content and create a artifacts.
-	Upload(context.Context, *UploadPayload, io.ReadCloser) (res *ArtifactStatusRT, err error)
 	// Show artifacts by ID
 	Read(context.Context, *ReadPayload) (res *ArtifactStatusRT, err error)
+	// Upload content and create a artifacts.
+	Upload(context.Context, *UploadPayload, io.ReadCloser) (res *ArtifactStatusRT, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -48,7 +48,7 @@ const ServiceName = "artifact"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"list", "upload", "read"}
+var MethodNames = [3]string{"list", "read", "upload"}
 
 type ArtifactListItem struct {
 	// Artifact ID
@@ -74,7 +74,7 @@ type ArtifactListRT struct {
 	Links *NavT
 }
 
-// ArtifactStatusRT is the result type of the artifact service upload method.
+// ArtifactStatusRT is the result type of the artifact service read method.
 type ArtifactStatusRT struct {
 	// Artifact ID
 	ID string

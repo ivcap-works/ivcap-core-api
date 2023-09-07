@@ -34,36 +34,6 @@ type ListResponseBody struct {
 	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
-// UploadResponseBody is the type of the "artifact" service "upload" endpoint
-// HTTP response body.
-type UploadResponseBody struct {
-	// Artifact ID
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Optional name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// Artifact status
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Mime-type of data
-	MimeType *string `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
-	// Size of data
-	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
-	// URL of object this artifact is caching
-	CacheOf *string `form:"cache-of,omitempty" json:"cache-of,omitempty" xml:"cache-of,omitempty"`
-	// ETAG of artifact
-	Etag *string `form:"etag,omitempty" json:"etag,omitempty" xml:"etag,omitempty"`
-	// DateTime artifact was created
-	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
-	// DateTime artifact was last modified
-	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
-	// Reference to policy controlling access
-	Policy *RefTResponseBody `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
-	// Reference to billable account
-	Account *RefTResponseBody `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	// Link to retrieve the artifact data
-	Data  *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
 // ReadResponseBody is the type of the "artifact" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
@@ -95,9 +65,39 @@ type ReadResponseBody struct {
 	// link back to record
 	Location *string `form:"location,omitempty" json:"location,omitempty" xml:"location,omitempty"`
 	// indicate version of TUS supported
-	TusResumable *string `form:"tus_resumable,omitempty" json:"tus_resumable,omitempty" xml:"tus_resumable,omitempty"`
+	TusResumable *string `form:"tus-resumable,omitempty" json:"tus-resumable,omitempty" xml:"tus-resumable,omitempty"`
 	// TUS offset for partially uploaded content
-	TusOffset *int64 `form:"tus_offset,omitempty" json:"tus_offset,omitempty" xml:"tus_offset,omitempty"`
+	TusOffset *int64 `form:"tus-offset,omitempty" json:"tus-offset,omitempty" xml:"tus-offset,omitempty"`
+}
+
+// UploadResponseBody is the type of the "artifact" service "upload" endpoint
+// HTTP response body.
+type UploadResponseBody struct {
+	// Artifact ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Optional name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Artifact status
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	// Mime-type of data
+	MimeType *string `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
+	// Size of data
+	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
+	// URL of object this artifact is caching
+	CacheOf *string `form:"cache-of,omitempty" json:"cache-of,omitempty" xml:"cache-of,omitempty"`
+	// ETAG of artifact
+	Etag *string `form:"etag,omitempty" json:"etag,omitempty" xml:"etag,omitempty"`
+	// DateTime artifact was created
+	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
+	// DateTime artifact was last modified
+	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
+	// Reference to policy controlling access
+	Policy *RefTResponseBody `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
+	// Reference to billable account
+	Account *RefTResponseBody `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Link to retrieve the artifact data
+	Data  *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ListBadRequestResponseBody is the type of the "artifact" service "list"
@@ -134,29 +134,6 @@ type ListNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// UploadBadRequestResponseBody is the type of the "artifact" service "upload"
-// endpoint HTTP response body for the "bad-request" error.
-type UploadBadRequestResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// UploadInvalidScopesResponseBody is the type of the "artifact" service
-// "upload" endpoint HTTP response body for the "invalid-scopes" error.
-type UploadInvalidScopesResponseBody struct {
-	// ID of involved resource
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message of error
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// UploadNotImplementedResponseBody is the type of the "artifact" service
-// "upload" endpoint HTTP response body for the "not-implemented" error.
-type UploadNotImplementedResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
 // ReadBadRequestResponseBody is the type of the "artifact" service "read"
 // endpoint HTTP response body for the "bad-request" error.
 type ReadBadRequestResponseBody struct {
@@ -186,6 +163,29 @@ type ReadNotFoundResponseBody struct {
 	// ID of missing resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UploadBadRequestResponseBody is the type of the "artifact" service "upload"
+// endpoint HTTP response body for the "bad-request" error.
+type UploadBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UploadInvalidScopesResponseBody is the type of the "artifact" service
+// "upload" endpoint HTTP response body for the "invalid-scopes" error.
+type UploadInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UploadNotImplementedResponseBody is the type of the "artifact" service
+// "upload" endpoint HTTP response body for the "not-implemented" error.
+type UploadNotImplementedResponseBody struct {
+	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -302,84 +302,6 @@ func NewListNotAuthorized() *artifact.UnauthorizedT {
 	return v
 }
 
-// NewUploadArtifactStatusRTCreated builds a "artifact" service "upload"
-// endpoint result from a HTTP "Created" response.
-func NewUploadArtifactStatusRTCreated(body *UploadResponseBody, location *string, tusResumable *string, tusOffset *int64) *artifactviews.ArtifactStatusRTView {
-	v := &artifactviews.ArtifactStatusRTView{
-		ID:             body.ID,
-		Name:           body.Name,
-		Status:         body.Status,
-		MimeType:       body.MimeType,
-		Size:           body.Size,
-		CacheOf:        body.CacheOf,
-		Etag:           body.Etag,
-		CreatedAt:      body.CreatedAt,
-		LastModifiedAt: body.LastModifiedAt,
-	}
-	if body.Policy != nil {
-		v.Policy = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Policy)
-	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Account)
-	}
-	if body.Data != nil {
-		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
-	}
-	v.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Links)
-	v.Location = location
-	v.TusResumable = tusResumable
-	v.TusOffset = tusOffset
-
-	return v
-}
-
-// NewUploadBadRequest builds a artifact service upload endpoint bad-request
-// error.
-func NewUploadBadRequest(body *UploadBadRequestResponseBody) *artifact.BadRequestT {
-	v := &artifact.BadRequestT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewUploadInvalidCredential builds a artifact service upload endpoint
-// invalid-credential error.
-func NewUploadInvalidCredential() *artifact.InvalidCredentialsT {
-	v := &artifact.InvalidCredentialsT{}
-
-	return v
-}
-
-// NewUploadInvalidScopes builds a artifact service upload endpoint
-// invalid-scopes error.
-func NewUploadInvalidScopes(body *UploadInvalidScopesResponseBody) *artifact.InvalidScopesT {
-	v := &artifact.InvalidScopesT{
-		ID:      body.ID,
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewUploadNotImplemented builds a artifact service upload endpoint
-// not-implemented error.
-func NewUploadNotImplemented(body *UploadNotImplementedResponseBody) *artifact.NotImplementedT {
-	v := &artifact.NotImplementedT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewUploadNotAuthorized builds a artifact service upload endpoint
-// not-authorized error.
-func NewUploadNotAuthorized() *artifact.UnauthorizedT {
-	v := &artifact.UnauthorizedT{}
-
-	return v
-}
-
 // NewReadArtifactStatusRTOK builds a "artifact" service "read" endpoint result
 // from a HTTP "OK" response.
 func NewReadArtifactStatusRTOK(body *ReadResponseBody) *artifactviews.ArtifactStatusRTView {
@@ -467,6 +389,84 @@ func NewReadNotAuthorized() *artifact.UnauthorizedT {
 	return v
 }
 
+// NewUploadArtifactStatusRTCreated builds a "artifact" service "upload"
+// endpoint result from a HTTP "Created" response.
+func NewUploadArtifactStatusRTCreated(body *UploadResponseBody, location *string, tusResumable *string, tusOffset *int64) *artifactviews.ArtifactStatusRTView {
+	v := &artifactviews.ArtifactStatusRTView{
+		ID:             body.ID,
+		Name:           body.Name,
+		Status:         body.Status,
+		MimeType:       body.MimeType,
+		Size:           body.Size,
+		CacheOf:        body.CacheOf,
+		Etag:           body.Etag,
+		CreatedAt:      body.CreatedAt,
+		LastModifiedAt: body.LastModifiedAt,
+	}
+	if body.Policy != nil {
+		v.Policy = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Policy)
+	}
+	if body.Account != nil {
+		v.Account = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Account)
+	}
+	if body.Data != nil {
+		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
+	}
+	v.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Links)
+	v.Location = location
+	v.TusResumable = tusResumable
+	v.TusOffset = tusOffset
+
+	return v
+}
+
+// NewUploadBadRequest builds a artifact service upload endpoint bad-request
+// error.
+func NewUploadBadRequest(body *UploadBadRequestResponseBody) *artifact.BadRequestT {
+	v := &artifact.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUploadInvalidCredential builds a artifact service upload endpoint
+// invalid-credential error.
+func NewUploadInvalidCredential() *artifact.InvalidCredentialsT {
+	v := &artifact.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewUploadInvalidScopes builds a artifact service upload endpoint
+// invalid-scopes error.
+func NewUploadInvalidScopes(body *UploadInvalidScopesResponseBody) *artifact.InvalidScopesT {
+	v := &artifact.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUploadNotImplemented builds a artifact service upload endpoint
+// not-implemented error.
+func NewUploadNotImplemented(body *UploadNotImplementedResponseBody) *artifact.NotImplementedT {
+	v := &artifact.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUploadNotAuthorized builds a artifact service upload endpoint
+// not-authorized error.
+func NewUploadNotAuthorized() *artifact.UnauthorizedT {
+	v := &artifact.UnauthorizedT{}
+
+	return v
+}
+
 // ValidateListBadRequestResponseBody runs the validations defined on
 // list_bad-request_response_body
 func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
@@ -503,36 +503,6 @@ func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) 
 // ValidateListNotImplementedResponseBody runs the validations defined on
 // list_not-implemented_response_body
 func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateUploadBadRequestResponseBody runs the validations defined on
-// upload_bad-request_response_body
-func ValidateUploadBadRequestResponseBody(body *UploadBadRequestResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateUploadInvalidScopesResponseBody runs the validations defined on
-// upload_invalid-scopes_response_body
-func ValidateUploadInvalidScopesResponseBody(body *UploadInvalidScopesResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
-	}
-	return
-}
-
-// ValidateUploadNotImplementedResponseBody runs the validations defined on
-// upload_not-implemented_response_body
-func ValidateUploadNotImplementedResponseBody(body *UploadNotImplementedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -580,6 +550,36 @@ func ValidateReadNotFoundResponseBody(body *ReadNotFoundResponseBody) (err error
 	}
 	if body.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateUploadBadRequestResponseBody runs the validations defined on
+// upload_bad-request_response_body
+func ValidateUploadBadRequestResponseBody(body *UploadBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUploadInvalidScopesResponseBody runs the validations defined on
+// upload_invalid-scopes_response_body
+func ValidateUploadInvalidScopesResponseBody(body *UploadInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateUploadNotImplementedResponseBody runs the validations defined on
+// upload_not-implemented_response_body
+func ValidateUploadNotImplementedResponseBody(body *UploadNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }

@@ -20,14 +20,14 @@ import (
 	"fmt"
 )
 
-// ListMetadataPath returns the URL path to the metadata service list HTTP endpoint.
-func ListMetadataPath() string {
-	return "/1/metadata"
-}
-
 // ReadMetadataPath returns the URL path to the metadata service read HTTP endpoint.
 func ReadMetadataPath(id string) string {
 	return fmt.Sprintf("/1/metadata/%v", id)
+}
+
+// ListMetadataPath returns the URL path to the metadata service list HTTP endpoint.
+func ListMetadataPath() string {
+	return "/1/metadata"
 }
 
 // AddMetadataPath returns the URL path to the metadata service add HTTP endpoint.

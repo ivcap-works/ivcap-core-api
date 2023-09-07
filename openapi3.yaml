@@ -2,7 +2,7 @@ openapi: 3.0.3
 info:
     title: IVCAP
     description: "\n**IVCAP** is for **service providers** to **offer** analytics **services** \nand for **consumers** to **order** customised **products** produced by said services.\n\n### Typical Workflow\n\n1. Obtain an token from the ID Providers listed in the document returned \nby [/1/authinfo.yaml](/1/authinfo.yaml). The token needs to be added\nas a bearer token via the \n<code>Authorization</code> header to every request to this service.\n1. <a href=\"#get-/1/services\">List</a> all available service.\n1. Select appropriate service and retrieve details, like parameters via \n<a href=\"#get-/1/services/-id-\">Read Service</a>.\n1. Create the appropriate json request and POST it to \n<a href=\"#post-/1/orders\">Create Order</a>. (see the example in the\nservice description.)\n1. The reply from the above POST operation contains a link (<code>links/self</code>) to the\nnewly create order record accessible via <a href=\"#get-/1/orders/-id-\">Read Order</a>.\n1. Progress of the order fulfillment can be tracked via repeated calls to \n<a href=\"#get-/1/orders/-id-\">Read Order</a> and the returned <code>status</code>.\n1. Any information products created in the context of an order will be listed under <code>producs</code>\nwhich also include a link to the respective <a href=\"#get-/1/artifacts/-id-\">Read Artifact</a>.\n1. The <a href=\"#get-/1/artifacts/-id-\">Read Artifact</a> service will return more details for \neach artifact, including a <code>data</code> link through which the artifact content can be downloaded. (The\ndownload link is also included in the <code>products</code> list returned by \nthe <a href=\"#get-/1/orders/-id-\">Read Order</a> service ).\n\nPlease note that all schemas in this API are following the [{json:api}](https://jsonapi.org/) specs \nwherever appropriate.\n\n### High-level Architecture\n\nOn receiving an order through this **API**, the internal *Order Dispatcher* is \ncreating a *workflow*, dispatching that to the \n[Argo workflow engine](https://argoproj.github.io/argo-workflows/) \nand create appropriate records in [Magda](https://magda.io/). \nAs the execution of the workflow progresses, appropriate updates are posted to the order record in Magda, \nsuch as data accessed or produced. In addition, any information products created will be\nstored via [Minio](https://min.io/) in a deployment specific object store \nand made accessible through the *Artifact* service.\n\t"
-    version: "0.26"
+    version: "0.27"
 servers:
     - url: http://localhost:8088
       description: This endpoint hosts all the IVCAP services.
@@ -12,16 +12,20 @@ paths:
             tags:
                 - artifact
             summary: list artifact
-            description: artifacts
+            description: list artifacts
             operationId: artifact#list
             parameters:
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The $limit system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   allowEmptyValue: true
                   schema:
                     type: integer
-                    description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                    description: |-
+                        The $limit system query option requests the number of items in the queried
+                        				collection to be included in the result.
                     default: 10
                     example: 10
                     minimum: 1
@@ -29,29 +33,49 @@ paths:
                   example: 10
                 - name: page
                   in: query
-                  description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of 'page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                    description: |-
+                        The content of 'page' is returned in the 'links' part of a previous query and
+                        				will when set, ALL other parameters, except for 'limit' are ignored.
                     example: gdsgQwhdgd
                   example: gdsgQwhdgd
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                    description: |-
+                        The 'filter' system query option allows clients to filter a collection of
+                        				resources that are addressed by a request URL. The expression specified with 'filter'
+                        				is evaluated for each resource in the collection, and only items where the expression
+                        				evaluates to true are included in the response.
                     example: name ~= 'Scott%'
                   example: name ~= 'Scott%'
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                    description: |-
+                        The 'orderby' query option allows clients to request resources in either
+                        				ascending order using asc or descending order using desc. If asc or desc not specified,
+                        				then the resources will be ordered in ascending order. The request below orders Trips on
+                        				property EndsAt in descending order.
                     example: orderby=EndsAt
                   example: orderby=EndsAt
                 - name: order-desc
@@ -62,8 +86,8 @@ paths:
                     type: boolean
                     description: When set order result in descending order. Ascending order is the default.
                     default: false
-                    example: false
-                  example: true
+                    example: true
+                  example: false
                 - name: at-time
                   in: query
                   description: Return the state of the respective resources at that time [now]
@@ -234,43 +258,43 @@ paths:
                             schema:
                                 type: string
                                 description: link back to record
-                                example: Commodi facilis sit quas est dignissimos.
-                            example: Explicabo repellat rerum ut.
+                                example: Dolorum libero.
+                            example: Accusamus doloremque autem omnis et et qui.
                         Tus-Resumable:
                             description: indicate version of TUS supported
                             schema:
                                 type: string
                                 description: indicate version of TUS supported
-                                example: Alias repellat consequatur sunt.
-                            example: Et sit voluptas cumque voluptatibus.
+                                example: Unde hic.
+                            example: Cum omnis animi.
                         Upload-Offset:
                             description: TUS offset for partially uploaded content
                             schema:
                                 type: integer
                                 description: TUS offset for partially uploaded content
-                                example: 3755384499548569529
+                                example: 8284588355277128107
                                 format: int64
-                            example: 7239526014081435734
+                            example: 5307571630176049186
                     content:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/ArtifactStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                cache-of: Qui quidem architecto dolore inventore consequuntur vero.
+                                cache-of: Exercitationem dignissimos voluptate consequuntur exercitationem quae provident.
                                 created-at: "2022-01-01"
                                 data:
                                     describedBy:
                                         href: https://api.com/swagger/...
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
-                                etag: Aut numquam aut.
+                                etag: Aut ut nihil quia sapiente ullam quis.
                                 id: type:scope:name
                                 last-modified-at: "2022-01-01"
                                 links:
@@ -278,17 +302,17 @@ paths:
                                         href: https://api.com/swagger/...
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
-                                mime-type: Nemo aut atque quam sequi expedita dicta.
+                                mime-type: Et quas rem repellendus magni.
                                 name: Fire risk per LGA
                                 policy:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                size: 8950352911424434891
-                                status: partial
+                                size: 7896428934166973396
+                                status: pending
                 "400":
                     description: 'invalid-credential: Provided credential is not valid'
                 "401":
@@ -335,20 +359,20 @@ paths:
                                 $ref: '#/components/schemas/ArtifactStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                cache-of: Ratione assumenda ratione.
+                                cache-of: Dicta quis sed qui quidem architecto.
                                 created-at: "2022-01-01"
                                 data:
                                     describedBy:
                                         href: https://api.com/swagger/...
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
-                                etag: Provident possimus distinctio deleniti cumque et quas.
+                                etag: Inventore consequuntur vero.
                                 id: type:scope:name
                                 last-modified-at: "2022-01-01"
                                 links:
@@ -356,20 +380,20 @@ paths:
                                         href: https://api.com/swagger/...
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
-                                location: Repellendus magni sequi inventore exercitationem.
-                                mime-type: Ut quia harum distinctio possimus at quam.
+                                location: Aut numquam aut.
+                                mime-type: Ut nemo aut atque quam.
                                 name: Fire risk per LGA
                                 policy:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                size: 4948552088965511670
-                                status: pending
-                                tus_offset: 6792879961332786909
-                                tus_resumable: Voluptate consequuntur exercitationem quae.
+                                size: 343211328847546352
+                                status: partial
+                                tus-offset: 4511612631376913099
+                                tus-resumable: Magni asperiores illo et ut.
                 "400":
                     description: 'invalid-credential: Provided credential is not valid'
                 "401":
@@ -425,11 +449,15 @@ paths:
                   example: urn:blue:image%
                 - name: aspect-path
                   in: query
-                  description: "To learn more about the supported format, see \n\t\t\t\t\thttps://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH"
+                  description: |-
+                    To learn more about the supported format, see
+                    					https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "To learn more about the supported format, see \n\t\t\t\t\thttps://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH"
+                    description: |-
+                        To learn more about the supported format, see
+                        					https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
                     example: $.images[*] ? (@.size > 10000)
                   example: $.images[*] ? (@.size > 10000)
                 - name: at-time
@@ -444,11 +472,15 @@ paths:
                   example: "1996-12-19T16:39:57-08:00"
                 - name: limit
                   in: query
-                  description: "The 'limit' system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The 'limit' system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   allowEmptyValue: true
                   schema:
                     type: integer
-                    description: "The 'limit' system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                    description: |-
+                        The 'limit' system query option requests the number of items in the queried
+                        				collection to be included in the result.
                     default: 10
                     example: 10
                     minimum: 1
@@ -456,21 +488,37 @@ paths:
                   example: 10
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                    description: |-
+                        The 'filter' system query option allows clients to filter a collection of
+                        				resources that are addressed by a request URL. The expression specified with 'filter'
+                        				is evaluated for each resource in the collection, and only items where the expression
+                        				evaluates to true are included in the response.
                     default: ""
                     example: filter=FirstName eq 'Scott'
                   example: filter=FirstName eq 'Scott'
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                    description: |-
+                        The 'orderby' query option allows clients to request resources in either
+                        				ascending order using asc or descending order using desc. If asc or desc not specified,
+                        				then the resources will be ordered in ascending order. The request below orders Trips on
+                        				property EndsAt in descending order.
                     default: ""
                     example: orderby=EndsAt
                   example: orderby=EndsAt
@@ -482,14 +530,18 @@ paths:
                     type: boolean
                     description: When set order result in descending order. Ascending order is the default.
                     example: false
-                  example: false
+                  example: true
                 - name: page
                   in: query
-                  description: "The content of '$page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of '$page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The content of '$page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                    description: |-
+                        The content of '$page' is returned in the 'links' part of a previous query and
+                        				will when set, ALL other parameters, except for 'limit' are ignored.
                     example: gdsgQwhdgd
                   example: gdsgQwhdgd
             responses:
@@ -500,7 +552,7 @@ paths:
                             schema:
                                 $ref: '#/components/schemas/ListMetaRT'
                             example:
-                                aspect-path: Nemo est dolore repellat.
+                                aspect-path: Omnis praesentium.
                                 at-time: "1996-12-19T16:39:57-08:00"
                                 entity-id: urn:blue:image.collA.12
                                 links:
@@ -565,9 +617,9 @@ paths:
                   schema:
                     type: string
                     description: Entity to which attach metadata
-                    example: http://howell.org/clara
+                    example: http://dickens.org/elody
                     format: uri
-                  example: http://stamm.net/aisha.kozey
+                  example: http://huels.biz/lindsey
                 - name: schema
                   in: query
                   description: Schema of metadata
@@ -576,9 +628,9 @@ paths:
                   schema:
                     type: string
                     description: Schema of metadata
-                    example: http://williamson.info/annalise
+                    example: http://wiza.com/carol
                     format: uri
-                  example: http://grant.com/leon
+                  example: http://dickens.biz/katrina.schneider
                 - name: policy-id
                   in: query
                   description: Policy guiding visibility and actions performed
@@ -586,9 +638,9 @@ paths:
                   schema:
                     type: string
                     description: Policy guiding visibility and actions performed
-                    example: http://lefflerlabadie.net/america
+                    example: http://pagac.org/maximillia
                     format: uri
-                  example: http://kohler.net/orland
+                  example: http://mueller.biz/leanne
                 - name: Content-Type
                   in: header
                   description: Content-Type header, MUST be of application/json.
@@ -683,9 +735,9 @@ paths:
                   schema:
                     type: string
                     description: Policy guiding visibility and actions performed
-                    example: http://okuneva.com/bryana
+                    example: http://rowe.biz/odie_marquardt
                     format: uri
-                  example: http://ebert.org/georgiana
+                  example: http://waters.biz/dean
                 - name: Content-Type
                   in: header
                   description: Content-Type header, MUST be of application/json.
@@ -704,7 +756,7 @@ paths:
                             type: string
                             description: Aspect content
                             example: '{"$schema": ...}'
-                            format: json
+                            format: binary
                         example: '{"$schema": ...}'
             responses:
                 "200":
@@ -882,9 +934,9 @@ paths:
                   schema:
                     type: string
                     description: Policy guiding visibility and actions performed
-                    example: http://kirlin.name/ansel_ratke
+                    example: http://skiles.info/rupert
                     format: uri
-                  example: http://huel.name/josefina
+                  example: http://nader.com/davonte_krajcik
                 - name: id
                   in: path
                   description: Record ID to update
@@ -913,7 +965,7 @@ paths:
                             type: string
                             description: Aspect content
                             example: '{"$schema": ...}'
-                            format: json
+                            format: binary
                         example: '{"$schema": ...}'
             responses:
                 "200":
@@ -965,16 +1017,20 @@ paths:
             tags:
                 - order
             summary: list order
-            description: orders
+            description: list orders
             operationId: order#list
             parameters:
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The $limit system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   allowEmptyValue: true
                   schema:
                     type: integer
-                    description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                    description: |-
+                        The $limit system query option requests the number of items in the queried
+                        				collection to be included in the result.
                     default: 10
                     example: 10
                     minimum: 1
@@ -982,29 +1038,49 @@ paths:
                   example: 10
                 - name: page
                   in: query
-                  description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of 'page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                    description: |-
+                        The content of 'page' is returned in the 'links' part of a previous query and
+                        				will when set, ALL other parameters, except for 'limit' are ignored.
                     example: gdsgQwhdgd
                   example: gdsgQwhdgd
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                    description: |-
+                        The 'filter' system query option allows clients to filter a collection of
+                        				resources that are addressed by a request URL. The expression specified with 'filter'
+                        				is evaluated for each resource in the collection, and only items where the expression
+                        				evaluates to true are included in the response.
                     example: name ~= 'Scott%'
                   example: name ~= 'Scott%'
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                    description: |-
+                        The 'orderby' query option allows clients to request resources in either
+                        				ascending order using asc or descending order using desc. If asc or desc not specified,
+                        				then the resources will be ordered in ascending order. The request below orders Trips on
+                        				property EndsAt in descending order.
                     example: orderby=EndsAt
                   example: orderby=EndsAt
                 - name: order-desc
@@ -1015,7 +1091,7 @@ paths:
                     type: boolean
                     description: When set order result in descending order. Ascending order is the default.
                     default: false
-                    example: true
+                    example: false
                   example: false
                 - name: at-time
                   in: query
@@ -1041,8 +1117,8 @@ paths:
                                     next: https://api.com/foo/...
                                     self: https://api.com/foo/...
                                 orders:
-                                    - account_id: "2022-01-01"
-                                      finished_at: "2022-01-01"
+                                    - account-id: "2022-01-01"
+                                      finished-at: "2022-01-01"
                                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                                       links:
                                         describedBy:
@@ -1050,12 +1126,12 @@ paths:
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
                                       name: Fire risk for Lot2
-                                      ordered_at: "2022-01-01"
-                                      service_id: "2022-01-01"
-                                      started_at: "2022-01-01"
-                                      status: pending
-                                    - account_id: "2022-01-01"
-                                      finished_at: "2022-01-01"
+                                      ordered-at: "2022-01-01"
+                                      service-id: "2022-01-01"
+                                      started-at: "2022-01-01"
+                                      status: unknown
+                                    - account-id: "2022-01-01"
+                                      finished-at: "2022-01-01"
                                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                                       links:
                                         describedBy:
@@ -1063,12 +1139,12 @@ paths:
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
                                       name: Fire risk for Lot2
-                                      ordered_at: "2022-01-01"
-                                      service_id: "2022-01-01"
-                                      started_at: "2022-01-01"
-                                      status: pending
-                                    - account_id: "2022-01-01"
-                                      finished_at: "2022-01-01"
+                                      ordered-at: "2022-01-01"
+                                      service-id: "2022-01-01"
+                                      started-at: "2022-01-01"
+                                      status: unknown
+                                    - account-id: "2022-01-01"
+                                      finished-at: "2022-01-01"
                                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                                       links:
                                         describedBy:
@@ -1076,23 +1152,10 @@ paths:
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
                                       name: Fire risk for Lot2
-                                      ordered_at: "2022-01-01"
-                                      service_id: "2022-01-01"
-                                      started_at: "2022-01-01"
-                                      status: pending
-                                    - account_id: "2022-01-01"
-                                      finished_at: "2022-01-01"
-                                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
-                                      links:
-                                        describedBy:
-                                            href: https://api.com/swagger/...
-                                            type: application/openapi3+json
-                                        self: Ipsam deleniti magnam nihil et.
-                                      name: Fire risk for Lot2
-                                      ordered_at: "2022-01-01"
-                                      service_id: "2022-01-01"
-                                      started_at: "2022-01-01"
-                                      status: pending
+                                      ordered-at: "2022-01-01"
+                                      service-id: "2022-01-01"
+                                      started-at: "2022-01-01"
+                                      status: unknown
                 "400":
                     description: 'invalid-credential: Provided credential is not valid'
                 "401":
@@ -1133,32 +1196,32 @@ paths:
                         schema:
                             $ref: '#/components/schemas/OrderRequestT'
                         example:
-                            accountID: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
+                            account-id: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
                             name: Fire risk for Lot2
                             parameters:
                                 - name: region
                                   value: Upper Valley
                                 - name: threshold
                                   value: 10
-                            policyID: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
-                            serviceID: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
+                            policy-id: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
+                            service-id: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                description: 'Response body may alternatively be #/components/schemas/CreateResponseBodyTiny'
+                                description: 'Response body may alternatively be #/components/schemas/ReadResponseBodyTiny'
                                 $ref: '#/components/schemas/OrderStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                finished_at: "2023-03-17T04:57:00Z"
+                                finished-at: "2023-03-17T04:57:00Z"
                                 id: 123e4567-e89b-12d3-a456-426614174000
                                 links:
                                     describedBy:
@@ -1166,7 +1229,7 @@ paths:
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
                                 name: Fire risk for Lot2
-                                ordered_at: "2023-03-17T04:57:00Z"
+                                ordered-at: "2023-03-17T04:57:00Z"
                                 parameters:
                                     - name: region
                                       value: Upper Valley
@@ -1178,14 +1241,14 @@ paths:
                                       name: fire risk map
                                       size: 1234963
                                 service:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                started_at: "2023-03-17T04:57:00Z"
-                                status: failed
+                                started-at: "2023-03-17T04:57:00Z"
+                                status: succeeded
                 "400":
                     description: 'invalid-credential: Provided credential is not valid'
                 "401":
@@ -1243,17 +1306,17 @@ paths:
                     content:
                         application/json:
                             schema:
-                                description: 'Response body may alternatively be #/components/schemas/CreateResponseBodyTiny'
+                                description: 'Response body may alternatively be #/components/schemas/ReadResponseBodyTiny'
                                 $ref: '#/components/schemas/OrderStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                finished_at: "2023-03-17T04:57:00Z"
+                                finished-at: "2023-03-17T04:57:00Z"
                                 id: 123e4567-e89b-12d3-a456-426614174000
                                 links:
                                     describedBy:
@@ -1261,7 +1324,7 @@ paths:
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
                                 name: Fire risk for Lot2
-                                ordered_at: "2023-03-17T04:57:00Z"
+                                ordered-at: "2023-03-17T04:57:00Z"
                                 parameters:
                                     - name: region
                                       value: Upper Valley
@@ -1273,14 +1336,14 @@ paths:
                                       name: fire risk map
                                       size: 1234963
                                 service:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
-                                started_at: "2023-03-17T04:57:00Z"
-                                status: scheduled
+                                started-at: "2023-03-17T04:57:00Z"
+                                status: executing
                 "400":
                     description: 'invalid-credential: Provided credential is not valid'
                 "401":
@@ -1312,16 +1375,20 @@ paths:
             tags:
                 - service
             summary: list service
-            description: services
+            description: list services
             operationId: service#list
             parameters:
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The $limit system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   allowEmptyValue: true
                   schema:
                     type: integer
-                    description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                    description: |-
+                        The $limit system query option requests the number of items in the queried
+                        				collection to be included in the result.
                     default: 10
                     example: 10
                     minimum: 1
@@ -1329,29 +1396,49 @@ paths:
                   example: 10
                 - name: page
                   in: query
-                  description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of 'page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                    description: |-
+                        The content of 'page' is returned in the 'links' part of a previous query and
+                        				will when set, ALL other parameters, except for 'limit' are ignored.
                     example: gdsgQwhdgd
                   example: gdsgQwhdgd
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                    description: |-
+                        The 'filter' system query option allows clients to filter a collection of
+                        				resources that are addressed by a request URL. The expression specified with 'filter'
+                        				is evaluated for each resource in the collection, and only items where the expression
+                        				evaluates to true are included in the response.
                     example: name ~= 'Scott%'
                   example: name ~= 'Scott%'
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   allowEmptyValue: true
                   schema:
                     type: string
-                    description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                    description: |-
+                        The 'orderby' query option allows clients to request resources in either
+                        				ascending order using asc or descending order using desc. If asc or desc not specified,
+                        				then the resources will be ordered in ascending order. The request below orders Trips on
+                        				property EndsAt in descending order.
                     example: orderby=EndsAt
                   example: orderby=EndsAt
                 - name: order-desc
@@ -1397,7 +1484,7 @@ paths:
                                         self: Ipsam deleniti magnam nihil et.
                                       name: Fire risk for region
                                       provider:
-                                        id: http://klingdicki.info/creola
+                                        id: http://bednar.name/rupert_hickle
                                         links:
                                             describedBy:
                                                 href: https://api.com/swagger/...
@@ -1412,7 +1499,7 @@ paths:
                                         self: Ipsam deleniti magnam nihil et.
                                       name: Fire risk for region
                                       provider:
-                                        id: http://klingdicki.info/creola
+                                        id: http://bednar.name/rupert_hickle
                                         links:
                                             describedBy:
                                                 href: https://api.com/swagger/...
@@ -1427,7 +1514,7 @@ paths:
                                         self: Ipsam deleniti magnam nihil et.
                                       name: Fire risk for region
                                       provider:
-                                        id: http://klingdicki.info/creola
+                                        id: http://bednar.name/rupert_hickle
                                         links:
                                             describedBy:
                                                 href: https://api.com/swagger/...
@@ -1462,9 +1549,9 @@ paths:
         post:
             tags:
                 - service
-            summary: create service
+            summary: create_service service
             description: Create a new services and return its status.
-            operationId: service#create
+            operationId: service#create_service
             requestBody:
                 description: New services description
                 required: true
@@ -1473,26 +1560,65 @@ paths:
                         schema:
                             $ref: '#/components/schemas/ServiceDescriptionT'
                         example:
-                            accountID: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
+                            account-id: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
+                            banner: http://thompson.com/brennon.thompson
+                            description: This service ...
+                            metadata:
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
                             name: Fire risk for Lot2
                             parameters:
-                                - name: region
-                                  value: Upper Valley
-                                - name: threshold
-                                  value: 10
-                            policyID: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
-                            serviceID: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
+                                - description: The name of the region as according to ...
+                                  label: Region Name
+                                  name: region
+                                  type: string
+                                - label: Rainfall/month threshold
+                                  name: threshold
+                                  type: float
+                                  unit: m
+                            policy-id: Praesentium autem quis sit inventore et.
+                            provider-id: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
+                            provider-ref: service_foo_patch_1
+                            references:
+                                - title: Et sed.
+                                  uri: http://howe.com/jeremie_gutkowski
+                                - title: Et sed.
+                                  uri: http://howe.com/jeremie_gutkowski
+                            tags:
+                                - tag1
+                                - tag2
+                            workflow:
+                                argo: Fugiat repudiandae mollitia aliquam labore.
+                                basic:
+                                    command:
+                                        - Et voluptas vitae qui commodi nemo occaecati.
+                                        - Et consectetur ex.
+                                    cpu:
+                                        limit: At eligendi.
+                                        request: Doloribus optio laborum incidunt nihil molestias.
+                                    image: Qui omnis minus illum nisi dolorum.
+                                    memory:
+                                        limit: At eligendi.
+                                        request: Doloribus optio laborum incidunt nihil molestias.
+                                opts: Molestiae minima sint.
+                                type: Veritatis dolorum.
             responses:
                 "201":
                     description: Created response.
                     content:
                         application/json:
                             schema:
-                                description: 'Response body may alternatively be #/components/schemas/CreateResponseBodyTiny2'
+                                description: 'Response body may alternatively be #/components/schemas/CreateServiceResponseBodyTiny'
                                 $ref: '#/components/schemas/ServiceStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
@@ -1506,10 +1632,14 @@ paths:
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
                                 metadata:
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
                                 name: Fire risk for Lot2
                                 parameters:
                                     - description: The name of the region as according to ...
@@ -1521,7 +1651,7 @@ paths:
                                       type: float
                                       unit: m
                                 provider:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
@@ -1585,8 +1715,8 @@ paths:
                   schema:
                     type: string
                     description: ID of services to update
-                    example: Ipsum hic.
-                  example: Voluptatem ad sint.
+                    example: Autem quod voluptas reprehenderit et cumque dolore.
+                  example: Perspiciatis aspernatur rem voluptatum ab consequatur dolorem.
             responses:
                 "204":
                     description: No Content response.
@@ -1632,11 +1762,11 @@ paths:
                     content:
                         application/json:
                             schema:
-                                description: 'Response body may alternatively be #/components/schemas/CreateResponseBodyTiny2'
+                                description: 'Response body may alternatively be #/components/schemas/CreateServiceResponseBodyTiny'
                                 $ref: '#/components/schemas/ServiceStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
@@ -1650,14 +1780,12 @@ paths:
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
                                 metadata:
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
                                 name: Fire risk for Lot2
                                 parameters:
                                     - description: The name of the region as according to ...
@@ -1669,14 +1797,14 @@ paths:
                                       type: float
                                       unit: m
                                 provider:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
                                             type: application/openapi3+json
                                         self: Ipsam deleniti magnam nihil et.
                                 provider-ref: service_foo
-                                status: active
+                                status: error
                                 tags:
                                     - tag1
                                     - tag2
@@ -1729,8 +1857,8 @@ paths:
                   schema:
                     type: string
                     description: ID of services to update
-                    example: Illum ut amet vel ut in repellendus.
-                  example: Non autem eligendi.
+                    example: Qui quidem illo quo labore.
+                  example: Vel corporis cumque iure tenetur.
             requestBody:
                 description: Updated services description
                 required: true
@@ -1739,18 +1867,16 @@ paths:
                         schema:
                             $ref: '#/components/schemas/ServiceDescriptionT'
                         example:
-                            account-id: cayp:account:acme
-                            banner: http://ullrich.com/jamir_wyman
+                            account-id: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
+                            banner: http://ricedickens.net/yvonne_vonrueden
                             description: This service ...
                             metadata:
-                                - name: Et ut et.
-                                  value: Possimus et id harum iste dolores esse.
-                                - name: Et ut et.
-                                  value: Possimus et id harum iste dolores esse.
-                                - name: Et ut et.
-                                  value: Possimus et id harum iste dolores esse.
-                                - name: Et ut et.
-                                  value: Possimus et id harum iste dolores esse.
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
+                                - name: Voluptatum qui error ipsam.
+                                  value: Hic voluptates error fugit.
                             name: Fire risk for Lot2
                             parameters:
                                 - description: The name of the region as according to ...
@@ -1761,45 +1887,47 @@ paths:
                                   name: threshold
                                   type: float
                                   unit: m
-                            policy-id: Qui magnam repellendus nihil reprehenderit.
-                            provider-id: cayp:provider:acme
+                            policy-id: Nihil mollitia maiores ratione voluptates qui.
+                            provider-id: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
                             provider-ref: service_foo_patch_1
                             references:
-                                - title: Minus sed sit expedita enim.
-                                  uri: http://doylemarks.org/krystal_douglas
-                                - title: Minus sed sit expedita enim.
-                                  uri: http://doylemarks.org/krystal_douglas
+                                - title: Et sed.
+                                  uri: http://howe.com/jeremie_gutkowski
+                                - title: Et sed.
+                                  uri: http://howe.com/jeremie_gutkowski
+                                - title: Et sed.
+                                  uri: http://howe.com/jeremie_gutkowski
+                                - title: Et sed.
+                                  uri: http://howe.com/jeremie_gutkowski
                             tags:
                                 - tag1
                                 - tag2
                             workflow:
-                                argo: Temporibus eum quo corporis qui molestiae.
+                                argo: Fugiat repudiandae mollitia aliquam labore.
                                 basic:
                                     command:
-                                        - Quis fugiat.
-                                        - Nostrum ex.
-                                        - Laborum qui.
-                                        - Rem assumenda sit magnam accusamus enim.
+                                        - Et voluptas vitae qui commodi nemo occaecati.
+                                        - Et consectetur ex.
                                     cpu:
-                                        limit: Quaerat nulla iure illum eum.
-                                        request: Est iusto eum rerum dolores sed.
-                                    image: Esse dolorem laudantium nisi laboriosam dolores.
+                                        limit: At eligendi.
+                                        request: Doloribus optio laborum incidunt nihil molestias.
+                                    image: Qui omnis minus illum nisi dolorum.
                                     memory:
-                                        limit: Quaerat nulla iure illum eum.
-                                        request: Est iusto eum rerum dolores sed.
-                                opts: Minus dignissimos fuga facere minus.
-                                type: Illo odit et.
+                                        limit: At eligendi.
+                                        request: Doloribus optio laborum incidunt nihil molestias.
+                                opts: Molestiae minima sint.
+                                type: Veritatis dolorum.
             responses:
                 "200":
                     description: OK response.
                     content:
                         application/json:
                             schema:
-                                description: 'Response body may alternatively be #/components/schemas/CreateResponseBodyTiny2'
+                                description: 'Response body may alternatively be #/components/schemas/CreateServiceResponseBodyTiny'
                                 $ref: '#/components/schemas/ServiceStatusRT'
                             example:
                                 account:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
@@ -1813,10 +1941,12 @@ paths:
                                         type: application/openapi3+json
                                     self: Ipsam deleniti magnam nihil et.
                                 metadata:
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
-                                    - name: Quia quis aut quia veniam est dignissimos.
-                                      value: Rem incidunt dolorum vitae magni.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
+                                    - name: Beatae qui repellendus molestias culpa aut.
+                                      value: Quia quis aut quia veniam est dignissimos.
                                 name: Fire risk for Lot2
                                 parameters:
                                     - description: The name of the region as according to ...
@@ -1828,7 +1958,7 @@ paths:
                                       type: float
                                       unit: m
                                 provider:
-                                    id: http://klingdicki.info/creola
+                                    id: http://bednar.name/rupert_hickle
                                     links:
                                         describedBy:
                                             href: https://api.com/swagger/...
@@ -1959,26 +2089,6 @@ components:
                           name: Fire risk for Lot2
                           size: 19000
                           status: ready
-                        - id: cayp:artifact:0000-000
-                          links:
-                            describedBy:
-                                href: https://api.com/swagger/...
-                                type: application/openapi3+json
-                            self: Ipsam deleniti magnam nihil et.
-                          mime-type: image/jpeg
-                          name: Fire risk for Lot2
-                          size: 19000
-                          status: ready
-                        - id: cayp:artifact:0000-000
-                          links:
-                            describedBy:
-                                href: https://api.com/swagger/...
-                                type: application/openapi3+json
-                            self: Ipsam deleniti magnam nihil et.
-                          mime-type: image/jpeg
-                          name: Fire risk for Lot2
-                          size: 19000
-                          status: ready
                 at-time:
                     type: string
                     description: Time at which this list was valid
@@ -1988,16 +2098,6 @@ components:
                     $ref: '#/components/schemas/NavT'
             example:
                 artifacts:
-                    - id: cayp:artifact:0000-000
-                      links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                      mime-type: image/jpeg
-                      name: Fire risk for Lot2
-                      size: 19000
-                      status: ready
                     - id: cayp:artifact:0000-000
                       links:
                         describedBy:
@@ -2044,7 +2144,7 @@ components:
                 cache-of:
                     type: string
                     description: URL of object this artifact is caching
-                    example: Neque sapiente commodi dolorem.
+                    example: Nesciunt est.
                 created-at:
                     type: string
                     description: DateTime artifact was created
@@ -2054,7 +2154,7 @@ components:
                 etag:
                     type: string
                     description: ETAG of artifact
-                    example: Voluptatum nihil optio sit.
+                    example: Rerum qui amet.
                 id:
                     type: string
                     description: Artifact ID
@@ -2065,10 +2165,14 @@ components:
                     example: "2022-01-01"
                 links:
                     $ref: '#/components/schemas/SelfT'
+                location:
+                    type: string
+                    description: link back to record
+                    example: Sed iusto nihil dolor recusandae sunt aliquam.
                 mime-type:
                     type: string
                     description: Mime-type of data
-                    example: Voluptate nostrum quibusdam.
+                    example: Voluptatem quis quam repudiandae dolor odit.
                 name:
                     type: string
                     description: Optional name
@@ -2078,7 +2182,7 @@ components:
                 size:
                     type: integer
                     description: Size of data
-                    example: 3503468521889432458
+                    example: 200039650156946672
                     format: int64
                 status:
                     type: string
@@ -2090,22 +2194,31 @@ components:
                         - ready
                         - error
                         - unknown
+                tus-offset:
+                    type: integer
+                    description: TUS offset for partially uploaded content
+                    example: 2136629185509603331
+                    format: int64
+                tus-resumable:
+                    type: string
+                    description: indicate version of TUS supported
+                    example: Vero rerum incidunt commodi voluptas.
             example:
                 account:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
-                cache-of: Quis numquam cumque magnam.
+                cache-of: Reiciendis incidunt.
                 created-at: "2022-01-01"
                 data:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-                etag: Voluptates dolor atque.
+                etag: Perspiciatis sit pariatur sunt.
                 id: type:scope:name
                 last-modified-at: "2022-01-01"
                 links:
@@ -2113,17 +2226,20 @@ components:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-                mime-type: Qui fugit pariatur numquam omnis similique quisquam.
+                location: Reiciendis similique repellendus et.
+                mime-type: Consequatur quo ex mollitia eum.
                 name: Fire risk per LGA
                 policy:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
-                size: 4169950383954327222
-                status: partial
+                size: 7620536082927971343
+                status: ready
+                tus-offset: 4781407271279886572
+                tus-resumable: Fugit alias velit.
             required:
                 - id
                 - status
@@ -2135,61 +2251,35 @@ components:
                     type: array
                     items:
                         type: string
-                        example: Corporis quas architecto amet asperiores.
+                        example: Excepturi impedit cupiditate et nihil.
                     description: Command to start the container - needed for some container runtimes
                     example:
-                        - Amet repudiandae sed voluptas sapiente nihil.
-                        - Eveniet tenetur quasi cupiditate accusamus dolore.
+                        - Ipsum qui necessitatibus quidem sint doloremque.
+                        - Blanditiis nihil eligendi.
+                        - Cumque qui pariatur sint corrupti.
+                        - Accusamus doloremque et dolor ullam dolorem hic.
                 cpu:
                     $ref: '#/components/schemas/ResourceMemoryT'
                 image:
                     type: string
                     description: container image name
-                    example: Illum assumenda explicabo aut quo et porro.
+                    example: Nihil rerum voluptas sit perferendis tempora deserunt.
                 memory:
                     $ref: '#/components/schemas/ResourceMemoryT'
             example:
                 command:
-                    - Quisquam earum dolores unde qui mollitia veniam.
-                    - Eaque cumque ipsa eum laborum corporis.
+                    - Nemo maxime.
+                    - Expedita quasi natus.
+                    - Optio minima et quisquam ipsum rem dolore.
+                    - Qui est nostrum.
                 cpu:
-                    limit: Quaerat nulla iure illum eum.
-                    request: Est iusto eum rerum dolores sed.
-                image: Ut deserunt corporis voluptatibus optio quibusdam.
+                    limit: At eligendi.
+                    request: Doloribus optio laborum incidunt nihil molestias.
+                image: Quis voluptate quis ipsa repudiandae quidem eos.
                 memory:
-                    limit: Quaerat nulla iure illum eum.
-                    request: Est iusto eum rerum dolores sed.
-        CreateResponseBodyTiny:
-            type: object
-            properties:
-                links:
-                    $ref: '#/components/schemas/SelfT'
-                name:
-                    type: string
-                    description: Optional customer provided name
-                    example: Fire risk for Lot2
-                status:
-                    type: string
-                    description: Order status
-                    example: failed
-                    enum:
-                        - unknown
-                        - pending
-                        - scheduled
-                        - executing
-                        - succeeded
-                        - failed
-                        - error
-            description: CreateResponseBody result type (tiny view)
-            example:
-                links:
-                    describedBy:
-                        href: https://api.com/swagger/...
-                        type: application/openapi3+json
-                    self: Ipsam deleniti magnam nihil et.
-                name: Fire risk for Lot2
-                status: unknown
-        CreateResponseBodyTiny2:
+                    limit: At eligendi.
+                    request: Doloribus optio laborum incidunt nihil molestias.
+        CreateServiceResponseBodyTiny:
             type: object
             properties:
                 links:
@@ -2198,7 +2288,7 @@ components:
                     type: string
                     description: Optional provider provided name
                     example: Fire risk for Lot2
-            description: CreateResponseBody result type (tiny view)
+            description: create_service_response_body result type (tiny view)
             example:
                 links:
                     describedBy:
@@ -2227,20 +2317,20 @@ components:
                 message:
                     type: string
                     description: message describing expected type or pattern.
-                    example: Iure consequuntur commodi.
+                    example: Voluptas odit.
                 name:
                     type: string
                     description: name of parameter.
-                    example: Commodi optio et magni reprehenderit reprehenderit.
+                    example: Molestiae et ex hic aut dicta dolorem.
                 value:
                     type: string
                     description: provided parameter value.
-                    example: Accusamus maxime.
+                    example: Est esse voluptas consectetur quia.
             description: Invalide parameter value
             example:
-                message: Iste iusto.
-                name: Consequatur voluptas eius sed error id et.
-                value: Tenetur ratione qui amet reiciendis debitis.
+                message: Aut odit dolorum nulla quo.
+                name: Asperiores temporibus.
+                value: Ut voluptatem.
             required:
                 - name
                 - message
@@ -2256,11 +2346,11 @@ components:
                     type: string
                     description: Message of error
                     default: Not authorized to perform this action
-                    example: Cumque in nulla.
+                    example: Nostrum quibusdam quia aut.
             description: Token scopes are invalid
             example:
                 id: 123e4567-e89b-12d3-a456-426614174000
-                message: Consequatur qui voluptatem.
+                message: Sapiente commodi dolorem.
             required:
                 - message
         ListMetaRT:
@@ -2269,7 +2359,7 @@ components:
                 aspect-path:
                     type: string
                     description: Optional json path to further filter on returned list
-                    example: Facere veniam dolorem velit quia.
+                    example: Qui consequatur minima ut ipsam magni iste.
                 at-time:
                     type: string
                     description: Time at which this list was valid
@@ -2303,13 +2393,18 @@ components:
                           entity: urn:blue:transect.1
                           record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                           schema: urn:blue:schema.image
+                        - aspect: '{...}'
+                          aspectContext: '{...}'
+                          entity: urn:blue:transect.1
+                          record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
+                          schema: urn:blue:schema.image
                 schema:
                     type: string
                     description: Optional schema to filter on
                     example: urn:blue:image,urn:blue:location
                     format: uri
             example:
-                aspect-path: Possimus commodi qui sint.
+                aspect-path: Harum hic qui voluptas vel repellendus.
                 at-time: "1996-12-19T16:39:57-08:00"
                 entity-id: urn:blue:image.collA.12
                 links:
@@ -2317,6 +2412,16 @@ components:
                     next: https://api.com/foo/...
                     self: https://api.com/foo/...
                 records:
+                    - aspect: '{...}'
+                      aspectContext: '{...}'
+                      entity: urn:blue:transect.1
+                      record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
+                      schema: urn:blue:schema.image
+                    - aspect: '{...}'
+                      aspectContext: '{...}'
+                      entity: urn:blue:transect.1
+                      record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
+                      schema: urn:blue:schema.image
                     - aspect: '{...}'
                       aspectContext: '{...}'
                       entity: urn:blue:transect.1
@@ -2338,12 +2443,11 @@ components:
                     type: string
                     description: Attached metadata aspect
                     example: '{...}'
-                    format: json
+                    format: binary
                 aspectContext:
                     type: string
                     description: If aspectPath was defined, this is what matched the query
                     example: '{...}'
-                    format: json
                 entity:
                     type: string
                     description: Entity ID
@@ -2372,7 +2476,7 @@ components:
                     type: string
                     description: Attached metadata aspect
                     example: '{...}'
-                    format: json
+                    format: binary
                 asserter:
                     type: string
                     description: Entity asserting this metadata record at 'valid-from'
@@ -2442,20 +2546,20 @@ components:
                     type: string
                     description: Information message
                     default: Method not implemented
-                    example: Earum aliquid quia repellat ipsum.
+                    example: Voluptatum nihil optio sit.
             description: Method is not yet implemented
             example:
-                message: Adipisci optio aut officia.
+                message: Iure facere excepturi voluptatem provident.
             required:
                 - message
         OrderListItem:
             type: object
             properties:
-                account_id:
+                account-id:
                     type: string
                     description: ID of ordered service
                     example: "2022-01-01"
-                finished_at:
+                finished-at:
                     type: string
                     description: DateTime order was finished
                     example: "2022-01-01"
@@ -2469,15 +2573,15 @@ components:
                     type: string
                     description: Optional customer provided name
                     example: Fire risk for Lot2
-                ordered_at:
+                ordered-at:
                     type: string
                     description: DateTime order was placed
                     example: "2022-01-01"
-                service_id:
+                service-id:
                     type: string
                     description: ID of ordered service
                     example: "2022-01-01"
-                started_at:
+                started-at:
                     type: string
                     description: DateTime processing of order started
                     example: "2022-01-01"
@@ -2494,8 +2598,8 @@ components:
                         - failed
                         - error
             example:
-                account_id: "2022-01-01"
-                finished_at: "2022-01-01"
+                account-id: "2022-01-01"
+                finished-at: "2022-01-01"
                 id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                 links:
                     describedBy:
@@ -2503,10 +2607,10 @@ components:
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
                 name: Fire risk for Lot2
-                ordered_at: "2022-01-01"
-                service_id: "2022-01-01"
-                started_at: "2022-01-01"
-                status: error
+                ordered-at: "2022-01-01"
+                service-id: "2022-01-01"
+                started-at: "2022-01-01"
+                status: unknown
             required:
                 - links
         OrderListRT:
@@ -2525,8 +2629,8 @@ components:
                         $ref: '#/components/schemas/OrderListItem'
                     description: Orders
                     example:
-                        - account_id: "2022-01-01"
-                          finished_at: "2022-01-01"
+                        - account-id: "2022-01-01"
+                          finished-at: "2022-01-01"
                           id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                           links:
                             describedBy:
@@ -2534,12 +2638,12 @@ components:
                                 type: application/openapi3+json
                             self: Ipsam deleniti magnam nihil et.
                           name: Fire risk for Lot2
-                          ordered_at: "2022-01-01"
-                          service_id: "2022-01-01"
-                          started_at: "2022-01-01"
-                          status: pending
-                        - account_id: "2022-01-01"
-                          finished_at: "2022-01-01"
+                          ordered-at: "2022-01-01"
+                          service-id: "2022-01-01"
+                          started-at: "2022-01-01"
+                          status: unknown
+                        - account-id: "2022-01-01"
+                          finished-at: "2022-01-01"
                           id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                           links:
                             describedBy:
@@ -2547,12 +2651,12 @@ components:
                                 type: application/openapi3+json
                             self: Ipsam deleniti magnam nihil et.
                           name: Fire risk for Lot2
-                          ordered_at: "2022-01-01"
-                          service_id: "2022-01-01"
-                          started_at: "2022-01-01"
-                          status: pending
-                        - account_id: "2022-01-01"
-                          finished_at: "2022-01-01"
+                          ordered-at: "2022-01-01"
+                          service-id: "2022-01-01"
+                          started-at: "2022-01-01"
+                          status: unknown
+                        - account-id: "2022-01-01"
+                          finished-at: "2022-01-01"
                           id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                           links:
                             describedBy:
@@ -2560,10 +2664,23 @@ components:
                                 type: application/openapi3+json
                             self: Ipsam deleniti magnam nihil et.
                           name: Fire risk for Lot2
-                          ordered_at: "2022-01-01"
-                          service_id: "2022-01-01"
-                          started_at: "2022-01-01"
-                          status: pending
+                          ordered-at: "2022-01-01"
+                          service-id: "2022-01-01"
+                          started-at: "2022-01-01"
+                          status: unknown
+                        - account-id: "2022-01-01"
+                          finished-at: "2022-01-01"
+                          id: cayp:order:123e4567-e89b-12d3-a456-426614174000
+                          links:
+                            describedBy:
+                                href: https://api.com/swagger/...
+                                type: application/openapi3+json
+                            self: Ipsam deleniti magnam nihil et.
+                          name: Fire risk for Lot2
+                          ordered-at: "2022-01-01"
+                          service-id: "2022-01-01"
+                          started-at: "2022-01-01"
+                          status: unknown
             example:
                 at-time: "1996-12-19T16:39:57-08:00"
                 links:
@@ -2571,8 +2688,8 @@ components:
                     next: https://api.com/foo/...
                     self: https://api.com/foo/...
                 orders:
-                    - account_id: "2022-01-01"
-                      finished_at: "2022-01-01"
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                       links:
                         describedBy:
@@ -2580,12 +2697,12 @@ components:
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for Lot2
-                      ordered_at: "2022-01-01"
-                      service_id: "2022-01-01"
-                      started_at: "2022-01-01"
-                      status: pending
-                    - account_id: "2022-01-01"
-                      finished_at: "2022-01-01"
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                       links:
                         describedBy:
@@ -2593,10 +2710,36 @@ components:
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for Lot2
-                      ordered_at: "2022-01-01"
-                      service_id: "2022-01-01"
-                      started_at: "2022-01-01"
-                      status: pending
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
+                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                      name: Fire risk for Lot2
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
+                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                      name: Fire risk for Lot2
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
             required:
                 - orders
                 - at-time
@@ -2604,7 +2747,7 @@ components:
         OrderRequestT:
             type: object
             properties:
-                accountID:
+                account-id:
                     type: string
                     description: Reference to billable account
                     example: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
@@ -2623,36 +2766,35 @@ components:
                           value: Upper Valley
                         - name: threshold
                           value: 10
-                policyID:
+                policy-id:
                     type: string
                     description: Policy to control access to record an all generated artifacts
                     example: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
                     format: uri
-                serviceID:
+                service-id:
                     type: string
                     description: Reference to service requested
                     example: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
                     format: uri
             example:
-                accountID: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
+                account-id: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
                 name: Fire risk for Lot2
                 parameters:
                     - name: region
                       value: Upper Valley
                     - name: threshold
                       value: 10
-                policyID: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
-                serviceID: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
+                policy-id: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
+                service-id: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
             required:
-                - serviceID
-                - accountID
+                - service-id
                 - parameters
         OrderStatusRT:
             type: object
             properties:
                 account:
                     $ref: '#/components/schemas/RefT'
-                finished_at:
+                finished-at:
                     type: string
                     description: DateTime order processing finished
                     example: "2023-03-17T04:57:00Z"
@@ -2667,7 +2809,7 @@ components:
                     type: string
                     description: Optional customer provided name
                     example: Fire risk for Lot2
-                ordered_at:
+                ordered-at:
                     type: string
                     description: DateTime order was placed
                     example: "2023-03-17T04:57:00Z"
@@ -2693,10 +2835,179 @@ components:
                           size: 1234963
                 service:
                     $ref: '#/components/schemas/RefT'
-                started_at:
+                started-at:
                     type: string
                     description: DateTime order processing started
                     example: "2023-03-17T04:57:00Z"
+                status:
+                    type: string
+                    description: Order status
+                    example: failed
+                    enum:
+                        - unknown
+                        - pending
+                        - scheduled
+                        - executing
+                        - succeeded
+                        - failed
+                        - error
+            example:
+                account:
+                    id: http://bednar.name/rupert_hickle
+                    links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                finished-at: "2023-03-17T04:57:00Z"
+                id: 123e4567-e89b-12d3-a456-426614174000
+                links:
+                    describedBy:
+                        href: https://api.com/swagger/...
+                        type: application/openapi3+json
+                    self: Ipsam deleniti magnam nihil et.
+                name: Fire risk for Lot2
+                ordered-at: "2023-03-17T04:57:00Z"
+                parameters:
+                    - name: region
+                      value: Upper Valley
+                    - name: threshold
+                      value: 10
+                products:
+                    - href: https:/.../1/artifacts/0000-00001220
+                      mime-type: image/geo+tiff
+                      name: fire risk map
+                      size: 1234963
+                service:
+                    id: http://bednar.name/rupert_hickle
+                    links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                started-at: "2023-03-17T04:57:00Z"
+                status: unknown
+            required:
+                - id
+                - parameters
+        ParameterDefT:
+            type: object
+            properties:
+                constant:
+                    type: boolean
+                    example: false
+                default:
+                    type: string
+                    example: Consequatur dolor natus nihil.
+                description:
+                    type: string
+                    example: Accusantium suscipit nisi labore.
+                label:
+                    type: string
+                    example: Eum velit molestiae quo.
+                name:
+                    type: string
+                    example: Id magni consequatur.
+                optional:
+                    type: boolean
+                    example: true
+                options:
+                    type: array
+                    items:
+                        $ref: '#/components/schemas/ParameterOptT'
+                    example:
+                        - description: Cupiditate est omnis quo aut neque numquam.
+                          value: Autem dolore eos rerum tempora optio.
+                        - description: Cupiditate est omnis quo aut neque numquam.
+                          value: Autem dolore eos rerum tempora optio.
+                type:
+                    type: string
+                    example: Omnis dicta incidunt impedit necessitatibus.
+                unit:
+                    type: string
+                    example: Modi exercitationem natus quaerat veritatis.
+            example:
+                constant: false
+                default: Rerum ut omnis alias.
+                description: Commodi facilis sit quas est dignissimos.
+                label: Officiis asperiores quaerat.
+                name: Vel officia eum.
+                optional: true
+                options:
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
+                type: Et nam.
+                unit: Quia omnis.
+        ParameterOptT:
+            type: object
+            properties:
+                description:
+                    type: string
+                    example: Est dicta.
+                value:
+                    type: string
+                    example: Voluptatum recusandae et laboriosam id est.
+            example:
+                description: Sit est magni corrupti ut et assumenda.
+                value: Inventore eveniet qui quia.
+        ParameterT:
+            type: object
+            properties:
+                name:
+                    type: string
+                    example: Dolores vel.
+                value:
+                    type: string
+                    example: Omnis maxime rerum aut voluptates.
+            example:
+                name: Nam consectetur sapiente at.
+                value: Aut illo doloremque aut maxime.
+        ProductT:
+            type: object
+            properties:
+                id:
+                    type: string
+                    example: Quasi assumenda aut quia.
+                links:
+                    $ref: '#/components/schemas/SelfWithDataT'
+                mime-type:
+                    type: string
+                    example: Suscipit officiis.
+                name:
+                    type: string
+                    example: Non occaecati.
+                size:
+                    type: integer
+                    example: 9160335822313678370
+                    format: int64
+                status:
+                    type: string
+                    example: Ut nostrum.
+            example:
+                id: Doloremque quod earum.
+                links:
+                    data: Laboriosam sint sit cumque.
+                    describedBy:
+                        href: https://api.com/swagger/...
+                        type: application/openapi3+json
+                    self: Necessitatibus perferendis quo omnis voluptas.
+                mime-type: Laboriosam et ea voluptatum quas.
+                name: Et est quisquam doloribus labore est recusandae.
+                size: 4541757197358361803
+                status: Exercitationem excepturi quia qui.
+        ReadResponseBodyTiny:
+            type: object
+            properties:
+                links:
+                    $ref: '#/components/schemas/SelfT'
+                name:
+                    type: string
+                    description: Optional customer provided name
+                    example: Fire risk for Lot2
                 status:
                     type: string
                     description: Order status
@@ -2709,167 +3020,26 @@ components:
                         - succeeded
                         - failed
                         - error
+            description: ReadResponseBody result type (tiny view)
             example:
-                account:
-                    id: http://klingdicki.info/creola
-                    links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                finished_at: "2023-03-17T04:57:00Z"
-                id: 123e4567-e89b-12d3-a456-426614174000
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
                 name: Fire risk for Lot2
-                ordered_at: "2023-03-17T04:57:00Z"
-                parameters:
-                    - name: region
-                      value: Upper Valley
-                    - name: threshold
-                      value: 10
-                products:
-                    - href: https:/.../1/artifacts/0000-00001220
-                      mime-type: image/geo+tiff
-                      name: fire risk map
-                      size: 1234963
-                service:
-                    id: http://klingdicki.info/creola
-                    links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                started_at: "2023-03-17T04:57:00Z"
-                status: scheduled
-            required:
-                - id
-                - parameters
-        ParameterDefT:
-            type: object
-            properties:
-                constant:
-                    type: boolean
-                    example: true
-                default:
-                    type: string
-                    example: Quis ipsa repudiandae quidem eos vitae quibusdam.
-                description:
-                    type: string
-                    example: Ipsa consequatur distinctio necessitatibus.
-                label:
-                    type: string
-                    example: Et dolore qui dolores est dolorum rerum.
-                name:
-                    type: string
-                    example: Accusamus doloremque et dolor ullam dolorem hic.
-                optional:
-                    type: boolean
-                    example: false
-                options:
-                    type: array
-                    items:
-                        $ref: '#/components/schemas/ParameterOptT'
-                    example:
-                        - description: Ut fuga ea sapiente quo quo.
-                          value: Repudiandae non corporis.
-                        - description: Ut fuga ea sapiente quo quo.
-                          value: Repudiandae non corporis.
-                type:
-                    type: string
-                    example: Totam voluptas.
-                unit:
-                    type: string
-                    example: Et vel beatae.
-            example:
-                constant: true
-                default: Quia molestiae id magni.
-                description: Vel vero.
-                label: Animi inventore officiis repellendus ipsum quasi.
-                name: Culpa vero asperiores aliquid amet.
-                optional: true
-                options:
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                type: Vitae eum dolor deserunt quas ut.
-                unit: Asperiores ipsa labore.
-        ParameterOptT:
-            type: object
-            properties:
-                description:
-                    type: string
-                    example: Natus quidem optio minima et quisquam ipsum.
-                value:
-                    type: string
-                    example: Maxime qui expedita.
-            example:
-                description: Est nostrum tempora enim porro.
-                value: Dolore nemo.
-        ParameterT:
-            type: object
-            properties:
-                name:
-                    type: string
-                    example: Debitis reiciendis libero qui unde.
-                value:
-                    type: string
-                    example: Recusandae quisquam.
-            example:
-                name: Et officia.
-                value: Fuga beatae blanditiis sed iusto.
-        ProductT:
-            type: object
-            properties:
-                id:
-                    type: string
-                    example: Recusandae sunt aliquam iure vero rerum incidunt.
-                links:
-                    $ref: '#/components/schemas/SelfWithDataT'
-                mime-type:
-                    type: string
-                    example: Reiciendis incidunt.
-                name:
-                    type: string
-                    example: Voluptas cupiditate.
-                size:
-                    type: integer
-                    example: 1950728851434815693
-                    format: int64
-                status:
-                    type: string
-                    example: Corporis consequatur quo ex mollitia eum consequatur.
-            example:
-                id: Minima ut ipsam.
-                links:
-                    data: Quia ut pariatur.
-                    describedBy:
-                        href: https://api.com/swagger/...
-                        type: application/openapi3+json
-                    self: Sit cumque corrupti excepturi.
-                mime-type: Commodi non.
-                name: Iste nemo et harum hic qui voluptas.
-                size: 3667088909667561467
-                status: Repellendus eos labore quasi assumenda aut.
+                status: failed
         RefT:
             type: object
             properties:
                 id:
                     type: string
-                    example: http://torphyzieme.biz/murl
+                    example: http://kiehnlockman.com/eleonore_witting
                     format: uri
                 links:
                     $ref: '#/components/schemas/SelfT'
             example:
-                id: http://gulgowski.name/junior
+                id: http://mills.biz/emanuel
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -2881,30 +3051,32 @@ components:
                 title:
                     type: string
                     description: Title of reference document
-                    example: Non occaecati sit.
+                    example: Labore molestias dolorum provident inventore nam dicta.
                 uri:
                     type: string
                     description: Link to document
-                    example: http://leffler.info/herminia
+                    example: http://fisher.info/buddy_jenkins
                     format: uri
             example:
-                title: Iure omnis maxime.
-                uri: http://rutherford.info/rickie
+                title: Voluptas dolores quis quaerat consequatur quas.
+                uri: http://boganstanton.info/nina.osinski
         ResourceMemoryT:
             type: object
             properties:
                 limit:
                     type: string
                     description: minimal requirements [system limit]
-                    example: Ratione dolore dolor ut nisi optio.
+                    example: Totam voluptas.
                 request:
                     type: string
                     description: minimal requirements [0]
-                    example: Tempore iusto.
-            description: "See \nand https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/ for units"
+                    example: Et dolore qui dolores est dolorum rerum.
+            description: |-
+                See
+                and https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/ for units
             example:
-                limit: Omnis explicabo officiis vel eius in asperiores.
-                request: Dignissimos atque reiciendis perferendis.
+                limit: Et vel beatae.
+                request: Ipsa consequatur distinctio necessitatibus.
         ResourceNotFoundT:
             type: object
             properties:
@@ -2931,41 +3103,41 @@ components:
                     $ref: '#/components/schemas/DescribedByT'
                 self:
                     type: string
-                    example: Quae hic dignissimos.
+                    example: Consequatur voluptas eius sed error id et.
             example:
                 describedBy:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
-                self: Consequatur adipisci.
+                self: Tenetur ratione qui amet reiciendis debitis.
         SelfWithDataT:
             type: object
             properties:
                 data:
                     type: string
-                    example: Voluptatem reiciendis similique repellendus et a.
+                    example: Voluptatem quibusdam dolore.
                 describedBy:
                     $ref: '#/components/schemas/DescribedByT'
                 self:
                     type: string
-                    example: Sit pariatur.
+                    example: Occaecati sit laboriosam.
             example:
-                data: At qui.
+                data: Incidunt maiores et dolores quo soluta.
                 describedBy:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
-                self: Alias velit adipisci.
+                self: Beatae incidunt voluptas sequi debitis est quis.
         ServiceDescriptionT:
             type: object
             properties:
                 account-id:
                     type: string
                     description: Reference to account revenues for this service should be credited to
-                    example: cayp:account:acme
+                    example: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
                     format: uri
                 banner:
                     type: string
                     description: Link to banner image oprionally used for this service
-                    example: http://schowalterlangworth.name/antonette.pouros
+                    example: http://flatleytremblay.name/elody
                     format: uri
                 description:
                     type: string
@@ -2977,10 +3149,12 @@ components:
                         $ref: '#/components/schemas/ParameterT'
                     description: Optional provider provided meta tags
                     example:
-                        - name: Et ut et.
-                          value: Possimus et id harum iste dolores esse.
-                        - name: Et ut et.
-                          value: Possimus et id harum iste dolores esse.
+                        - name: Voluptatum qui error ipsam.
+                          value: Hic voluptates error fugit.
+                        - name: Voluptatum qui error ipsam.
+                          value: Hic voluptates error fugit.
+                        - name: Voluptatum qui error ipsam.
+                          value: Hic voluptates error fugit.
                 name:
                     type: string
                     description: Optional provider provided name
@@ -3002,11 +3176,11 @@ components:
                 policy-id:
                     type: string
                     description: Reference to policy controlling access
-                    example: Porro blanditiis nihil eligendi perferendis cumque.
+                    example: Asperiores ipsa labore.
                 provider-id:
                     type: string
                     description: Reference to service provider
-                    example: cayp:provider:acme
+                    example: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
                     format: uri
                 provider-ref:
                     type: string
@@ -3018,19 +3192,19 @@ components:
                         $ref: '#/components/schemas/ReferenceT'
                     description: Reference to account revenues for this service should be credited to
                     example:
-                        - title: Minus sed sit expedita enim.
-                          uri: http://doylemarks.org/krystal_douglas
-                        - title: Minus sed sit expedita enim.
-                          uri: http://doylemarks.org/krystal_douglas
-                        - title: Minus sed sit expedita enim.
-                          uri: http://doylemarks.org/krystal_douglas
-                        - title: Minus sed sit expedita enim.
-                          uri: http://doylemarks.org/krystal_douglas
+                        - title: Et sed.
+                          uri: http://howe.com/jeremie_gutkowski
+                        - title: Et sed.
+                          uri: http://howe.com/jeremie_gutkowski
+                        - title: Et sed.
+                          uri: http://howe.com/jeremie_gutkowski
+                        - title: Et sed.
+                          uri: http://howe.com/jeremie_gutkowski
                 tags:
                     type: array
                     items:
                         type: string
-                        example: Pariatur sint corrupti.
+                        example: Nihil itaque quia.
                     description: Optional provider provided tags
                     example:
                         - tag1
@@ -3038,18 +3212,18 @@ components:
                 workflow:
                     $ref: '#/components/schemas/WorkflowT'
             example:
-                account-id: cayp:account:acme
-                banner: http://bechtelar.com/verla
+                account-id: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
+                banner: http://rempel.biz/greyson_durgan
                 description: This service ...
                 metadata:
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
                 name: Fire risk for Lot2
                 parameters:
                     - description: The name of the region as according to ...
@@ -3060,38 +3234,34 @@ components:
                       name: threshold
                       type: float
                       unit: m
-                policy-id: Magni corrupti ut et assumenda consequatur.
-                provider-id: cayp:provider:acme
+                policy-id: Iure magni nihil ut rerum omnis quam.
+                provider-id: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
                 provider-ref: service_foo_patch_1
                 references:
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
                 tags:
                     - tag1
                     - tag2
                 workflow:
-                    argo: Temporibus eum quo corporis qui molestiae.
+                    argo: Fugiat repudiandae mollitia aliquam labore.
                     basic:
                         command:
-                            - Quis fugiat.
-                            - Nostrum ex.
-                            - Laborum qui.
-                            - Rem assumenda sit magnam accusamus enim.
+                            - Et voluptas vitae qui commodi nemo occaecati.
+                            - Et consectetur ex.
                         cpu:
-                            limit: Quaerat nulla iure illum eum.
-                            request: Est iusto eum rerum dolores sed.
-                        image: Esse dolorem laudantium nisi laboriosam dolores.
+                            limit: At eligendi.
+                            request: Doloribus optio laborum incidunt nihil molestias.
+                        image: Qui omnis minus illum nisi dolorum.
                         memory:
-                            limit: Quaerat nulla iure illum eum.
-                            request: Est iusto eum rerum dolores sed.
-                    opts: Minus dignissimos fuga facere minus.
-                    type: Illo odit et.
+                            limit: At eligendi.
+                            request: Doloribus optio laborum incidunt nihil molestias.
+                    opts: Molestiae minima sint.
+                    type: Veritatis dolorum.
             required:
                 - description
                 - provider-id
@@ -3127,7 +3297,7 @@ components:
                     self: Ipsam deleniti magnam nihil et.
                 name: Fire risk for region
                 provider:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
@@ -3160,7 +3330,7 @@ components:
                             self: Ipsam deleniti magnam nihil et.
                           name: Fire risk for region
                           provider:
-                            id: http://klingdicki.info/creola
+                            id: http://bednar.name/rupert_hickle
                             links:
                                 describedBy:
                                     href: https://api.com/swagger/...
@@ -3175,7 +3345,7 @@ components:
                             self: Ipsam deleniti magnam nihil et.
                           name: Fire risk for region
                           provider:
-                            id: http://klingdicki.info/creola
+                            id: http://bednar.name/rupert_hickle
                             links:
                                 describedBy:
                                     href: https://api.com/swagger/...
@@ -3197,7 +3367,7 @@ components:
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for region
                       provider:
-                        id: http://klingdicki.info/creola
+                        id: http://bednar.name/rupert_hickle
                         links:
                             describedBy:
                                 href: https://api.com/swagger/...
@@ -3212,7 +3382,7 @@ components:
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for region
                       provider:
-                        id: http://klingdicki.info/creola
+                        id: http://bednar.name/rupert_hickle
                         links:
                             describedBy:
                                 href: https://api.com/swagger/...
@@ -3227,22 +3397,7 @@ components:
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for region
                       provider:
-                        id: http://klingdicki.info/creola
-                        links:
-                            describedBy:
-                                href: https://api.com/swagger/...
-                                type: application/openapi3+json
-                            self: Ipsam deleniti magnam nihil et.
-                    - description: Some lengthy description of fire risk
-                      id: service:acme:oracle
-                      links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                      name: Fire risk for region
-                      provider:
-                        id: http://klingdicki.info/creola
+                        id: http://bednar.name/rupert_hickle
                         links:
                             describedBy:
                                 href: https://api.com/swagger/...
@@ -3273,10 +3428,14 @@ components:
                         $ref: '#/components/schemas/ParameterT'
                     description: Optional provider provided meta tags
                     example:
-                        - name: Quia quis aut quia veniam est dignissimos.
-                          value: Rem incidunt dolorum vitae magni.
-                        - name: Quia quis aut quia veniam est dignissimos.
-                          value: Rem incidunt dolorum vitae magni.
+                        - name: Beatae qui repellendus molestias culpa aut.
+                          value: Quia quis aut quia veniam est dignissimos.
+                        - name: Beatae qui repellendus molestias culpa aut.
+                          value: Quia quis aut quia veniam est dignissimos.
+                        - name: Beatae qui repellendus molestias culpa aut.
+                          value: Quia quis aut quia veniam est dignissimos.
+                        - name: Beatae qui repellendus molestias culpa aut.
+                          value: Quia quis aut quia veniam est dignissimos.
                 name:
                     type: string
                     description: Optional provider provided name
@@ -3304,7 +3463,7 @@ components:
                 status:
                     type: string
                     description: Service status
-                    example: inactive
+                    example: error
                     enum:
                         - active
                         - inactive
@@ -3313,14 +3472,14 @@ components:
                     type: array
                     items:
                         type: string
-                        example: Eum exercitationem officiis asperiores.
+                        example: Perferendis et qui.
                     description: Optional provider provided tags
                     example:
                         - tag1
                         - tag2
             example:
                 account:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
@@ -3334,12 +3493,12 @@ components:
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
                 metadata:
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
                 name: Fire risk for Lot2
                 parameters:
                     - description: The name of the region as according to ...
@@ -3351,14 +3510,14 @@ components:
                       type: float
                       unit: m
                 provider:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
                 provider-ref: service_foo
-                status: inactive
+                status: active
                 tags:
                     - tag1
                     - tag2
@@ -3372,40 +3531,38 @@ components:
                 argo:
                     type: string
                     description: Defines the workflow using argo's WF schema
-                    example: Ipsam cumque voluptatem.
+                    example: Enim porro ex dolores culpa vero asperiores.
                     format: binary
                 basic:
                     $ref: '#/components/schemas/BasicWorkflowOptsT'
                 opts:
                     type: string
                     description: Type specific options - left for backward compatibility, if possible use type specific elements
-                    example: Nulla corporis unde aperiam.
+                    example: Amet neque.
                     format: binary
                 type:
                     type: string
                     description: Type of workflow
-                    example: Unde architecto quis tenetur.
+                    example: Nulla corporis unde aperiam.
             description: |-
                 Defines the workflow to use to execute this service. Currently supported 'types' are 'basic'
                 	and 'argo'. In case of 'basic', use the 'basic' element for further parameters. In the current implementation
                 	'opts' is expected to contain the same schema as 'basic'
             example:
-                argo: Excepturi impedit cupiditate et nihil.
+                argo: Dolor deserunt quas ut.
                 basic:
                     command:
-                        - Quis fugiat.
-                        - Nostrum ex.
-                        - Laborum qui.
-                        - Rem assumenda sit magnam accusamus enim.
+                        - Et voluptas vitae qui commodi nemo occaecati.
+                        - Et consectetur ex.
                     cpu:
-                        limit: Quaerat nulla iure illum eum.
-                        request: Est iusto eum rerum dolores sed.
-                    image: Esse dolorem laudantium nisi laboriosam dolores.
+                        limit: At eligendi.
+                        request: Doloribus optio laborum incidunt nihil molestias.
+                    image: Qui omnis minus illum nisi dolorum.
                     memory:
-                        limit: Quaerat nulla iure illum eum.
-                        request: Est iusto eum rerum dolores sed.
-                opts: Aut ipsum qui necessitatibus quidem sint.
-                type: Nihil rerum voluptas sit perferendis tempora deserunt.
+                        limit: At eligendi.
+                        request: Doloribus optio laborum incidunt nihil molestias.
+                opts: Vel vero.
+                type: Inventore officiis repellendus ipsum quasi harum vitae.
     securitySchemes:
         jwt_header_Authorization:
             type: http

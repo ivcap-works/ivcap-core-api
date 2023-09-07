@@ -101,6 +101,24 @@ func BuildListPayload(artifactListLimit string, artifactListPage string, artifac
 	return v, nil
 }
 
+// BuildReadPayload builds the payload for the artifact read endpoint from CLI
+// flags.
+func BuildReadPayload(artifactReadID string, artifactReadJWT string) (*artifact.ReadPayload, error) {
+	var id string
+	{
+		id = artifactReadID
+	}
+	var jwt string
+	{
+		jwt = artifactReadJWT
+	}
+	v := &artifact.ReadPayload{}
+	v.ID = id
+	v.JWT = jwt
+
+	return v, nil
+}
+
 // BuildUploadPayload builds the payload for the artifact upload endpoint from
 // CLI flags.
 func BuildUploadPayload(artifactUploadJWT string, artifactUploadContentType string, artifactUploadContentEncoding string, artifactUploadContentLength string, artifactUploadName string, artifactUploadCollection string, artifactUploadXContentType string, artifactUploadXContentLength string, artifactUploadUploadLength string, artifactUploadTusResumable string) (*artifact.UploadPayload, error) {
@@ -192,24 +210,6 @@ func BuildUploadPayload(artifactUploadJWT string, artifactUploadContentType stri
 	v.XContentLength = xContentLength
 	v.UploadLength = uploadLength
 	v.TusResumable = tusResumable
-
-	return v, nil
-}
-
-// BuildReadPayload builds the payload for the artifact read endpoint from CLI
-// flags.
-func BuildReadPayload(artifactReadID string, artifactReadJWT string) (*artifact.ReadPayload, error) {
-	var id string
-	{
-		id = artifactReadID
-	}
-	var jwt string
-	{
-		jwt = artifactReadJWT
-	}
-	v := &artifact.ReadPayload{}
-	v.ID = id
-	v.JWT = jwt
 
 	return v, nil
 }

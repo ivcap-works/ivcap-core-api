@@ -201,6 +201,168 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 	}
 }
 
+// BuildReadRequest instantiates a HTTP request object with method and path set
+// to call the "artifact" service "read" endpoint
+func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	var (
+		id string
+	)
+	{
+		p, ok := v.(*artifact.ReadPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("artifact", "read", "*artifact.ReadPayload", v)
+		}
+		id = p.ID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReadArtifactPath(id)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("artifact", "read", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeReadRequest returns an encoder for requests sent to the artifact read
+// server.
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*artifact.ReadPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("artifact", "read", "*artifact.ReadPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeReadResponse returns a decoder for responses returned by the artifact
+// read endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeReadResponse may return the following errors:
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
+//   - "invalid-credential" (type *artifact.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *artifact.ResourceNotFoundT): http.StatusNotFound
+//   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ReadResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "read", err)
+			}
+			p := NewReadArtifactStatusRTOK(&body)
+			view := "default"
+			vres := &artifactviews.ArtifactStatusRT{Projected: p, View: view}
+			if err = artifactviews.ValidateArtifactStatusRT(vres); err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "read", err)
+			}
+			res := artifact.NewArtifactStatusRT(vres)
+			return res, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body ReadBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("artifact", "read", err)
+				}
+				err = ValidateReadBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("artifact", "read", err)
+				}
+				return nil, NewReadBadRequest(&body)
+			case "invalid-credential":
+				return nil, NewReadInvalidCredential()
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("artifact", "read", resp.StatusCode, string(body))
+			}
+		case http.StatusForbidden:
+			var (
+				body ReadInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "read", err)
+			}
+			err = ValidateReadInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "read", err)
+			}
+			return nil, NewReadInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body ReadNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "read", err)
+			}
+			err = ValidateReadNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "read", err)
+			}
+			return nil, NewReadNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body ReadNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "read", err)
+			}
+			err = ValidateReadNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "read", err)
+			}
+			return nil, NewReadNotFound(&body)
+		case http.StatusUnauthorized:
+			return nil, NewReadNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("artifact", "read", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // BuildUploadRequest instantiates a HTTP request object with method and path
 // set to call the "artifact" service "upload" endpoint
 func (c *Client) BuildUploadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
@@ -423,168 +585,6 @@ func BuildUploadStreamPayload(payload interface{}, fpath string) (*artifact.Uplo
 		Payload: payload.(*artifact.UploadPayload),
 		Body:    f,
 	}, nil
-}
-
-// BuildReadRequest instantiates a HTTP request object with method and path set
-// to call the "artifact" service "read" endpoint
-func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	var (
-		id string
-	)
-	{
-		p, ok := v.(*artifact.ReadPayload)
-		if !ok {
-			return nil, goahttp.ErrInvalidType("artifact", "read", "*artifact.ReadPayload", v)
-		}
-		id = p.ID
-	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReadArtifactPath(id)}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		return nil, goahttp.ErrInvalidURL("artifact", "read", u.String(), err)
-	}
-	if ctx != nil {
-		req = req.WithContext(ctx)
-	}
-
-	return req, nil
-}
-
-// EncodeReadRequest returns an encoder for requests sent to the artifact read
-// server.
-func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
-		p, ok := v.(*artifact.ReadPayload)
-		if !ok {
-			return goahttp.ErrInvalidType("artifact", "read", "*artifact.ReadPayload", v)
-		}
-		{
-			head := p.JWT
-			if !strings.Contains(head, " ") {
-				req.Header.Set("Authorization", "Bearer "+head)
-			} else {
-				req.Header.Set("Authorization", head)
-			}
-		}
-		return nil
-	}
-}
-
-// DecodeReadResponse returns a decoder for responses returned by the artifact
-// read endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
-// DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *artifact.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
-//   - "not-found" (type *artifact.ResourceNotFoundT): http.StatusNotFound
-//   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
-//   - error: internal error
-func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
-		if restoreBody {
-			b, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-			resp.Body = io.NopCloser(bytes.NewBuffer(b))
-			defer func() {
-				resp.Body = io.NopCloser(bytes.NewBuffer(b))
-			}()
-		} else {
-			defer resp.Body.Close()
-		}
-		switch resp.StatusCode {
-		case http.StatusOK:
-			var (
-				body ReadResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("artifact", "read", err)
-			}
-			p := NewReadArtifactStatusRTOK(&body)
-			view := "default"
-			vres := &artifactviews.ArtifactStatusRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactStatusRT(vres); err != nil {
-				return nil, goahttp.ErrValidationError("artifact", "read", err)
-			}
-			res := artifact.NewArtifactStatusRT(vres)
-			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ReadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("artifact", "read", err)
-				}
-				err = ValidateReadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("artifact", "read", err)
-				}
-				return nil, NewReadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewReadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("artifact", "read", resp.StatusCode, string(body))
-			}
-		case http.StatusForbidden:
-			var (
-				body ReadInvalidScopesResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("artifact", "read", err)
-			}
-			err = ValidateReadInvalidScopesResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("artifact", "read", err)
-			}
-			return nil, NewReadInvalidScopes(&body)
-		case http.StatusNotImplemented:
-			var (
-				body ReadNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("artifact", "read", err)
-			}
-			err = ValidateReadNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("artifact", "read", err)
-			}
-			return nil, NewReadNotImplemented(&body)
-		case http.StatusNotFound:
-			var (
-				body ReadNotFoundResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("artifact", "read", err)
-			}
-			err = ValidateReadNotFoundResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("artifact", "read", err)
-			}
-			return nil, NewReadNotFound(&body)
-		case http.StatusUnauthorized:
-			return nil, NewReadNotAuthorized()
-		default:
-			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("artifact", "read", resp.StatusCode, string(body))
-		}
-	}
 }
 
 // unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView

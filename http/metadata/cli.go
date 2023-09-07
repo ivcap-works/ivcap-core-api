@@ -25,6 +25,24 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
+// BuildReadPayload builds the payload for the metadata read endpoint from CLI
+// flags.
+func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.ReadPayload, error) {
+	var id string
+	{
+		id = metadataReadID
+	}
+	var jwt string
+	{
+		jwt = metadataReadJWT
+	}
+	v := &metadata.ReadPayload{}
+	v.ID = id
+	v.JWT = jwt
+
+	return v, nil
+}
+
 // BuildListPayload builds the payload for the metadata list endpoint from CLI
 // flags.
 func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListFilter string, metadataListOrderBy string, metadataListOrderDesc string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
@@ -129,24 +147,6 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	return v, nil
 }
 
-// BuildReadPayload builds the payload for the metadata read endpoint from CLI
-// flags.
-func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.ReadPayload, error) {
-	var id string
-	{
-		id = metadataReadID
-	}
-	var jwt string
-	{
-		jwt = metadataReadJWT
-	}
-	v := &metadata.ReadPayload{}
-	v.ID = id
-	v.JWT = jwt
-
-	return v, nil
-}
-
 // BuildAddPayload builds the payload for the metadata add endpoint from CLI
 // flags.
 func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddPolicyID string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
@@ -209,9 +209,12 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 // endpoint from CLI flags.
 func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntityID string, metadataUpdateOneSchema string, metadataUpdateOnePolicyID string, metadataUpdateOneJWT string, metadataUpdateOneContentType string) (*metadata.UpdateOnePayload, error) {
 	var err error
-	var body string
+	var body interface{}
 	{
-		body = metadataUpdateOneBody
+		err = json.Unmarshal([]byte(metadataUpdateOneBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
+		}
 	}
 	var entityID string
 	{
@@ -266,9 +269,12 @@ func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntity
 // endpoint from CLI flags.
 func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRecordID string, metadataUpdateRecordEntityID string, metadataUpdateRecordSchema string, metadataUpdateRecordPolicyID string, metadataUpdateRecordJWT string, metadataUpdateRecordContentType string) (*metadata.UpdateRecordPayload, error) {
 	var err error
-	var body string
+	var body interface{}
 	{
-		body = metadataUpdateRecordBody
+		err = json.Unmarshal([]byte(metadataUpdateRecordBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
+		}
 	}
 	var id string
 	{
@@ -322,7 +328,7 @@ func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRec
 	res := &metadata.UpdateRecordPayload{
 		Aspect: v,
 	}
-	res.ID = &id
+	res.ID = id
 	res.EntityID = entityID
 	res.Schema = schema
 	res.PolicyID = policyID

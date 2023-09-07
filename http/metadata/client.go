@@ -26,11 +26,11 @@ import (
 
 // Client lists the metadata service endpoint HTTP clients.
 type Client struct {
-	// List Doer is the HTTP client used to make requests to the list endpoint.
-	ListDoer goahttp.Doer
-
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
+
+	// List Doer is the HTTP client used to make requests to the list endpoint.
+	ListDoer goahttp.Doer
 
 	// Add Doer is the HTTP client used to make requests to the add endpoint.
 	AddDoer goahttp.Doer
@@ -69,8 +69,8 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ListDoer:            doer,
 		ReadDoer:            doer,
+		ListDoer:            doer,
 		AddDoer:             doer,
 		UpdateOneDoer:       doer,
 		UpdateRecordDoer:    doer,
@@ -81,30 +81,6 @@ func NewClient(
 		host:                host,
 		decoder:             dec,
 		encoder:             enc,
-	}
-}
-
-// List returns an endpoint that makes HTTP requests to the metadata service
-// list server.
-func (c *Client) List() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeListRequest(c.encoder)
-		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildListRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.ListDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "list", err)
-		}
-		return decodeResponse(resp)
 	}
 }
 
@@ -127,6 +103,30 @@ func (c *Client) Read() goa.Endpoint {
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("metadata", "read", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// List returns an endpoint that makes HTTP requests to the metadata service
+// list server.
+func (c *Client) List() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeListRequest(c.encoder)
+		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildListRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ListDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("metadata", "list", err)
 		}
 		return decodeResponse(resp)
 	}

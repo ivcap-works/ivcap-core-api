@@ -29,11 +29,11 @@ type Client struct {
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
-	// Upload Doer is the HTTP client used to make requests to the upload endpoint.
-	UploadDoer goahttp.Doer
-
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
+
+	// Upload Doer is the HTTP client used to make requests to the upload endpoint.
+	UploadDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -59,8 +59,8 @@ func NewClient(
 ) *Client {
 	return &Client{
 		ListDoer:            doer,
-		UploadDoer:          doer,
 		ReadDoer:            doer,
+		UploadDoer:          doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -94,30 +94,6 @@ func (c *Client) List() goa.Endpoint {
 	}
 }
 
-// Upload returns an endpoint that makes HTTP requests to the artifact service
-// upload server.
-func (c *Client) Upload() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeUploadRequest(c.encoder)
-		decodeResponse = DecodeUploadResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildUploadRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.UploadDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("artifact", "upload", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
 // Read returns an endpoint that makes HTTP requests to the artifact service
 // read server.
 func (c *Client) Read() goa.Endpoint {
@@ -137,6 +113,30 @@ func (c *Client) Read() goa.Endpoint {
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("artifact", "read", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Upload returns an endpoint that makes HTTP requests to the artifact service
+// upload server.
+func (c *Client) Upload() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeUploadRequest(c.encoder)
+		decodeResponse = DecodeUploadResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildUploadRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.UploadDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("artifact", "upload", err)
 		}
 		return decodeResponse(resp)
 	}

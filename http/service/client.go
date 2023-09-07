@@ -29,8 +29,9 @@ type Client struct {
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
-	// Create Doer is the HTTP client used to make requests to the create endpoint.
-	CreateDoer goahttp.Doer
+	// CreateService Doer is the HTTP client used to make requests to the
+	// create_service endpoint.
+	CreateServiceDoer goahttp.Doer
 
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
@@ -65,7 +66,7 @@ func NewClient(
 ) *Client {
 	return &Client{
 		ListDoer:            doer,
-		CreateDoer:          doer,
+		CreateServiceDoer:   doer,
 		ReadDoer:            doer,
 		UpdateDoer:          doer,
 		DeleteDoer:          doer,
@@ -102,15 +103,15 @@ func (c *Client) List() goa.Endpoint {
 	}
 }
 
-// Create returns an endpoint that makes HTTP requests to the service service
-// create server.
-func (c *Client) Create() goa.Endpoint {
+// CreateService returns an endpoint that makes HTTP requests to the service
+// service create_service server.
+func (c *Client) CreateService() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeCreateRequest(c.encoder)
-		decodeResponse = DecodeCreateResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeCreateServiceRequest(c.encoder)
+		decodeResponse = DecodeCreateServiceResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildCreateRequest(ctx, v)
+		req, err := c.BuildCreateServiceRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -118,9 +119,9 @@ func (c *Client) Create() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.CreateDoer.Do(req)
+		resp, err := c.CreateServiceDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "create", err)
+			return nil, goahttp.ErrRequestError("service", "create_service", err)
 		}
 		return decodeResponse(resp)
 	}

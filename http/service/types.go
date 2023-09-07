@@ -23,9 +23,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// CreateRequestBody is the type of the "service" service "create" endpoint
-// HTTP request body.
-type CreateRequestBody struct {
+// CreateServiceRequestBody is the type of the "service" service
+// "create_service" endpoint HTTP request body.
+type CreateServiceRequestBody struct {
 	// Provider provided reference. Should to be a single string with punctuations
 	// allowed. Might be changed, so please check result
 	ProviderRef *string `form:"provider-ref,omitempty" json:"provider-ref,omitempty" xml:"provider-ref,omitempty"`
@@ -94,9 +94,9 @@ type ListResponseBody struct {
 	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
-// CreateResponseBody is the type of the "service" service "create" endpoint
-// HTTP response body.
-type CreateResponseBody struct {
+// CreateServiceResponseBody is the type of the "service" service
+// "create_service" endpoint HTTP response body.
+type CreateServiceResponseBody struct {
 	// Service ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Provider provided ID. Needs to be a single string with punctuations allowed.
@@ -209,16 +209,17 @@ type ListNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// CreateBadRequestResponseBody is the type of the "service" service "create"
-// endpoint HTTP response body for the "bad-request" error.
-type CreateBadRequestResponseBody struct {
+// CreateServiceBadRequestResponseBody is the type of the "service" service
+// "create_service" endpoint HTTP response body for the "bad-request" error.
+type CreateServiceBadRequestResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// CreateInvalidParameterResponseBody is the type of the "service" service
-// "create" endpoint HTTP response body for the "invalid-parameter" error.
-type CreateInvalidParameterResponseBody struct {
+// CreateServiceInvalidParameterResponseBody is the type of the "service"
+// service "create_service" endpoint HTTP response body for the
+// "invalid-parameter" error.
+type CreateServiceInvalidParameterResponseBody struct {
 	// message describing expected type or pattern.
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 	// name of parameter.
@@ -227,34 +228,34 @@ type CreateInvalidParameterResponseBody struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
-// CreateInvalidScopesResponseBody is the type of the "service" service
-// "create" endpoint HTTP response body for the "invalid-scopes" error.
-type CreateInvalidScopesResponseBody struct {
+// CreateServiceInvalidScopesResponseBody is the type of the "service" service
+// "create_service" endpoint HTTP response body for the "invalid-scopes" error.
+type CreateServiceInvalidScopesResponseBody struct {
 	// ID of involved resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// CreateNotImplementedResponseBody is the type of the "service" service
-// "create" endpoint HTTP response body for the "not-implemented" error.
-type CreateNotImplementedResponseBody struct {
+// CreateServiceNotImplementedResponseBody is the type of the "service" service
+// "create_service" endpoint HTTP response body for the "not-implemented" error.
+type CreateServiceNotImplementedResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// CreateAlreadyCreatedResponseBody is the type of the "service" service
-// "create" endpoint HTTP response body for the "already-created" error.
-type CreateAlreadyCreatedResponseBody struct {
+// CreateServiceAlreadyCreatedResponseBody is the type of the "service" service
+// "create_service" endpoint HTTP response body for the "already-created" error.
+type CreateServiceAlreadyCreatedResponseBody struct {
 	// ID of already existing resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// CreateNotFoundResponseBody is the type of the "service" service "create"
-// endpoint HTTP response body for the "not-found" error.
-type CreateNotFoundResponseBody struct {
+// CreateServiceNotFoundResponseBody is the type of the "service" service
+// "create_service" endpoint HTTP response body for the "not-found" error.
+type CreateServiceNotFoundResponseBody struct {
 	// ID of missing resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
@@ -495,10 +496,10 @@ type ParameterOptTResponseBody struct {
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 }
 
-// NewCreateRequestBody builds the HTTP request body from the payload of the
-// "create" endpoint of the "service" service.
-func NewCreateRequestBody(p *service.CreatePayload) *CreateRequestBody {
-	body := &CreateRequestBody{
+// NewCreateServiceRequestBody builds the HTTP request body from the payload of
+// the "create_service" endpoint of the "service" service.
+func NewCreateServiceRequestBody(p *service.CreateServicePayload) *CreateServiceRequestBody {
+	body := &CreateServiceRequestBody{
 		ProviderRef: p.Services.ProviderRef,
 		ProviderID:  p.Services.ProviderID,
 		Description: p.Services.Description,
@@ -652,9 +653,9 @@ func NewListNotAuthorized() *service.UnauthorizedT {
 	return v
 }
 
-// NewCreateServiceStatusRTCreated builds a "service" service "create" endpoint
-// result from a HTTP "Created" response.
-func NewCreateServiceStatusRTCreated(body *CreateResponseBody) *serviceviews.ServiceStatusRTView {
+// NewCreateServiceServiceStatusRTCreated builds a "service" service
+// "create_service" endpoint result from a HTTP "Created" response.
+func NewCreateServiceServiceStatusRTCreated(body *CreateServiceResponseBody) *serviceviews.ServiceStatusRTView {
 	v := &serviceviews.ServiceStatusRTView{
 		ID:          body.ID,
 		ProviderRef: body.ProviderRef,
@@ -689,9 +690,9 @@ func NewCreateServiceStatusRTCreated(body *CreateResponseBody) *serviceviews.Ser
 	return v
 }
 
-// NewCreateBadRequest builds a service service create endpoint bad-request
-// error.
-func NewCreateBadRequest(body *CreateBadRequestResponseBody) *service.BadRequestT {
+// NewCreateServiceBadRequest builds a service service create_service endpoint
+// bad-request error.
+func NewCreateServiceBadRequest(body *CreateServiceBadRequestResponseBody) *service.BadRequestT {
 	v := &service.BadRequestT{
 		Message: *body.Message,
 	}
@@ -699,17 +700,17 @@ func NewCreateBadRequest(body *CreateBadRequestResponseBody) *service.BadRequest
 	return v
 }
 
-// NewCreateInvalidCredential builds a service service create endpoint
-// invalid-credential error.
-func NewCreateInvalidCredential() *service.InvalidCredentialsT {
+// NewCreateServiceInvalidCredential builds a service service create_service
+// endpoint invalid-credential error.
+func NewCreateServiceInvalidCredential() *service.InvalidCredentialsT {
 	v := &service.InvalidCredentialsT{}
 
 	return v
 }
 
-// NewCreateInvalidParameter builds a service service create endpoint
-// invalid-parameter error.
-func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *service.InvalidParameterValue {
+// NewCreateServiceInvalidParameter builds a service service create_service
+// endpoint invalid-parameter error.
+func NewCreateServiceInvalidParameter(body *CreateServiceInvalidParameterResponseBody) *service.InvalidParameterValue {
 	v := &service.InvalidParameterValue{
 		Message: *body.Message,
 		Name:    *body.Name,
@@ -719,9 +720,9 @@ func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *servic
 	return v
 }
 
-// NewCreateInvalidScopes builds a service service create endpoint
-// invalid-scopes error.
-func NewCreateInvalidScopes(body *CreateInvalidScopesResponseBody) *service.InvalidScopesT {
+// NewCreateServiceInvalidScopes builds a service service create_service
+// endpoint invalid-scopes error.
+func NewCreateServiceInvalidScopes(body *CreateServiceInvalidScopesResponseBody) *service.InvalidScopesT {
 	v := &service.InvalidScopesT{
 		ID:      body.ID,
 		Message: *body.Message,
@@ -730,9 +731,9 @@ func NewCreateInvalidScopes(body *CreateInvalidScopesResponseBody) *service.Inva
 	return v
 }
 
-// NewCreateNotImplemented builds a service service create endpoint
-// not-implemented error.
-func NewCreateNotImplemented(body *CreateNotImplementedResponseBody) *service.NotImplementedT {
+// NewCreateServiceNotImplemented builds a service service create_service
+// endpoint not-implemented error.
+func NewCreateServiceNotImplemented(body *CreateServiceNotImplementedResponseBody) *service.NotImplementedT {
 	v := &service.NotImplementedT{
 		Message: *body.Message,
 	}
@@ -740,9 +741,9 @@ func NewCreateNotImplemented(body *CreateNotImplementedResponseBody) *service.No
 	return v
 }
 
-// NewCreateAlreadyCreated builds a service service create endpoint
-// already-created error.
-func NewCreateAlreadyCreated(body *CreateAlreadyCreatedResponseBody) *service.ResourceAlreadyCreatedT {
+// NewCreateServiceAlreadyCreated builds a service service create_service
+// endpoint already-created error.
+func NewCreateServiceAlreadyCreated(body *CreateServiceAlreadyCreatedResponseBody) *service.ResourceAlreadyCreatedT {
 	v := &service.ResourceAlreadyCreatedT{
 		ID:      *body.ID,
 		Message: *body.Message,
@@ -751,8 +752,9 @@ func NewCreateAlreadyCreated(body *CreateAlreadyCreatedResponseBody) *service.Re
 	return v
 }
 
-// NewCreateNotFound builds a service service create endpoint not-found error.
-func NewCreateNotFound(body *CreateNotFoundResponseBody) *service.ResourceNotFoundT {
+// NewCreateServiceNotFound builds a service service create_service endpoint
+// not-found error.
+func NewCreateServiceNotFound(body *CreateServiceNotFoundResponseBody) *service.ResourceNotFoundT {
 	v := &service.ResourceNotFoundT{
 		ID:      *body.ID,
 		Message: *body.Message,
@@ -761,9 +763,9 @@ func NewCreateNotFound(body *CreateNotFoundResponseBody) *service.ResourceNotFou
 	return v
 }
 
-// NewCreateNotAuthorized builds a service service create endpoint
-// not-authorized error.
-func NewCreateNotAuthorized() *service.UnauthorizedT {
+// NewCreateServiceNotAuthorized builds a service service create_service
+// endpoint not-authorized error.
+func NewCreateServiceNotAuthorized() *service.UnauthorizedT {
 	v := &service.UnauthorizedT{}
 
 	return v
@@ -1057,18 +1059,18 @@ func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody
 	return
 }
 
-// ValidateCreateBadRequestResponseBody runs the validations defined on
-// create_bad-request_response_body
-func ValidateCreateBadRequestResponseBody(body *CreateBadRequestResponseBody) (err error) {
+// ValidateCreateServiceBadRequestResponseBody runs the validations defined on
+// create_service_bad-request_response_body
+func ValidateCreateServiceBadRequestResponseBody(body *CreateServiceBadRequestResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
 
-// ValidateCreateInvalidParameterResponseBody runs the validations defined on
-// create_invalid-parameter_response_body
-func ValidateCreateInvalidParameterResponseBody(body *CreateInvalidParameterResponseBody) (err error) {
+// ValidateCreateServiceInvalidParameterResponseBody runs the validations
+// defined on create_service_invalid-parameter_response_body
+func ValidateCreateServiceInvalidParameterResponseBody(body *CreateServiceInvalidParameterResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -1078,9 +1080,9 @@ func ValidateCreateInvalidParameterResponseBody(body *CreateInvalidParameterResp
 	return
 }
 
-// ValidateCreateInvalidScopesResponseBody runs the validations defined on
-// create_invalid-scopes_response_body
-func ValidateCreateInvalidScopesResponseBody(body *CreateInvalidScopesResponseBody) (err error) {
+// ValidateCreateServiceInvalidScopesResponseBody runs the validations defined
+// on create_service_invalid-scopes_response_body
+func ValidateCreateServiceInvalidScopesResponseBody(body *CreateServiceInvalidScopesResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -1090,18 +1092,18 @@ func ValidateCreateInvalidScopesResponseBody(body *CreateInvalidScopesResponseBo
 	return
 }
 
-// ValidateCreateNotImplementedResponseBody runs the validations defined on
-// create_not-implemented_response_body
-func ValidateCreateNotImplementedResponseBody(body *CreateNotImplementedResponseBody) (err error) {
+// ValidateCreateServiceNotImplementedResponseBody runs the validations defined
+// on create_service_not-implemented_response_body
+func ValidateCreateServiceNotImplementedResponseBody(body *CreateServiceNotImplementedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
 
-// ValidateCreateAlreadyCreatedResponseBody runs the validations defined on
-// create_already-created_response_body
-func ValidateCreateAlreadyCreatedResponseBody(body *CreateAlreadyCreatedResponseBody) (err error) {
+// ValidateCreateServiceAlreadyCreatedResponseBody runs the validations defined
+// on create_service_already-created_response_body
+func ValidateCreateServiceAlreadyCreatedResponseBody(body *CreateServiceAlreadyCreatedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -1114,9 +1116,9 @@ func ValidateCreateAlreadyCreatedResponseBody(body *CreateAlreadyCreatedResponse
 	return
 }
 
-// ValidateCreateNotFoundResponseBody runs the validations defined on
-// create_not-found_response_body
-func ValidateCreateNotFoundResponseBody(body *CreateNotFoundResponseBody) (err error) {
+// ValidateCreateServiceNotFoundResponseBody runs the validations defined on
+// create_service_not-found_response_body
+func ValidateCreateServiceNotFoundResponseBody(body *CreateServiceNotFoundResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

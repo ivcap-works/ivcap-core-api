@@ -198,13 +198,13 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 	}
 }
 
-// BuildCreateRequest instantiates a HTTP request object with method and path
-// set to call the "service" service "create" endpoint
-func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateServicePath()}
+// BuildCreateServiceRequest instantiates a HTTP request object with method and
+// path set to call the "service" service "create_service" endpoint
+func (c *Client) BuildCreateServiceRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateServiceServicePath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("service", "create", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("service", "create_service", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -213,13 +213,13 @@ func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.R
 	return req, nil
 }
 
-// EncodeCreateRequest returns an encoder for requests sent to the service
-// create server.
-func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+// EncodeCreateServiceRequest returns an encoder for requests sent to the
+// service create_service server.
+func EncodeCreateServiceRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
 	return func(req *http.Request, v interface{}) error {
-		p, ok := v.(*service.CreatePayload)
+		p, ok := v.(*service.CreateServicePayload)
 		if !ok {
-			return goahttp.ErrInvalidType("service", "create", "*service.CreatePayload", v)
+			return goahttp.ErrInvalidType("service", "create_service", "*service.CreateServicePayload", v)
 		}
 		{
 			head := p.JWT
@@ -229,18 +229,18 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 				req.Header.Set("Authorization", head)
 			}
 		}
-		body := NewCreateRequestBody(p)
+		body := NewCreateServiceRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("service", "create", err)
+			return goahttp.ErrEncodingError("service", "create_service", err)
 		}
 		return nil
 	}
 }
 
-// DecodeCreateResponse returns a decoder for responses returned by the service
-// create endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
-// DecodeCreateResponse may return the following errors:
+// DecodeCreateServiceResponse returns a decoder for responses returned by the
+// service create_service endpoint. restoreBody controls whether the response
+// body should be restored after having been read.
+// DecodeCreateServiceResponse may return the following errors:
 //   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
 //   - "invalid-parameter" (type *service.InvalidParameterValue): http.StatusUnprocessableEntity
@@ -250,7 +250,7 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 //   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
 	return func(resp *http.Response) (interface{}, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
@@ -267,18 +267,18 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusCreated:
 			var (
-				body CreateResponseBody
+				body CreateServiceResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create", err)
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			p := NewCreateServiceStatusRTCreated(&body)
+			p := NewCreateServiceServiceStatusRTCreated(&body)
 			view := resp.Header.Get("goa-view")
 			vres := &serviceviews.ServiceStatusRT{Projected: p, View: view}
 			if err = serviceviews.ValidateServiceStatusRT(vres); err != nil {
-				return nil, goahttp.ErrValidationError("service", "create", err)
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
 			res := service.NewServiceStatusRT(vres)
 			return res, nil
@@ -287,99 +287,99 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			switch en {
 			case "bad-request":
 				var (
-					body CreateBadRequestResponseBody
+					body CreateServiceBadRequestResponseBody
 					err  error
 				)
 				err = decoder(resp).Decode(&body)
 				if err != nil {
-					return nil, goahttp.ErrDecodingError("service", "create", err)
+					return nil, goahttp.ErrDecodingError("service", "create_service", err)
 				}
-				err = ValidateCreateBadRequestResponseBody(&body)
+				err = ValidateCreateServiceBadRequestResponseBody(&body)
 				if err != nil {
-					return nil, goahttp.ErrValidationError("service", "create", err)
+					return nil, goahttp.ErrValidationError("service", "create_service", err)
 				}
-				return nil, NewCreateBadRequest(&body)
+				return nil, NewCreateServiceBadRequest(&body)
 			case "invalid-credential":
-				return nil, NewCreateInvalidCredential()
+				return nil, NewCreateServiceInvalidCredential()
 			default:
 				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("service", "create", resp.StatusCode, string(body))
+				return nil, goahttp.ErrInvalidResponse("service", "create_service", resp.StatusCode, string(body))
 			}
 		case http.StatusUnprocessableEntity:
 			var (
-				body CreateInvalidParameterResponseBody
+				body CreateServiceInvalidParameterResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create", err)
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			err = ValidateCreateInvalidParameterResponseBody(&body)
+			err = ValidateCreateServiceInvalidParameterResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create", err)
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
-			return nil, NewCreateInvalidParameter(&body)
+			return nil, NewCreateServiceInvalidParameter(&body)
 		case http.StatusForbidden:
 			var (
-				body CreateInvalidScopesResponseBody
+				body CreateServiceInvalidScopesResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create", err)
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			err = ValidateCreateInvalidScopesResponseBody(&body)
+			err = ValidateCreateServiceInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create", err)
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
-			return nil, NewCreateInvalidScopes(&body)
+			return nil, NewCreateServiceInvalidScopes(&body)
 		case http.StatusNotImplemented:
 			var (
-				body CreateNotImplementedResponseBody
+				body CreateServiceNotImplementedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create", err)
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			err = ValidateCreateNotImplementedResponseBody(&body)
+			err = ValidateCreateServiceNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create", err)
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
-			return nil, NewCreateNotImplemented(&body)
+			return nil, NewCreateServiceNotImplemented(&body)
 		case http.StatusConflict:
 			var (
-				body CreateAlreadyCreatedResponseBody
+				body CreateServiceAlreadyCreatedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create", err)
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			err = ValidateCreateAlreadyCreatedResponseBody(&body)
+			err = ValidateCreateServiceAlreadyCreatedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create", err)
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
-			return nil, NewCreateAlreadyCreated(&body)
+			return nil, NewCreateServiceAlreadyCreated(&body)
 		case http.StatusNotFound:
 			var (
-				body CreateNotFoundResponseBody
+				body CreateServiceNotFoundResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create", err)
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			err = ValidateCreateNotFoundResponseBody(&body)
+			err = ValidateCreateServiceNotFoundResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create", err)
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
-			return nil, NewCreateNotFound(&body)
+			return nil, NewCreateServiceNotFound(&body)
 		case http.StatusUnauthorized:
-			return nil, NewCreateNotAuthorized()
+			return nil, NewCreateServiceNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("service", "create", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("service", "create_service", resp.StatusCode, string(body))
 		}
 	}
 }

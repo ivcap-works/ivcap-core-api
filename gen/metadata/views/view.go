@@ -20,18 +20,18 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// ListMetaRT is the viewed result type that is projected based on a view.
-type ListMetaRT struct {
-	// Type to project
-	Projected *ListMetaRTView
-	// View to render
-	View string
-}
-
 // MetadataRecordRT is the viewed result type that is projected based on a view.
 type MetadataRecordRT struct {
 	// Type to project
 	Projected *MetadataRecordRTView
+	// View to render
+	View string
+}
+
+// ListMetaRT is the viewed result type that is projected based on a view.
+type ListMetaRT struct {
+	// Type to project
+	Projected *ListMetaRTView
 	// View to render
 	View string
 }
@@ -42,6 +42,26 @@ type AddMetaRT struct {
 	Projected *AddMetaRTView
 	// View to render
 	View string
+}
+
+// MetadataRecordRTView is a type that runs validations on a projected type.
+type MetadataRecordRTView struct {
+	// Record ID
+	RecordID *string
+	// Entity ID
+	Entity *string
+	// Schema ID
+	Schema *string
+	// Attached metadata aspect
+	Aspect interface{}
+	// Time this record was asserted
+	ValidFrom *string
+	// Time this record was revoked
+	ValidTo *string
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter *string
+	// Entity revoking this record at 'valid-to'
+	Revoker *string
 }
 
 // ListMetaRTView is a type that runs validations on a projected type.
@@ -69,7 +89,7 @@ type MetadataListItemRTView struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect *string
+	Aspect interface{}
 	// If aspectPath was defined, this is what matched the query
 	AspectContext *string
 }
@@ -81,26 +101,6 @@ type NavTView struct {
 	Next  *string
 }
 
-// MetadataRecordRTView is a type that runs validations on a projected type.
-type MetadataRecordRTView struct {
-	// Record ID
-	RecordID *string
-	// Entity ID
-	Entity *string
-	// Schema ID
-	Schema *string
-	// Attached metadata aspect
-	Aspect *string
-	// Time this record was asserted
-	ValidFrom *string
-	// Time this record was revoked
-	ValidTo *string
-	// Entity asserting this metadata record at 'valid-from'
-	Asserter *string
-	// Entity revoking this record at 'valid-to'
-	Revoker *string
-}
-
 // AddMetaRTView is a type that runs validations on a projected type.
 type AddMetaRTView struct {
 	// Reference to record created
@@ -108,18 +108,6 @@ type AddMetaRTView struct {
 }
 
 var (
-	// ListMetaRTMap is a map indexing the attribute names of ListMetaRT by view
-	// name.
-	ListMetaRTMap = map[string][]string{
-		"default": {
-			"records",
-			"entity-id",
-			"schema",
-			"aspect-path",
-			"at-time",
-			"links",
-		},
-	}
 	// MetadataRecordRTMap is a map indexing the attribute names of
 	// MetadataRecordRT by view name.
 	MetadataRecordRTMap = map[string][]string{
@@ -132,6 +120,18 @@ var (
 			"valid-to",
 			"asserter",
 			"revoker",
+		},
+	}
+	// ListMetaRTMap is a map indexing the attribute names of ListMetaRT by view
+	// name.
+	ListMetaRTMap = map[string][]string{
+		"default": {
+			"records",
+			"entity-id",
+			"schema",
+			"aspect-path",
+			"at-time",
+			"links",
 		},
 	}
 	// AddMetaRTMap is a map indexing the attribute names of AddMetaRT by view name.
@@ -153,24 +153,24 @@ var (
 	}
 )
 
-// ValidateListMetaRT runs the validations defined on the viewed result type
-// ListMetaRT.
-func ValidateListMetaRT(result *ListMetaRT) (err error) {
-	switch result.View {
-	case "default", "":
-		err = ValidateListMetaRTView(result.Projected)
-	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
-	}
-	return
-}
-
 // ValidateMetadataRecordRT runs the validations defined on the viewed result
 // type MetadataRecordRT.
 func ValidateMetadataRecordRT(result *MetadataRecordRT) (err error) {
 	switch result.View {
 	case "default", "":
 		err = ValidateMetadataRecordRTView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+	}
+	return
+}
+
+// ValidateListMetaRT runs the validations defined on the viewed result type
+// ListMetaRT.
+func ValidateListMetaRT(result *ListMetaRT) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateListMetaRTView(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
 	}
@@ -185,6 +185,30 @@ func ValidateAddMetaRT(result *AddMetaRT) (err error) {
 		err = ValidateAddMetaRTView(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+	}
+	return
+}
+
+// ValidateMetadataRecordRTView runs the validations defined on
+// MetadataRecordRTView using the "default" view.
+func ValidateMetadataRecordRTView(result *MetadataRecordRTView) (err error) {
+	if result.RecordID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.record-id", *result.RecordID, goa.FormatURI))
+	}
+	if result.Entity != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.entity", *result.Entity, goa.FormatURI))
+	}
+	if result.Schema != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
+	}
+	if result.ValidFrom != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-from", *result.ValidFrom, goa.FormatDateTime))
+	}
+	if result.ValidTo != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-to", *result.ValidTo, goa.FormatDateTime))
+	}
+	if result.Revoker != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.revoker", *result.Revoker, goa.FormatDateTime))
 	}
 	return
 }
@@ -234,12 +258,6 @@ func ValidateMetadataListItemRTView(result *MetadataListItemRTView) (err error) 
 	if result.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
 	}
-	if result.Aspect != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.aspect", *result.Aspect, goa.FormatJSON))
-	}
-	if result.AspectContext != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.aspectContext", *result.AspectContext, goa.FormatJSON))
-	}
 	return
 }
 
@@ -253,33 +271,6 @@ func ValidateNavTView(result *NavTView) (err error) {
 	}
 	if result.Next != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.next", *result.Next, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateMetadataRecordRTView runs the validations defined on
-// MetadataRecordRTView using the "default" view.
-func ValidateMetadataRecordRTView(result *MetadataRecordRTView) (err error) {
-	if result.RecordID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.record-id", *result.RecordID, goa.FormatURI))
-	}
-	if result.Entity != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.entity", *result.Entity, goa.FormatURI))
-	}
-	if result.Schema != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.schema", *result.Schema, goa.FormatURI))
-	}
-	if result.Aspect != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.aspect", *result.Aspect, goa.FormatJSON))
-	}
-	if result.ValidFrom != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-from", *result.ValidFrom, goa.FormatDateTime))
-	}
-	if result.ValidTo != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-to", *result.ValidTo, goa.FormatDateTime))
-	}
-	if result.Revoker != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.revoker", *result.Revoker, goa.FormatDateTime))
 	}
 	return
 }

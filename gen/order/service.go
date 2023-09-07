@@ -25,18 +25,18 @@ import (
 
 // Manage the life cycle of an order for CRE services.
 type Service interface {
-	// orders
+	// Show orders by ID
+	// The "view" return value must have one of the following views
+	//	- "default"
+	//	- "tiny"
+	Read(context.Context, *ReadPayload) (res *OrderStatusRT, view string, err error)
+	// list orders
 	List(context.Context, *ListPayload) (res *OrderListRT, err error)
 	// Create a new orders and return its status.
 	// The "view" return value must have one of the following views
 	//	- "default"
 	//	- "tiny"
 	Create(context.Context, *CreatePayload) (res *OrderStatusRT, view string, err error)
-	// Show orders by ID
-	// The "view" return value must have one of the following views
-	//	- "default"
-	//	- "tiny"
-	Read(context.Context, *ReadPayload) (res *OrderStatusRT, view string, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -53,7 +53,7 @@ const ServiceName = "order"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"list", "create", "read"}
+var MethodNames = [3]string{"read", "list", "create"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -173,7 +173,7 @@ type OrderRequestT struct {
 	// Reference to service requested
 	ServiceID string
 	// Reference to billable account
-	AccountID string
+	AccountID *string
 	// Policy to control access to record an all generated artifacts
 	PolicyID *string
 	// Optional customer provided name
@@ -182,7 +182,7 @@ type OrderRequestT struct {
 	Parameters []*ParameterT
 }
 
-// OrderStatusRT is the result type of the order service create method.
+// OrderStatusRT is the result type of the order service read method.
 type OrderStatusRT struct {
 	// Order ID
 	ID string
@@ -399,19 +399,6 @@ func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
 }
 
-// NewOrderListRT initializes result type OrderListRT from viewed result type
-// OrderListRT.
-func NewOrderListRT(vres *orderviews.OrderListRT) *OrderListRT {
-	return newOrderListRT(vres.Projected)
-}
-
-// NewViewedOrderListRT initializes viewed result type OrderListRT from result
-// type OrderListRT using the given view.
-func NewViewedOrderListRT(res *OrderListRT, view string) *orderviews.OrderListRT {
-	p := newOrderListRTView(res)
-	return &orderviews.OrderListRT{Projected: p, View: "default"}
-}
-
 // NewOrderStatusRT initializes result type OrderStatusRT from viewed result
 // type OrderStatusRT.
 func NewOrderStatusRT(vres *orderviews.OrderStatusRT) *OrderStatusRT {
@@ -440,41 +427,17 @@ func NewViewedOrderStatusRT(res *OrderStatusRT, view string) *orderviews.OrderSt
 	return vres
 }
 
-// newOrderListRT converts projected type OrderListRT to service type
+// NewOrderListRT initializes result type OrderListRT from viewed result type
 // OrderListRT.
-func newOrderListRT(vres *orderviews.OrderListRTView) *OrderListRT {
-	res := &OrderListRT{}
-	if vres.AtTime != nil {
-		res.AtTime = *vres.AtTime
-	}
-	if vres.Orders != nil {
-		res.Orders = make([]*OrderListItem, len(vres.Orders))
-		for i, val := range vres.Orders {
-			res.Orders[i] = transformOrderviewsOrderListItemViewToOrderListItem(val)
-		}
-	}
-	if vres.Links != nil {
-		res.Links = transformOrderviewsNavTViewToNavT(vres.Links)
-	}
-	return res
+func NewOrderListRT(vres *orderviews.OrderListRT) *OrderListRT {
+	return newOrderListRT(vres.Projected)
 }
 
-// newOrderListRTView projects result type OrderListRT to projected type
-// OrderListRTView using the "default" view.
-func newOrderListRTView(res *OrderListRT) *orderviews.OrderListRTView {
-	vres := &orderviews.OrderListRTView{
-		AtTime: &res.AtTime,
-	}
-	if res.Orders != nil {
-		vres.Orders = make([]*orderviews.OrderListItemView, len(res.Orders))
-		for i, val := range res.Orders {
-			vres.Orders[i] = transformOrderListItemToOrderviewsOrderListItemView(val)
-		}
-	}
-	if res.Links != nil {
-		vres.Links = transformNavTToOrderviewsNavTView(res.Links)
-	}
-	return vres
+// NewViewedOrderListRT initializes viewed result type OrderListRT from result
+// type OrderListRT using the given view.
+func NewViewedOrderListRT(res *OrderListRT, view string) *orderviews.OrderListRT {
+	p := newOrderListRTView(res)
+	return &orderviews.OrderListRT{Projected: p, View: "default"}
 }
 
 // newOrderStatusRT converts projected type OrderStatusRT to service type
@@ -575,128 +538,41 @@ func newOrderStatusRTViewTiny(res *OrderStatusRT) *orderviews.OrderStatusRTView 
 	return vres
 }
 
-// transformOrderviewsOrderListItemViewToOrderListItem builds a value of type
-// *OrderListItem from a value of type *orderviews.OrderListItemView.
-func transformOrderviewsOrderListItemViewToOrderListItem(v *orderviews.OrderListItemView) *OrderListItem {
-	if v == nil {
-		return nil
+// newOrderListRT converts projected type OrderListRT to service type
+// OrderListRT.
+func newOrderListRT(vres *orderviews.OrderListRTView) *OrderListRT {
+	res := &OrderListRT{}
+	if vres.AtTime != nil {
+		res.AtTime = *vres.AtTime
 	}
-	res := &OrderListItem{
-		ID:         v.ID,
-		Name:       v.Name,
-		Status:     v.Status,
-		OrderedAt:  v.OrderedAt,
-		StartedAt:  v.StartedAt,
-		FinishedAt: v.FinishedAt,
-		ServiceID:  v.ServiceID,
-		AccountID:  v.AccountID,
+	if vres.Orders != nil {
+		res.Orders = make([]*OrderListItem, len(vres.Orders))
+		for i, val := range vres.Orders {
+			res.Orders[i] = transformOrderviewsOrderListItemViewToOrderListItem(val)
+		}
 	}
-	if v.Links != nil {
-		res.Links = transformOrderviewsSelfTViewToSelfT(v.Links)
+	if vres.Links != nil {
+		res.Links = transformOrderviewsNavTViewToNavT(vres.Links)
 	}
-
 	return res
 }
 
-// transformOrderviewsSelfTViewToSelfT builds a value of type *SelfT from a
-// value of type *orderviews.SelfTView.
-func transformOrderviewsSelfTViewToSelfT(v *orderviews.SelfTView) *SelfT {
-	res := &SelfT{
-		Self: v.Self,
+// newOrderListRTView projects result type OrderListRT to projected type
+// OrderListRTView using the "default" view.
+func newOrderListRTView(res *OrderListRT) *orderviews.OrderListRTView {
+	vres := &orderviews.OrderListRTView{
+		AtTime: &res.AtTime,
 	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = transformOrderviewsDescribedByTViewToDescribedByT(v.DescribedBy)
+	if res.Orders != nil {
+		vres.Orders = make([]*orderviews.OrderListItemView, len(res.Orders))
+		for i, val := range res.Orders {
+			vres.Orders[i] = transformOrderListItemToOrderviewsOrderListItemView(val)
+		}
 	}
-
-	return res
-}
-
-// transformOrderviewsDescribedByTViewToDescribedByT builds a value of type
-// *DescribedByT from a value of type *orderviews.DescribedByTView.
-func transformOrderviewsDescribedByTViewToDescribedByT(v *orderviews.DescribedByTView) *DescribedByT {
-	if v == nil {
-		return nil
+	if res.Links != nil {
+		vres.Links = transformNavTToOrderviewsNavTView(res.Links)
 	}
-	res := &DescribedByT{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// transformOrderviewsNavTViewToNavT builds a value of type *NavT from a value
-// of type *orderviews.NavTView.
-func transformOrderviewsNavTViewToNavT(v *orderviews.NavTView) *NavT {
-	if v == nil {
-		return nil
-	}
-	res := &NavT{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// transformOrderListItemToOrderviewsOrderListItemView builds a value of type
-// *orderviews.OrderListItemView from a value of type *OrderListItem.
-func transformOrderListItemToOrderviewsOrderListItemView(v *OrderListItem) *orderviews.OrderListItemView {
-	res := &orderviews.OrderListItemView{
-		ID:         v.ID,
-		Name:       v.Name,
-		Status:     v.Status,
-		OrderedAt:  v.OrderedAt,
-		StartedAt:  v.StartedAt,
-		FinishedAt: v.FinishedAt,
-		ServiceID:  v.ServiceID,
-		AccountID:  v.AccountID,
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToOrderviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// transformSelfTToOrderviewsSelfTView builds a value of type
-// *orderviews.SelfTView from a value of type *SelfT.
-func transformSelfTToOrderviewsSelfTView(v *SelfT) *orderviews.SelfTView {
-	res := &orderviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = transformDescribedByTToOrderviewsDescribedByTView(v.DescribedBy)
-	}
-
-	return res
-}
-
-// transformDescribedByTToOrderviewsDescribedByTView builds a value of type
-// *orderviews.DescribedByTView from a value of type *DescribedByT.
-func transformDescribedByTToOrderviewsDescribedByTView(v *DescribedByT) *orderviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// transformNavTToOrderviewsNavTView builds a value of type
-// *orderviews.NavTView from a value of type *NavT.
-func transformNavTToOrderviewsNavTView(v *NavT) *orderviews.NavTView {
-	res := &orderviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
+	return vres
 }
 
 // transformOrderviewsParameterTViewToParameterT builds a value of type
@@ -750,6 +626,20 @@ func transformOrderviewsSelfWithDataTViewToSelfWithDataT(v *orderviews.SelfWithD
 	return res
 }
 
+// transformOrderviewsDescribedByTViewToDescribedByT builds a value of type
+// *DescribedByT from a value of type *orderviews.DescribedByTView.
+func transformOrderviewsDescribedByTViewToDescribedByT(v *orderviews.DescribedByTView) *DescribedByT {
+	if v == nil {
+		return nil
+	}
+	res := &DescribedByT{
+		Href: v.Href,
+		Type: v.Type,
+	}
+
+	return res
+}
+
 // transformOrderviewsRefTViewToRefT builds a value of type *RefT from a value
 // of type *orderviews.RefTView.
 func transformOrderviewsRefTViewToRefT(v *orderviews.RefTView) *RefT {
@@ -761,6 +651,22 @@ func transformOrderviewsRefTViewToRefT(v *orderviews.RefTView) *RefT {
 	}
 	if v.Links != nil {
 		res.Links = transformOrderviewsSelfTViewToSelfT(v.Links)
+	}
+
+	return res
+}
+
+// transformOrderviewsSelfTViewToSelfT builds a value of type *SelfT from a
+// value of type *orderviews.SelfTView.
+func transformOrderviewsSelfTViewToSelfT(v *orderviews.SelfTView) *SelfT {
+	if v == nil {
+		return nil
+	}
+	res := &SelfT{
+		Self: v.Self,
+	}
+	if v.DescribedBy != nil {
+		res.DescribedBy = transformOrderviewsDescribedByTViewToDescribedByT(v.DescribedBy)
 	}
 
 	return res
@@ -803,6 +709,20 @@ func transformSelfWithDataTToOrderviewsSelfWithDataTView(v *SelfWithDataT) *orde
 	return res
 }
 
+// transformDescribedByTToOrderviewsDescribedByTView builds a value of type
+// *orderviews.DescribedByTView from a value of type *DescribedByT.
+func transformDescribedByTToOrderviewsDescribedByTView(v *DescribedByT) *orderviews.DescribedByTView {
+	if v == nil {
+		return nil
+	}
+	res := &orderviews.DescribedByTView{
+		Href: v.Href,
+		Type: v.Type,
+	}
+
+	return res
+}
+
 // transformRefTToOrderviewsRefTView builds a value of type
 // *orderviews.RefTView from a value of type *RefT.
 func transformRefTToOrderviewsRefTView(v *RefT) *orderviews.RefTView {
@@ -819,12 +739,98 @@ func transformRefTToOrderviewsRefTView(v *RefT) *orderviews.RefTView {
 	return res
 }
 
+// transformSelfTToOrderviewsSelfTView builds a value of type
+// *orderviews.SelfTView from a value of type *SelfT.
+func transformSelfTToOrderviewsSelfTView(v *SelfT) *orderviews.SelfTView {
+	if v == nil {
+		return nil
+	}
+	res := &orderviews.SelfTView{
+		Self: v.Self,
+	}
+	if v.DescribedBy != nil {
+		res.DescribedBy = transformDescribedByTToOrderviewsDescribedByTView(v.DescribedBy)
+	}
+
+	return res
+}
+
 // transformParameterTToOrderviewsParameterTView builds a value of type
 // *orderviews.ParameterTView from a value of type *ParameterT.
 func transformParameterTToOrderviewsParameterTView(v *ParameterT) *orderviews.ParameterTView {
 	res := &orderviews.ParameterTView{
 		Name:  v.Name,
 		Value: v.Value,
+	}
+
+	return res
+}
+
+// transformOrderviewsOrderListItemViewToOrderListItem builds a value of type
+// *OrderListItem from a value of type *orderviews.OrderListItemView.
+func transformOrderviewsOrderListItemViewToOrderListItem(v *orderviews.OrderListItemView) *OrderListItem {
+	if v == nil {
+		return nil
+	}
+	res := &OrderListItem{
+		ID:         v.ID,
+		Name:       v.Name,
+		Status:     v.Status,
+		OrderedAt:  v.OrderedAt,
+		StartedAt:  v.StartedAt,
+		FinishedAt: v.FinishedAt,
+		ServiceID:  v.ServiceID,
+		AccountID:  v.AccountID,
+	}
+	if v.Links != nil {
+		res.Links = transformOrderviewsSelfTViewToSelfT(v.Links)
+	}
+
+	return res
+}
+
+// transformOrderviewsNavTViewToNavT builds a value of type *NavT from a value
+// of type *orderviews.NavTView.
+func transformOrderviewsNavTViewToNavT(v *orderviews.NavTView) *NavT {
+	if v == nil {
+		return nil
+	}
+	res := &NavT{
+		Self:  v.Self,
+		First: v.First,
+		Next:  v.Next,
+	}
+
+	return res
+}
+
+// transformOrderListItemToOrderviewsOrderListItemView builds a value of type
+// *orderviews.OrderListItemView from a value of type *OrderListItem.
+func transformOrderListItemToOrderviewsOrderListItemView(v *OrderListItem) *orderviews.OrderListItemView {
+	res := &orderviews.OrderListItemView{
+		ID:         v.ID,
+		Name:       v.Name,
+		Status:     v.Status,
+		OrderedAt:  v.OrderedAt,
+		StartedAt:  v.StartedAt,
+		FinishedAt: v.FinishedAt,
+		ServiceID:  v.ServiceID,
+		AccountID:  v.AccountID,
+	}
+	if v.Links != nil {
+		res.Links = transformSelfTToOrderviewsSelfTView(v.Links)
+	}
+
+	return res
+}
+
+// transformNavTToOrderviewsNavTView builds a value of type
+// *orderviews.NavTView from a value of type *NavT.
+func transformNavTToOrderviewsNavTView(v *NavT) *orderviews.NavTView {
+	res := &orderviews.NavTView{
+		Self:  v.Self,
+		First: v.First,
+		Next:  v.Next,
 	}
 
 	return res

@@ -25,6 +25,24 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
+// BuildReadPayload builds the payload for the order read endpoint from CLI
+// flags.
+func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPayload, error) {
+	var id string
+	{
+		id = orderReadID
+	}
+	var jwt string
+	{
+		jwt = orderReadJWT
+	}
+	v := &order.ReadPayload{}
+	v.ID = id
+	v.JWT = jwt
+
+	return v, nil
+}
+
 // BuildListPayload builds the payload for the order list endpoint from CLI
 // flags.
 func BuildListPayload(orderListLimit string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
@@ -110,15 +128,17 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	{
 		err = json.Unmarshal([]byte(orderCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"accountID\": \"urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": 10\n         }\n      ],\n      \"policyID\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"serviceID\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": 10\n         }\n      ],\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"service-id\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
 		}
 		if body.Parameters == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.serviceID", body.ServiceID, goa.FormatURI))
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.accountID", body.AccountID, goa.FormatURI))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.service-id", body.ServiceID, goa.FormatURI))
+		if body.AccountID != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.account-id", *body.AccountID, goa.FormatURI))
+		}
 		if body.PolicyID != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.policyID", *body.PolicyID, goa.FormatURI))
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
 		}
 		if err != nil {
 			return nil, err
@@ -146,22 +166,4 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	res.JWT = jwt
 
 	return res, nil
-}
-
-// BuildReadPayload builds the payload for the order read endpoint from CLI
-// flags.
-func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPayload, error) {
-	var id string
-	{
-		id = orderReadID
-	}
-	var jwt string
-	{
-		jwt = orderReadJWT
-	}
-	v := &order.ReadPayload{}
-	v.ID = id
-	v.JWT = jwt
-
-	return v, nil
 }

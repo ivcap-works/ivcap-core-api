@@ -149,8 +149,8 @@ var (
 			"data",
 			"links",
 			"location",
-			"tus_resumable",
-			"tus_offset",
+			"tus-resumable",
+			"tus-offset",
 		},
 	}
 )

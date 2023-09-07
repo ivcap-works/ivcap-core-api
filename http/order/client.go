@@ -26,14 +26,14 @@ import (
 
 // Client lists the order service endpoint HTTP clients.
 type Client struct {
+	// Read Doer is the HTTP client used to make requests to the read endpoint.
+	ReadDoer goahttp.Doer
+
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
-
-	// Read Doer is the HTTP client used to make requests to the read endpoint.
-	ReadDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -58,15 +58,39 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
+		ReadDoer:            doer,
 		ListDoer:            doer,
 		CreateDoer:          doer,
-		ReadDoer:            doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
 		decoder:             dec,
 		encoder:             enc,
+	}
+}
+
+// Read returns an endpoint that makes HTTP requests to the order service read
+// server.
+func (c *Client) Read() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeReadRequest(c.encoder)
+		decodeResponse = DecodeReadResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildReadRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ReadDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("order", "read", err)
+		}
+		return decodeResponse(resp)
 	}
 }
 
@@ -113,30 +137,6 @@ func (c *Client) Create() goa.Endpoint {
 		resp, err := c.CreateDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("order", "create", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// Read returns an endpoint that makes HTTP requests to the order service read
-// server.
-func (c *Client) Read() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeReadRequest(c.encoder)
-		decodeResponse = DecodeReadResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
-		req, err := c.BuildReadRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.ReadDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "read", err)
 		}
 		return decodeResponse(resp)
 	}

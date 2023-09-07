@@ -25,13 +25,13 @@ import (
 
 // Manage the life cycle of a service offered on the CRE marketplace.
 type Service interface {
-	// services
+	// list services
 	List(context.Context, *ListPayload) (res *ServiceListRT, err error)
 	// Create a new services and return its status.
 	// The "view" return value must have one of the following views
 	//	- "default"
 	//	- "tiny"
-	Create(context.Context, *CreatePayload) (res *ServiceStatusRT, view string, err error)
+	CreateService(context.Context, *CreateServicePayload) (res *ServiceStatusRT, view string, err error)
 	// Show services by ID
 	// The "view" return value must have one of the following views
 	//	- "default"
@@ -60,7 +60,7 @@ const ServiceName = "service"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [5]string{"list", "create", "read", "update", "delete"}
+var MethodNames = [5]string{"list", "create_service", "read", "update", "delete"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -81,8 +81,9 @@ type BasicWorkflowOptsT struct {
 	CPU *ResourceMemoryT
 }
 
-// CreatePayload is the payload type of the service service create method.
-type CreatePayload struct {
+// CreateServicePayload is the payload type of the service service
+// create_service method.
+type CreateServicePayload struct {
 	// New services description
 	Services *ServiceDescriptionT
 	// JWT used for authentication
@@ -293,7 +294,8 @@ type ServiceListRT struct {
 	Links *NavT
 }
 
-// ServiceStatusRT is the result type of the service service create method.
+// ServiceStatusRT is the result type of the service service create_service
+// method.
 type ServiceStatusRT struct {
 	// Service ID
 	ID string

@@ -25,8 +25,8 @@ func ListServicePath() string {
 	return "/1/services"
 }
 
-// CreateServicePath returns the URL path to the service service create HTTP endpoint.
-func CreateServicePath() string {
+// CreateServiceServicePath returns the URL path to the service service create_service HTTP endpoint.
+func CreateServiceServicePath() string {
 	return "/1/services"
 }
 

@@ -25,10 +25,10 @@ import (
 
 // Manages the life cycle of metadata attached to an entity.
 type Service interface {
-	// Return a list of metadata records.
-	List(context.Context, *ListPayload) (res *ListMetaRT, err error)
 	// Show metadata by ID
 	Read(context.Context, *ReadPayload) (res *MetadataRecordRT, err error)
+	// Return a list of metadata records.
+	List(context.Context, *ListPayload) (res *ListMetaRT, err error)
 	// Attach new metadata to an entity.
 	Add(context.Context, *AddPayload) (res *AddMetaRT, err error)
 	// Revoke a record for the same entity and same schema and create new one
@@ -56,7 +56,7 @@ const ServiceName = "metadata"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [6]string{"list", "read", "add", "update_one", "update_record", "revoke"}
+var MethodNames = [6]string{"read", "list", "add", "update_one", "update_record", "revoke"}
 
 // AddMetaRT is the result type of the metadata service add method.
 type AddMetaRT struct {
@@ -171,7 +171,7 @@ type MetadataListItemRT struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect *string
+	Aspect interface{}
 	// If aspectPath was defined, this is what matched the query
 	AspectContext *string
 }
@@ -185,7 +185,7 @@ type MetadataRecordRT struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect *string
+	Aspect interface{}
 	// Time this record was asserted
 	ValidFrom *string
 	// Time this record was revoked
@@ -252,7 +252,7 @@ type UpdateOnePayload struct {
 	// Schema of metadata
 	Schema string
 	// Aspect content
-	Aspect *string
+	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
 	ContentType *string
 	// Policy guiding visibility and actions performed
@@ -265,13 +265,13 @@ type UpdateOnePayload struct {
 // update_record method.
 type UpdateRecordPayload struct {
 	// Record ID to update
-	ID *string
+	ID string
 	// Entity to which attach metadata
 	EntityID *string
 	// Schema of metadata
 	Schema *string
 	// Aspect content
-	Aspect string
+	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
 	ContentType *string
 	// Policy guiding visibility and actions performed
@@ -416,19 +416,6 @@ func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
 }
 
-// NewListMetaRT initializes result type ListMetaRT from viewed result type
-// ListMetaRT.
-func NewListMetaRT(vres *metadataviews.ListMetaRT) *ListMetaRT {
-	return newListMetaRT(vres.Projected)
-}
-
-// NewViewedListMetaRT initializes viewed result type ListMetaRT from result
-// type ListMetaRT using the given view.
-func NewViewedListMetaRT(res *ListMetaRT, view string) *metadataviews.ListMetaRT {
-	p := newListMetaRTView(res)
-	return &metadataviews.ListMetaRT{Projected: p, View: "default"}
-}
-
 // NewMetadataRecordRT initializes result type MetadataRecordRT from viewed
 // result type MetadataRecordRT.
 func NewMetadataRecordRT(vres *metadataviews.MetadataRecordRT) *MetadataRecordRT {
@@ -442,6 +429,19 @@ func NewViewedMetadataRecordRT(res *MetadataRecordRT, view string) *metadataview
 	return &metadataviews.MetadataRecordRT{Projected: p, View: "default"}
 }
 
+// NewListMetaRT initializes result type ListMetaRT from viewed result type
+// ListMetaRT.
+func NewListMetaRT(vres *metadataviews.ListMetaRT) *ListMetaRT {
+	return newListMetaRT(vres.Projected)
+}
+
+// NewViewedListMetaRT initializes viewed result type ListMetaRT from result
+// type ListMetaRT using the given view.
+func NewViewedListMetaRT(res *ListMetaRT, view string) *metadataviews.ListMetaRT {
+	p := newListMetaRTView(res)
+	return &metadataviews.ListMetaRT{Projected: p, View: "default"}
+}
+
 // NewAddMetaRT initializes result type AddMetaRT from viewed result type
 // AddMetaRT.
 func NewAddMetaRT(vres *metadataviews.AddMetaRT) *AddMetaRT {
@@ -453,6 +453,38 @@ func NewAddMetaRT(vres *metadataviews.AddMetaRT) *AddMetaRT {
 func NewViewedAddMetaRT(res *AddMetaRT, view string) *metadataviews.AddMetaRT {
 	p := newAddMetaRTView(res)
 	return &metadataviews.AddMetaRT{Projected: p, View: "default"}
+}
+
+// newMetadataRecordRT converts projected type MetadataRecordRT to service type
+// MetadataRecordRT.
+func newMetadataRecordRT(vres *metadataviews.MetadataRecordRTView) *MetadataRecordRT {
+	res := &MetadataRecordRT{
+		RecordID:  vres.RecordID,
+		Entity:    vres.Entity,
+		Schema:    vres.Schema,
+		Aspect:    vres.Aspect,
+		ValidFrom: vres.ValidFrom,
+		ValidTo:   vres.ValidTo,
+		Asserter:  vres.Asserter,
+		Revoker:   vres.Revoker,
+	}
+	return res
+}
+
+// newMetadataRecordRTView projects result type MetadataRecordRT to projected
+// type MetadataRecordRTView using the "default" view.
+func newMetadataRecordRTView(res *MetadataRecordRT) *metadataviews.MetadataRecordRTView {
+	vres := &metadataviews.MetadataRecordRTView{
+		RecordID:  res.RecordID,
+		Entity:    res.Entity,
+		Schema:    res.Schema,
+		Aspect:    res.Aspect,
+		ValidFrom: res.ValidFrom,
+		ValidTo:   res.ValidTo,
+		Asserter:  res.Asserter,
+		Revoker:   res.Revoker,
+	}
+	return vres
 }
 
 // newListMetaRT converts projected type ListMetaRT to service type ListMetaRT.
@@ -518,38 +550,6 @@ func newMetadataListItemRTView(res *MetadataListItemRT) *metadataviews.MetadataL
 		Schema:        res.Schema,
 		Aspect:        res.Aspect,
 		AspectContext: res.AspectContext,
-	}
-	return vres
-}
-
-// newMetadataRecordRT converts projected type MetadataRecordRT to service type
-// MetadataRecordRT.
-func newMetadataRecordRT(vres *metadataviews.MetadataRecordRTView) *MetadataRecordRT {
-	res := &MetadataRecordRT{
-		RecordID:  vres.RecordID,
-		Entity:    vres.Entity,
-		Schema:    vres.Schema,
-		Aspect:    vres.Aspect,
-		ValidFrom: vres.ValidFrom,
-		ValidTo:   vres.ValidTo,
-		Asserter:  vres.Asserter,
-		Revoker:   vres.Revoker,
-	}
-	return res
-}
-
-// newMetadataRecordRTView projects result type MetadataRecordRT to projected
-// type MetadataRecordRTView using the "default" view.
-func newMetadataRecordRTView(res *MetadataRecordRT) *metadataviews.MetadataRecordRTView {
-	vres := &metadataviews.MetadataRecordRTView{
-		RecordID:  res.RecordID,
-		Entity:    res.Entity,
-		Schema:    res.Schema,
-		Aspect:    res.Aspect,
-		ValidFrom: res.ValidFrom,
-		ValidTo:   res.ValidTo,
-		Asserter:  res.Asserter,
-		Revoker:   res.Revoker,
 	}
 	return vres
 }

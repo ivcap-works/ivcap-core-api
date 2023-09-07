@@ -2,7 +2,7 @@ swagger: "2.0"
 info:
     title: IVCAP
     description: "\n**IVCAP** is for **service providers** to **offer** analytics **services** \nand for **consumers** to **order** customised **products** produced by said services.\n\n### Typical Workflow\n\n1. Obtain an token from the ID Providers listed in the document returned \nby [/1/authinfo.yaml](/1/authinfo.yaml). The token needs to be added\nas a bearer token via the \n<code>Authorization</code> header to every request to this service.\n1. <a href=\"#get-/1/services\">List</a> all available service.\n1. Select appropriate service and retrieve details, like parameters via \n<a href=\"#get-/1/services/-id-\">Read Service</a>.\n1. Create the appropriate json request and POST it to \n<a href=\"#post-/1/orders\">Create Order</a>. (see the example in the\nservice description.)\n1. The reply from the above POST operation contains a link (<code>links/self</code>) to the\nnewly create order record accessible via <a href=\"#get-/1/orders/-id-\">Read Order</a>.\n1. Progress of the order fulfillment can be tracked via repeated calls to \n<a href=\"#get-/1/orders/-id-\">Read Order</a> and the returned <code>status</code>.\n1. Any information products created in the context of an order will be listed under <code>producs</code>\nwhich also include a link to the respective <a href=\"#get-/1/artifacts/-id-\">Read Artifact</a>.\n1. The <a href=\"#get-/1/artifacts/-id-\">Read Artifact</a> service will return more details for \neach artifact, including a <code>data</code> link through which the artifact content can be downloaded. (The\ndownload link is also included in the <code>products</code> list returned by \nthe <a href=\"#get-/1/orders/-id-\">Read Order</a> service ).\n\nPlease note that all schemas in this API are following the [{json:api}](https://jsonapi.org/) specs \nwherever appropriate.\n\n### High-level Architecture\n\nOn receiving an order through this **API**, the internal *Order Dispatcher* is \ncreating a *workflow*, dispatching that to the \n[Argo workflow engine](https://argoproj.github.io/argo-workflows/) \nand create appropriate records in [Magda](https://magda.io/). \nAs the execution of the workflow progresses, appropriate updates are posted to the order record in Magda, \nsuch as data accessed or produced. In addition, any information products created will be\nstored via [Minio](https://min.io/) in a deployment specific object store \nand made accessible through the *Artifact* service.\n\t"
-    version: "0.26"
+    version: "0.27"
 host: localhost:8088
 consumes:
     - application/json
@@ -19,7 +19,7 @@ paths:
                 - artifact
             summary: list artifact
             description: |-
-                artifacts
+                list artifacts
 
                 **Required security scopes for jwt**:
                   * `consumer:read`
@@ -27,7 +27,9 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The $limit system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   required: false
                   type: integer
                   default: 10
@@ -35,17 +37,27 @@ paths:
                   minimum: 1
                 - name: page
                   in: query
-                  description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of 'page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   required: false
                   type: string
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   required: false
                   type: string
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   required: false
                   type: string
                 - name: order-desc
@@ -272,7 +284,9 @@ paths:
                   type: string
                 - name: aspect-path
                   in: query
-                  description: "To learn more about the supported format, see \n\t\t\t\t\thttps://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH"
+                  description: |-
+                    To learn more about the supported format, see
+                    					https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
                   required: false
                   type: string
                 - name: at-time
@@ -283,7 +297,9 @@ paths:
                   format: date-time
                 - name: limit
                   in: query
-                  description: "The 'limit' system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The 'limit' system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   required: false
                   type: integer
                   default: 10
@@ -291,13 +307,21 @@ paths:
                   minimum: 1
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   required: false
                   type: string
                   default: ""
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   required: false
                   type: string
                   default: ""
@@ -308,7 +332,9 @@ paths:
                   type: boolean
                 - name: page
                   in: query
-                  description: "The content of '$page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of '$page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   required: false
                   type: string
                 - name: Authorization
@@ -388,13 +414,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: false
                   type: string
-                - name: string
+                - name: any
                   in: body
                   description: Aspect content
                   required: true
                   schema:
                     type: string
-                    format: json
+                    format: binary
             responses:
                 "200":
                     description: OK response.
@@ -605,13 +631,13 @@ paths:
                   description: Content-Type header, MUST be of application/json.
                   required: false
                   type: string
-                - name: string
+                - name: any
                   in: body
                   description: Aspect content
                   required: true
                   schema:
                     type: string
-                    format: json
+                    format: binary
             responses:
                 "200":
                     description: OK response.
@@ -716,7 +742,7 @@ paths:
                 - order
             summary: list order
             description: |-
-                orders
+                list orders
 
                 **Required security scopes for jwt**:
                   * `consumer:read`
@@ -724,7 +750,9 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The $limit system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   required: false
                   type: integer
                   default: 10
@@ -732,17 +760,27 @@ paths:
                   minimum: 1
                 - name: page
                   in: query
-                  description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of 'page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   required: false
                   type: string
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   required: false
                   type: string
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   required: false
                   type: string
                 - name: order-desc
@@ -917,7 +955,7 @@ paths:
                 - service
             summary: list service
             description: |-
-                services
+                list services
 
                 **Required security scopes for jwt**:
                   * `consumer:read`
@@ -925,7 +963,9 @@ paths:
             parameters:
                 - name: limit
                   in: query
-                  description: "The $limit system query option requests the number of items in the queried \n\t\t\t\tcollection to be included in the result."
+                  description: |-
+                    The $limit system query option requests the number of items in the queried
+                    				collection to be included in the result.
                   required: false
                   type: integer
                   default: 10
@@ -933,17 +973,27 @@ paths:
                   minimum: 1
                 - name: page
                   in: query
-                  description: "The content of 'page' is returned in the 'links' part of a previous query and \n\t\t\t\twill when set, ALL other parameters, except for 'limit' are ignored."
+                  description: |-
+                    The content of 'page' is returned in the 'links' part of a previous query and
+                    				will when set, ALL other parameters, except for 'limit' are ignored.
                   required: false
                   type: string
                 - name: filter
                   in: query
-                  description: "The 'filter' system query option allows clients to filter a collection of \n\t\t\t\tresources that are addressed by a request URL. The expression specified with 'filter'\n\t\t\t\tis evaluated for each resource in the collection, and only items where the expression \n\t\t\t\tevaluates to true are included in the response."
+                  description: |-
+                    The 'filter' system query option allows clients to filter a collection of
+                    				resources that are addressed by a request URL. The expression specified with 'filter'
+                    				is evaluated for each resource in the collection, and only items where the expression
+                    				evaluates to true are included in the response.
                   required: false
                   type: string
                 - name: order-by
                   in: query
-                  description: "The 'orderby' query option allows clients to request resources in either \n\t\t\t\tascending order using asc or descending order using desc. If asc or desc not specified, \n\t\t\t\tthen the resources will be ordered in ascending order. The request below orders Trips on \n\t\t\t\tproperty EndsAt in descending order."
+                  description: |-
+                    The 'orderby' query option allows clients to request resources in either
+                    				ascending order using asc or descending order using desc. If asc or desc not specified,
+                    				then the resources will be ordered in ascending order. The request below orders Trips on
+                    				property EndsAt in descending order.
                   required: false
                   type: string
                 - name: order-desc
@@ -998,30 +1048,30 @@ paths:
         post:
             tags:
                 - service
-            summary: create service
+            summary: create_service service
             description: |-
                 Create a new services and return its status.
 
                 **Required security scopes for jwt**:
                   * `consumer:write`
-            operationId: service#create
+            operationId: service#create_service
             parameters:
                 - name: Authorization
                   in: header
                   description: JWT used for authentication
                   required: true
                   type: string
-                - name: CreateRequestBody
+                - name: create_service_request_body
                   in: body
                   description: New services description
                   required: true
                   schema:
-                    $ref: '#/definitions/ServiceCreateRequestBody'
+                    $ref: '#/definitions/ServiceCreateServiceRequestBody'
             responses:
                 "201":
                     description: Created response.
                     schema:
-                        $ref: '#/definitions/ServiceCreateResponseBody'
+                        $ref: '#/definitions/ServiceCreateServiceResponseBody'
                 "400":
                     description: Bad Request response.
                 "401":
@@ -1029,34 +1079,34 @@ paths:
                 "403":
                     description: Forbidden response.
                     schema:
-                        $ref: '#/definitions/ServiceCreateInvalidScopesResponseBody'
+                        $ref: '#/definitions/ServiceCreateServiceInvalidScopesResponseBody'
                         required:
                             - message
                 "404":
                     description: Not Found response.
                     schema:
-                        $ref: '#/definitions/ServiceCreateNotFoundResponseBody'
+                        $ref: '#/definitions/ServiceCreateServiceNotFoundResponseBody'
                         required:
                             - message
                             - id
                 "409":
                     description: Conflict response.
                     schema:
-                        $ref: '#/definitions/ServiceCreateAlreadyCreatedResponseBody'
+                        $ref: '#/definitions/ServiceCreateServiceAlreadyCreatedResponseBody'
                         required:
                             - message
                             - id
                 "422":
                     description: Request contained semantically wrong paramter value
                     schema:
-                        $ref: '#/definitions/ServiceCreateInvalidParameterResponseBody'
+                        $ref: '#/definitions/ServiceCreateServiceInvalidParameterResponseBody'
                         required:
                             - name
                             - message
                 "501":
                     description: Not Implemented response.
                     schema:
-                        $ref: '#/definitions/ServiceCreateNotImplementedResponseBody'
+                        $ref: '#/definitions/ServiceCreateServiceNotImplementedResponseBody'
                         required:
                             - message
             schemes:
@@ -1241,10 +1291,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Voluptate quidem possimus eum quam est consequatur.
+                example: Cumque ipsa qui.
         description: Request contained problematic argument
         example:
-            message: Et saepe error aut voluptatem.
+            message: Unde iure exercitationem perferendis et similique.
         required:
             - message
     ArtifactListInvalidParameterResponseBody:
@@ -1254,20 +1304,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Ea est quaerat.
+                example: Numquam est quis corrupti.
             name:
                 type: string
                 description: name of parameter.
-                example: Aut modi autem dolore eos rerum.
+                example: Perferendis est dolore voluptatem dolorem dolorem dicta.
             value:
                 type: string
                 description: provided parameter value.
-                example: Optio voluptatem cupiditate est omnis quo aut.
+                example: Aperiam voluptatem.
         description: Invalide parameter value
         example:
-            message: Numquam repellendus reiciendis.
-            name: Et enim blanditiis et praesentium.
-            value: Minima non.
+            message: Omnis maiores in exercitationem repellat.
+            name: In molestiae laboriosam ut nihil repudiandae nulla.
+            value: Nesciunt nemo iste doloremque similique.
         required:
             - name
             - message
@@ -1284,11 +1334,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Iure odio.
+                example: Eum blanditiis ullam nemo necessitatibus.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Dolorem dolore.
+            message: Vel sequi repudiandae doloremque sit doloribus optio.
         required:
             - message
     ArtifactListItemResponseBody:
@@ -1345,10 +1395,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Alias accusamus.
+                example: At delectus dolorum inventore.
         description: Method is not yet implemented
         example:
-            message: Quo corporis temporibus nostrum et temporibus et.
+            message: Consequuntur corrupti aliquid quod ullam quo.
         required:
             - message
     ArtifactListResponseBody:
@@ -1381,16 +1431,6 @@ definitions:
                       name: Fire risk for Lot2
                       size: 19000
                       status: ready
-                    - id: cayp:artifact:0000-000
-                      links:
-                        describedBy:
-                            href: https://api.com/swagger/...
-                            type: application/openapi3+json
-                        self: Ipsam deleniti magnam nihil et.
-                      mime-type: image/jpeg
-                      name: Fire risk for Lot2
-                      size: 19000
-                      status: ready
             at-time:
                 type: string
                 description: Time at which this list was valid
@@ -1401,16 +1441,6 @@ definitions:
         description: ListResponseBody result type (default view)
         example:
             artifacts:
-                - id: cayp:artifact:0000-000
-                  links:
-                    describedBy:
-                        href: https://api.com/swagger/...
-                        type: application/openapi3+json
-                    self: Ipsam deleniti magnam nihil et.
-                  mime-type: image/jpeg
-                  name: Fire risk for Lot2
-                  size: 19000
-                  status: ready
                 - id: cayp:artifact:0000-000
                   links:
                     describedBy:
@@ -1466,11 +1496,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Voluptas iste ab voluptatibus necessitatibus dolore.
+                example: Necessitatibus dolore nobis.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Molestiae odit incidunt sequi id aut hic.
+            message: Odit incidunt sequi id aut hic.
         required:
             - message
     ArtifactReadNotFoundResponseBody:
@@ -1516,7 +1546,7 @@ definitions:
             cache-of:
                 type: string
                 description: URL of object this artifact is caching
-                example: Eos tempore eius.
+                example: Occaecati nulla.
             created-at:
                 type: string
                 description: DateTime artifact was created
@@ -1526,7 +1556,7 @@ definitions:
             etag:
                 type: string
                 description: ETAG of artifact
-                example: Quaerat impedit.
+                example: Laudantium ex vel error consequatur.
             id:
                 type: string
                 description: Artifact ID
@@ -1540,11 +1570,11 @@ definitions:
             location:
                 type: string
                 description: link back to record
-                example: Exercitationem odit repellendus et fugiat voluptatum ullam.
+                example: Voluptatum ullam quos qui cum.
             mime-type:
                 type: string
                 description: Mime-type of data
-                example: Odit neque nostrum hic delectus asperiores nemo.
+                example: Omnis est.
             name:
                 type: string
                 description: Optional name
@@ -1554,44 +1584,44 @@ definitions:
             size:
                 type: integer
                 description: Size of data
-                example: 9177455869242915869
+                example: 7527091450606020572
                 format: int64
             status:
                 type: string
                 description: Artifact status
-                example: partial
+                example: unknown
                 enum:
                     - pending
                     - partial
                     - ready
                     - error
                     - unknown
-            tus_offset:
+            tus-offset:
                 type: integer
                 description: TUS offset for partially uploaded content
-                example: 2846503638962926010
+                example: 6699812253850757367
                 format: int64
-            tus_resumable:
+            tus-resumable:
                 type: string
                 description: indicate version of TUS supported
-                example: Qui cum aut voluptatem delectus beatae ipsam.
+                example: Voluptatem delectus beatae ipsam id ipsum id.
         description: ReadResponseBody result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            cache-of: Neque aut autem.
+            cache-of: Autem exercitationem vel laboriosam.
             created-at: "2022-01-01"
             data:
                 describedBy:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
-            etag: Vel laboriosam nemo dolor eligendi minus.
+            etag: Dolor eligendi minus ut saepe reprehenderit.
             id: type:scope:name
             last-modified-at: "2022-01-01"
             links:
@@ -1599,20 +1629,20 @@ definitions:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
-            location: Saepe reprehenderit.
-            mime-type: Vel quis quas adipisci sequi.
+            location: Qui et rerum corporis.
+            mime-type: Adipisci sequi aliquam consequatur.
             name: Fire risk per LGA
             policy:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            size: 5323528126384484328
-            status: partial
-            tus_offset: 5944184322872985761
-            tus_resumable: Qui et rerum corporis.
+            size: 8541586660893932755
+            status: error
+            tus-offset: 3836776471643167252
+            tus-resumable: Excepturi voluptas iste.
         required:
             - id
             - status
@@ -1625,10 +1655,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Alias fuga nobis omnis.
+                example: Tempora rerum fuga et aspernatur.
         description: Request contained problematic argument
         example:
-            message: Pariatur aut facere.
+            message: Incidunt expedita totam enim corrupti.
         required:
             - message
     ArtifactUploadInvalidScopesResponseBody:
@@ -1644,11 +1674,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Porro harum voluptatibus quo adipisci quam.
+                example: Harum dolorem eligendi sunt ut in nostrum.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Aut eaque possimus tempora esse reprehenderit officiis.
+            message: Perspiciatis ipsam animi ea.
         required:
             - message
     ArtifactUploadNotImplementedResponseBody:
@@ -1659,10 +1689,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Enim velit est aut ad.
+                example: Ea non impedit ab.
         description: Method is not yet implemented
         example:
-            message: Illum id.
+            message: Non recusandae qui ratione illo qui.
         required:
             - message
     ArtifactUploadResponseBody:
@@ -1674,7 +1704,7 @@ definitions:
             cache-of:
                 type: string
                 description: URL of object this artifact is caching
-                example: Ratione et eum blanditiis ullam nemo necessitatibus.
+                example: Soluta et excepturi culpa doloribus vel.
             created-at:
                 type: string
                 description: DateTime artifact was created
@@ -1684,7 +1714,7 @@ definitions:
             etag:
                 type: string
                 description: ETAG of artifact
-                example: Vel sequi repudiandae doloremque sit doloribus optio.
+                example: Quos voluptas commodi exercitationem qui.
             id:
                 type: string
                 description: Artifact ID
@@ -1698,7 +1728,7 @@ definitions:
             mime-type:
                 type: string
                 description: Mime-type of data
-                example: Voluptate sit repellat nemo recusandae asperiores dolorum.
+                example: Consequuntur consectetur cupiditate animi ipsa voluptatum.
             name:
                 type: string
                 description: Optional name
@@ -1708,12 +1738,12 @@ definitions:
             size:
                 type: integer
                 description: Size of data
-                example: 1768868138941601889
+                example: 3909622326162990867
                 format: int64
             status:
                 type: string
                 description: Artifact status
-                example: partial
+                example: ready
                 enum:
                     - pending
                     - partial
@@ -1723,20 +1753,20 @@ definitions:
         description: UploadResponseBody result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            cache-of: Saepe eaque fugit temporibus delectus.
+            cache-of: Qui magnam ut.
             created-at: "2022-01-01"
             data:
                 describedBy:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
-            etag: Unde in tempore vel quos.
+            etag: Blanditiis et dolore.
             id: type:scope:name
             last-modified-at: "2022-01-01"
             links:
@@ -1744,17 +1774,17 @@ definitions:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
-            mime-type: Nam natus voluptas facere.
+            mime-type: Doloremque ex officia saepe sed et.
             name: Fire risk per LGA
             policy:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            size: 438030679027607912
-            status: partial
+            size: 2751729763983478607
+            status: unknown
         required:
             - id
             - status
@@ -1767,33 +1797,31 @@ definitions:
                 type: array
                 items:
                     type: string
-                    example: Ea enim eos aliquid.
+                    example: Quibusdam dolores officiis.
                 description: Command to start the container - needed for some container runtimes
                 example:
-                    - Autem quis.
-                    - Dolorum illo blanditiis ipsum.
-                    - Ex facere quo cum veniam.
+                    - Eius vel.
+                    - Quaerat cupiditate quidem corporis.
+                    - Nobis exercitationem consequuntur incidunt iste ducimus facere.
             cpu:
                 $ref: '#/definitions/ResourceMemoryTRequestBodyRequestBody'
             image:
                 type: string
                 description: container image name
-                example: Exercitationem veritatis voluptate facilis quia.
+                example: Rerum explicabo consequatur rerum veniam.
             memory:
                 $ref: '#/definitions/ResourceMemoryTRequestBodyRequestBody'
         example:
             command:
-                - Optio voluptatem autem vel quis aliquam sint.
-                - Doloribus veritatis aliquam perspiciatis ab non est.
-                - Voluptates iste accusantium maiores placeat assumenda similique.
-                - Asperiores quidem nisi unde quibusdam.
+                - Et nemo excepturi ex.
+                - Corrupti laborum qui incidunt.
             cpu:
-                limit: Quaerat nulla iure illum eum.
-                request: Est iusto eum rerum dolores sed.
-            image: Ipsum dolore quisquam nobis.
+                limit: At eligendi.
+                request: Doloribus optio laborum incidunt nihil molestias.
+            image: Doloremque dolorem facilis et.
             memory:
-                limit: Quaerat nulla iure illum eum.
-                request: Est iusto eum rerum dolores sed.
+                limit: At eligendi.
+                request: Doloribus optio laborum incidunt nihil molestias.
     DescribedByTResponseBody:
         title: DescribedByTResponseBody
         type: object
@@ -1816,10 +1844,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Perspiciatis quod optio aspernatur cumque.
+                example: Unde dolor quis.
         description: Request contained problematic argument
         example:
-            message: Et eum aspernatur reprehenderit autem nihil magnam.
+            message: Voluptas quae ut voluptas laudantium possimus blanditiis.
         required:
             - message
     MetadataAddInvalidParameterResponseBody:
@@ -1829,20 +1857,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Dolorem quas est in illo repudiandae quos.
+                example: Ad quibusdam voluptatem dolor quod.
             name:
                 type: string
                 description: name of parameter.
-                example: Qui nihil molestiae amet.
+                example: Rerum delectus voluptatem unde odio aut.
             value:
                 type: string
                 description: provided parameter value.
-                example: Asperiores laudantium qui.
+                example: Omnis numquam animi eaque.
         description: Invalide parameter value
         example:
-            message: Id id officiis est est odit.
-            name: Nulla at.
-            value: Similique rerum illum in in.
+            message: Animi et.
+            name: Et suscipit eos quos.
+            value: Mollitia quo ea quasi.
         required:
             - name
             - message
@@ -1859,11 +1887,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Commodi aut ab laudantium et.
+                example: Libero perspiciatis at aut totam.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Sint aut sequi rerum.
+            message: Vel odit porro quia tenetur vitae.
         required:
             - message
     MetadataAddNotImplementedResponseBody:
@@ -1874,10 +1902,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Occaecati velit.
+                example: Quos et deserunt aut quae adipisci.
         description: Method is not yet implemented
         example:
-            message: Voluptatibus maiores.
+            message: Deserunt quia facilis nobis.
         required:
             - message
     MetadataAddResponseBody:
@@ -1902,10 +1930,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Eligendi sunt ut in nostrum officia perspiciatis.
+                example: Et eum aspernatur reprehenderit autem nihil magnam.
         description: Request contained problematic argument
         example:
-            message: Animi ea maxime ea non.
+            message: Dolorem quas est in illo repudiandae quos.
         required:
             - message
     MetadataListInvalidParameterResponseBody:
@@ -1915,20 +1943,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Ab quaerat non recusandae.
+                example: Qui nihil molestiae amet.
             name:
                 type: string
                 description: name of parameter.
-                example: Ratione illo qui ut tempora rerum.
+                example: Asperiores laudantium qui.
             value:
                 type: string
                 description: provided parameter value.
-                example: Et aspernatur cumque incidunt.
+                example: Id id officiis est est odit.
         description: Invalide parameter value
         example:
-            message: Totam enim corrupti.
-            name: Fugiat eveniet et.
-            value: Sint nesciunt fugit excepturi.
+            message: Nulla at.
+            name: Similique rerum illum in in.
+            value: Quia et vitae quia harum minus.
         required:
             - name
             - message
@@ -1945,11 +1973,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Quos voluptas commodi exercitationem qui.
+                example: Et illum sint aut sequi rerum.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Neque doloremque ex officia saepe.
+            message: Occaecati velit.
         required:
             - message
     MetadataListItemRTResponseBody:
@@ -1960,12 +1988,11 @@ definitions:
                 type: string
                 description: Attached metadata aspect
                 example: '{...}'
-                format: json
+                format: binary
             aspectContext:
                 type: string
                 description: If aspectPath was defined, this is what matched the query
                 example: '{...}'
-                format: json
             entity:
                 type: string
                 description: Entity ID
@@ -1996,10 +2023,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Et non eligendi qui magnam ut cupiditate.
+                example: Voluptatibus maiores.
         description: Method is not yet implemented
         example:
-            message: Et dolore officia harum.
+            message: Perspiciatis quod optio aspernatur cumque.
         required:
             - message
     MetadataListResponseBody:
@@ -2009,7 +2036,7 @@ definitions:
             aspect-path:
                 type: string
                 description: Optional json path to further filter on returned list
-                example: Consequuntur consectetur cupiditate animi ipsa voluptatum.
+                example: Et dolores qui vel eius.
             at-time:
                 type: string
                 description: Time at which this list was valid
@@ -2043,11 +2070,6 @@ definitions:
                       entity: urn:blue:transect.1
                       record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
                       schema: urn:blue:schema.image
-                    - aspect: '{...}'
-                      aspectContext: '{...}'
-                      entity: urn:blue:transect.1
-                      record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
-                      schema: urn:blue:schema.image
             schema:
                 type: string
                 description: Optional schema to filter on
@@ -2055,7 +2077,7 @@ definitions:
                 format: uri
         description: ListResponseBody result type (default view)
         example:
-            aspect-path: Soluta et excepturi culpa doloribus vel.
+            aspect-path: Quasi pariatur totam similique commodi aut ab.
             at-time: "1996-12-19T16:39:57-08:00"
             entity-id: urn:blue:image.collA.12
             links:
@@ -2063,6 +2085,11 @@ definitions:
                 next: https://api.com/foo/...
                 self: https://api.com/foo/...
             records:
+                - aspect: '{...}'
+                  aspectContext: '{...}'
+                  entity: urn:blue:transect.1
+                  record-id: urn:ivcap:record.123e4567-e89b-12d3-a456-426614174000
+                  schema: urn:blue:schema.image
                 - aspect: '{...}'
                   aspectContext: '{...}'
                   entity: urn:blue:transect.1
@@ -2085,10 +2112,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Iusto et dolores qui vel.
+                example: Et ut et quae neque provident aspernatur.
         description: Request contained problematic argument
         example:
-            message: Qui voluptatem quasi pariatur totam.
+            message: Tenetur est veniam et quis perferendis asperiores.
         required:
             - message
     MetadataReadInvalidScopesResponseBody:
@@ -2104,11 +2131,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Similique ipsa commodi harum beatae provident.
+                example: Fugiat eveniet et.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Debitis veniam distinctio ducimus in.
+            message: Sint nesciunt fugit excepturi.
         required:
             - message
     MetadataReadNotFoundResponseBody:
@@ -2139,10 +2166,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Et ut et quae neque provident aspernatur.
+                example: Similique ipsa commodi harum beatae provident.
         description: Method is not yet implemented
         example:
-            message: Tenetur est veniam et quis perferendis asperiores.
+            message: Debitis veniam distinctio ducimus in.
         required:
             - message
     MetadataReadResponseBody:
@@ -2153,7 +2180,7 @@ definitions:
                 type: string
                 description: Attached metadata aspect
                 example: '{...}'
-                format: json
+                format: binary
             asserter:
                 type: string
                 description: Entity asserting this metadata record at 'valid-from'
@@ -2206,10 +2233,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Fugit commodi unde explicabo quos.
+                example: Nemo et at cupiditate maiores.
         description: Request contained problematic argument
         example:
-            message: Nemo rerum tenetur ut assumenda.
+            message: Exercitationem dicta vel ea numquam dolor.
         required:
             - message
     MetadataRevokeInvalidParameterResponseBody:
@@ -2219,20 +2246,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Consequatur et similique et ut.
+                example: Sit tempore.
             name:
                 type: string
                 description: name of parameter.
-                example: Provident excepturi ratione.
+                example: Deleniti sed rerum.
             value:
                 type: string
                 description: provided parameter value.
-                example: Enim ipsa veniam.
+                example: Ut cum ut.
         description: Invalide parameter value
         example:
-            message: Beatae beatae aliquam.
-            name: Reiciendis eligendi quia quisquam.
-            value: Incidunt culpa assumenda recusandae nihil.
+            message: Nostrum atque.
+            name: Ipsum ipsum vitae consectetur.
+            value: Nulla temporibus dolorum ea molestiae.
         required:
             - name
             - message
@@ -2249,11 +2276,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Voluptatem libero dolores.
+                example: Veritatis ea veniam debitis tenetur cumque quam.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Recusandae molestiae a qui fuga necessitatibus.
+            message: Praesentium minus quasi eius ut quia sit.
         required:
             - message
     MetadataRevokeNotImplementedResponseBody:
@@ -2264,10 +2291,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Nesciunt distinctio deleniti perferendis eos totam.
+                example: Consequatur alias atque amet corporis dignissimos praesentium.
         description: Method is not yet implemented
         example:
-            message: Ab fugiat.
+            message: Ut perferendis et eaque eligendi ut.
         required:
             - message
     MetadataUpdateOneBadRequestResponseBody:
@@ -2278,10 +2305,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Deserunt quia facilis nobis.
+                example: Officiis porro vel et qui repellat.
         description: Request contained problematic argument
         example:
-            message: Unde dolor quis.
+            message: Odio aut quia quo repellat.
         required:
             - message
     MetadataUpdateOneInvalidParameterResponseBody:
@@ -2291,20 +2318,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Voluptas quae ut voluptas laudantium possimus blanditiis.
+                example: Dolorem aut dolores asperiores.
             name:
                 type: string
                 description: name of parameter.
-                example: Ad quibusdam voluptatem dolor quod.
+                example: Soluta aut doloremque aut maxime dolorum voluptates.
             value:
                 type: string
                 description: provided parameter value.
-                example: Rerum delectus voluptatem unde odio aut.
+                example: Quae ipsum sed minus.
         description: Invalide parameter value
         example:
-            message: Omnis numquam animi eaque.
-            name: Animi et.
-            value: Et suscipit eos quos.
+            message: In ad.
+            name: Maxime pariatur a esse.
+            value: Voluptatem libero dolores.
         required:
             - name
             - message
@@ -2321,11 +2348,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Quia et vitae quia harum minus.
+                example: Et architecto quas.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Libero perspiciatis at aut totam.
+            message: Magnam tempore.
         required:
             - message
     MetadataUpdateOneNotImplementedResponseBody:
@@ -2336,10 +2363,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Vel odit porro quia tenetur vitae.
+                example: Voluptas rerum quia.
         description: Method is not yet implemented
         example:
-            message: Quos et deserunt aut quae adipisci.
+            message: Velit enim et voluptas asperiores aliquam ut.
         required:
             - message
     MetadataUpdateOneResponseBody:
@@ -2364,10 +2391,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Velit enim et voluptas asperiores aliquam ut.
+                example: Nemo rerum tenetur ut assumenda.
         description: Request contained problematic argument
         example:
-            message: Officiis porro vel et qui repellat.
+            message: Consequatur et similique et ut.
         required:
             - message
     MetadataUpdateRecordInvalidParameterResponseBody:
@@ -2377,20 +2404,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Odio aut quia quo repellat.
+                example: Provident excepturi ratione.
             name:
                 type: string
                 description: name of parameter.
-                example: Dolorem aut dolores asperiores.
+                example: Enim ipsa veniam.
             value:
                 type: string
                 description: provided parameter value.
-                example: Soluta aut doloremque aut maxime dolorum voluptates.
+                example: Beatae beatae aliquam.
         description: Invalid parameter value
         example:
-            message: Quae ipsum sed minus.
-            name: In ad.
-            value: Maxime pariatur a esse.
+            message: Reiciendis eligendi quia quisquam.
+            name: Incidunt culpa assumenda recusandae nihil.
+            value: Eum dicta eos quis.
         required:
             - name
             - message
@@ -2407,11 +2434,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Mollitia quo ea quasi.
+                example: Recusandae molestiae a qui fuga necessitatibus.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Et architecto quas.
+            message: Nesciunt distinctio deleniti perferendis eos totam.
         required:
             - message
     MetadataUpdateRecordNotImplementedResponseBody:
@@ -2422,10 +2449,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Magnam tempore.
+                example: Ab fugiat.
         description: Method is not yet implemented
         example:
-            message: Voluptas rerum quia.
+            message: Fugit commodi unde explicabo quos.
         required:
             - message
     MetadataUpdateRecordResponseBody:
@@ -2470,10 +2497,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Quibusdam laudantium et ducimus suscipit possimus doloribus.
+                example: Sint hic.
         description: Request contained problematic argument
         example:
-            message: Et deserunt sit fugiat beatae eaque perferendis.
+            message: Hic eos voluptatem quia dignissimos blanditiis pariatur.
         required:
             - message
     OrderCreateInvalidParameterResponseBody:
@@ -2483,20 +2510,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Aliquid deserunt et.
+                example: Tempora veniam excepturi repellat tempore debitis.
             name:
                 type: string
                 description: name of parameter.
-                example: Perspiciatis libero et ea dolor sunt.
+                example: Id ratione.
             value:
                 type: string
                 description: provided parameter value.
-                example: Saepe ab numquam.
+                example: Quaerat placeat molestias.
         description: Invalide parameter value
         example:
-            message: Occaecati est mollitia voluptatem labore.
-            name: Aliquid numquam qui consectetur debitis.
-            value: Cumque dolores sint iste.
+            message: Quaerat et aut velit in.
+            name: Aut quidem et et et.
+            value: Recusandae et voluptatibus.
         required:
             - name
             - message
@@ -2513,11 +2540,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Magnam aut.
+                example: Dolore nemo libero sunt.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Quo similique at dolor.
+            message: Libero asperiores consequuntur alias.
         required:
             - message
     OrderCreateNotFoundResponseBody:
@@ -2548,17 +2575,17 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Et eveniet.
+                example: Eius consequatur aut iusto sint et est.
         description: Method is not yet implemented
         example:
-            message: Tempora sint est.
+            message: Eligendi accusamus quae nihil sunt.
         required:
             - message
     OrderCreateRequestBody:
         title: OrderCreateRequestBody
         type: object
         properties:
-            accountID:
+            account-id:
                 type: string
                 description: Reference to billable account
                 example: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
@@ -2577,29 +2604,28 @@ definitions:
                       value: Upper Valley
                     - name: threshold
                       value: 10
-            policyID:
+            policy-id:
                 type: string
                 description: Policy to control access to record an all generated artifacts
                 example: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
                 format: uri
-            serviceID:
+            service-id:
                 type: string
                 description: Reference to service requested
                 example: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
                 format: uri
         example:
-            accountID: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
+            account-id: urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000
             name: Fire risk for Lot2
             parameters:
                 - name: region
                   value: Upper Valley
                 - name: threshold
                   value: 10
-            policyID: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
-            serviceID: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
+            policy-id: urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000
+            service-id: urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000
         required:
-            - serviceID
-            - accountID
+            - service-id
             - parameters
     OrderCreateResponseBody:
         title: 'Mediatype identifier: application/vnd.ivcap.order.status; view=default'
@@ -2607,7 +2633,7 @@ definitions:
         properties:
             account:
                 $ref: '#/definitions/RefTResponseBody'
-            finished_at:
+            finished-at:
                 type: string
                 description: DateTime order processing finished
                 example: "2023-03-17T04:57:00Z"
@@ -2622,7 +2648,7 @@ definitions:
                 type: string
                 description: Optional customer provided name
                 example: Fire risk for Lot2
-            ordered_at:
+            ordered-at:
                 type: string
                 description: DateTime order was placed
                 example: "2023-03-17T04:57:00Z"
@@ -2648,14 +2674,14 @@ definitions:
                       size: 1234963
             service:
                 $ref: '#/definitions/RefTResponseBody'
-            started_at:
+            started-at:
                 type: string
                 description: DateTime order processing started
                 example: "2023-03-17T04:57:00Z"
             status:
                 type: string
                 description: Order status
-                example: unknown
+                example: executing
                 enum:
                     - unknown
                     - pending
@@ -2667,13 +2693,13 @@ definitions:
         description: CreateResponseBody result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            finished_at: "2023-03-17T04:57:00Z"
+            finished-at: "2023-03-17T04:57:00Z"
             id: 123e4567-e89b-12d3-a456-426614174000
             links:
                 describedBy:
@@ -2681,7 +2707,7 @@ definitions:
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
             name: Fire risk for Lot2
-            ordered_at: "2023-03-17T04:57:00Z"
+            ordered-at: "2023-03-17T04:57:00Z"
             parameters:
                 - name: region
                   value: Upper Valley
@@ -2693,14 +2719,14 @@ definitions:
                   name: fire risk map
                   size: 1234963
             service:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            started_at: "2023-03-17T04:57:00Z"
-            status: failed
+            started-at: "2023-03-17T04:57:00Z"
+            status: pending
         required:
             - id
             - parameters
@@ -2712,10 +2738,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Eaque eligendi ut minima nemo et.
+                example: Cumque dolores sint iste.
         description: Request contained problematic argument
         example:
-            message: Cupiditate maiores modi exercitationem dicta vel ea.
+            message: Dicta omnis voluptatem deleniti ea.
         required:
             - message
     OrderListInvalidParameterResponseBody:
@@ -2725,20 +2751,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Dolor et sit tempore.
+                example: Adipisci eius facilis est praesentium.
             name:
                 type: string
                 description: name of parameter.
-                example: Deleniti sed rerum.
+                example: Blanditiis voluptas.
             value:
                 type: string
                 description: provided parameter value.
-                example: Ut cum ut.
+                example: Ad quisquam voluptas.
         description: Invalide parameter value
         example:
-            message: Nostrum atque.
-            name: Ipsum ipsum vitae consectetur.
-            value: Nulla temporibus dolorum ea molestiae.
+            message: Sed tenetur aut.
+            name: Dolorum alias occaecati excepturi qui iure.
+            value: Ullam accusamus.
         required:
             - name
             - message
@@ -2755,22 +2781,22 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Qui veritatis ea veniam debitis tenetur cumque.
+                example: Perspiciatis libero et ea dolor sunt.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Animi praesentium minus quasi eius ut quia.
+            message: Saepe ab numquam.
         required:
             - message
     OrderListItemResponseBody:
         title: OrderListItemResponseBody
         type: object
         properties:
-            account_id:
+            account-id:
                 type: string
                 description: ID of ordered service
                 example: "2022-01-01"
-            finished_at:
+            finished-at:
                 type: string
                 description: DateTime order was finished
                 example: "2022-01-01"
@@ -2784,22 +2810,22 @@ definitions:
                 type: string
                 description: Optional customer provided name
                 example: Fire risk for Lot2
-            ordered_at:
+            ordered-at:
                 type: string
                 description: DateTime order was placed
                 example: "2022-01-01"
-            service_id:
+            service-id:
                 type: string
                 description: ID of ordered service
                 example: "2022-01-01"
-            started_at:
+            started-at:
                 type: string
                 description: DateTime processing of order started
                 example: "2022-01-01"
             status:
                 type: string
                 description: Order status
-                example: error
+                example: unknown
                 enum:
                     - unknown
                     - pending
@@ -2809,8 +2835,8 @@ definitions:
                     - failed
                     - error
         example:
-            account_id: "2022-01-01"
-            finished_at: "2022-01-01"
+            account-id: "2022-01-01"
+            finished-at: "2022-01-01"
             id: cayp:order:123e4567-e89b-12d3-a456-426614174000
             links:
                 describedBy:
@@ -2818,10 +2844,10 @@ definitions:
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
             name: Fire risk for Lot2
-            ordered_at: "2022-01-01"
-            service_id: "2022-01-01"
-            started_at: "2022-01-01"
-            status: pending
+            ordered-at: "2022-01-01"
+            service-id: "2022-01-01"
+            started-at: "2022-01-01"
+            status: failed
         required:
             - links
     OrderListNotImplementedResponseBody:
@@ -2832,10 +2858,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Dolorem consequatur alias atque amet.
+                example: Occaecati est mollitia voluptatem labore.
         description: Method is not yet implemented
         example:
-            message: Dignissimos praesentium corrupti ut perferendis.
+            message: Aliquid numquam qui consectetur debitis.
         required:
             - message
     OrderListResponseBody:
@@ -2855,8 +2881,8 @@ definitions:
                     $ref: '#/definitions/OrderListItemResponseBody'
                 description: Orders
                 example:
-                    - account_id: "2022-01-01"
-                      finished_at: "2022-01-01"
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                       links:
                         describedBy:
@@ -2864,12 +2890,12 @@ definitions:
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for Lot2
-                      ordered_at: "2022-01-01"
-                      service_id: "2022-01-01"
-                      started_at: "2022-01-01"
-                      status: pending
-                    - account_id: "2022-01-01"
-                      finished_at: "2022-01-01"
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
                       id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                       links:
                         describedBy:
@@ -2877,10 +2903,36 @@ definitions:
                             type: application/openapi3+json
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for Lot2
-                      ordered_at: "2022-01-01"
-                      service_id: "2022-01-01"
-                      started_at: "2022-01-01"
-                      status: pending
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
+                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                      name: Fire risk for Lot2
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
+                    - account-id: "2022-01-01"
+                      finished-at: "2022-01-01"
+                      id: cayp:order:123e4567-e89b-12d3-a456-426614174000
+                      links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                      name: Fire risk for Lot2
+                      ordered-at: "2022-01-01"
+                      service-id: "2022-01-01"
+                      started-at: "2022-01-01"
+                      status: unknown
         description: ListResponseBody result type (default view)
         example:
             at-time: "1996-12-19T16:39:57-08:00"
@@ -2889,8 +2941,8 @@ definitions:
                 next: https://api.com/foo/...
                 self: https://api.com/foo/...
             orders:
-                - account_id: "2022-01-01"
-                  finished_at: "2022-01-01"
+                - account-id: "2022-01-01"
+                  finished-at: "2022-01-01"
                   id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                   links:
                     describedBy:
@@ -2898,12 +2950,12 @@ definitions:
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
                   name: Fire risk for Lot2
-                  ordered_at: "2022-01-01"
-                  service_id: "2022-01-01"
-                  started_at: "2022-01-01"
-                  status: pending
-                - account_id: "2022-01-01"
-                  finished_at: "2022-01-01"
+                  ordered-at: "2022-01-01"
+                  service-id: "2022-01-01"
+                  started-at: "2022-01-01"
+                  status: unknown
+                - account-id: "2022-01-01"
+                  finished-at: "2022-01-01"
                   id: cayp:order:123e4567-e89b-12d3-a456-426614174000
                   links:
                     describedBy:
@@ -2911,36 +2963,10 @@ definitions:
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
                   name: Fire risk for Lot2
-                  ordered_at: "2022-01-01"
-                  service_id: "2022-01-01"
-                  started_at: "2022-01-01"
-                  status: pending
-                - account_id: "2022-01-01"
-                  finished_at: "2022-01-01"
-                  id: cayp:order:123e4567-e89b-12d3-a456-426614174000
-                  links:
-                    describedBy:
-                        href: https://api.com/swagger/...
-                        type: application/openapi3+json
-                    self: Ipsam deleniti magnam nihil et.
-                  name: Fire risk for Lot2
-                  ordered_at: "2022-01-01"
-                  service_id: "2022-01-01"
-                  started_at: "2022-01-01"
-                  status: pending
-                - account_id: "2022-01-01"
-                  finished_at: "2022-01-01"
-                  id: cayp:order:123e4567-e89b-12d3-a456-426614174000
-                  links:
-                    describedBy:
-                        href: https://api.com/swagger/...
-                        type: application/openapi3+json
-                    self: Ipsam deleniti magnam nihil et.
-                  name: Fire risk for Lot2
-                  ordered_at: "2022-01-01"
-                  service_id: "2022-01-01"
-                  started_at: "2022-01-01"
-                  status: pending
+                  ordered-at: "2022-01-01"
+                  service-id: "2022-01-01"
+                  started-at: "2022-01-01"
+                  status: unknown
         required:
             - orders
             - at-time
@@ -2953,10 +2979,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Libero asperiores consequuntur alias.
+                example: Quibusdam laudantium et ducimus suscipit possimus doloribus.
         description: Request contained problematic argument
         example:
-            message: Eius consequatur aut iusto sint et est.
+            message: Et deserunt sit fugiat beatae eaque perferendis.
         required:
             - message
     OrderReadInvalidScopesResponseBody:
@@ -2972,11 +2998,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Aut rerum.
+                example: Magnam aut.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Alias occaecati excepturi qui iure nihil.
+            message: Quo similique at dolor.
         required:
             - message
     OrderReadNotFoundResponseBody:
@@ -3007,10 +3033,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Accusamus velit dolorem enim.
+                example: Et eveniet.
         description: Method is not yet implemented
         example:
-            message: Nemo libero sunt.
+            message: Tempora sint est.
         required:
             - message
     OrderReadResponseBody:
@@ -3019,7 +3045,7 @@ definitions:
         properties:
             account:
                 $ref: '#/definitions/RefTResponseBody'
-            finished_at:
+            finished-at:
                 type: string
                 description: DateTime order processing finished
                 example: "2023-03-17T04:57:00Z"
@@ -3034,7 +3060,7 @@ definitions:
                 type: string
                 description: Optional customer provided name
                 example: Fire risk for Lot2
-            ordered_at:
+            ordered-at:
                 type: string
                 description: DateTime order was placed
                 example: "2023-03-17T04:57:00Z"
@@ -3060,14 +3086,14 @@ definitions:
                       size: 1234963
             service:
                 $ref: '#/definitions/RefTResponseBody'
-            started_at:
+            started-at:
                 type: string
                 description: DateTime order processing started
                 example: "2023-03-17T04:57:00Z"
             status:
                 type: string
                 description: Order status
-                example: scheduled
+                example: unknown
                 enum:
                     - unknown
                     - pending
@@ -3079,13 +3105,13 @@ definitions:
         description: ReadResponseBody result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            finished_at: "2023-03-17T04:57:00Z"
+            finished-at: "2023-03-17T04:57:00Z"
             id: 123e4567-e89b-12d3-a456-426614174000
             links:
                 describedBy:
@@ -3093,7 +3119,7 @@ definitions:
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
             name: Fire risk for Lot2
-            ordered_at: "2023-03-17T04:57:00Z"
+            ordered-at: "2023-03-17T04:57:00Z"
             parameters:
                 - name: region
                   value: Upper Valley
@@ -3105,14 +3131,14 @@ definitions:
                   name: fire risk map
                   size: 1234963
             service:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
                         type: application/openapi3+json
                     self: Ipsam deleniti magnam nihil et.
-            started_at: "2023-03-17T04:57:00Z"
-            status: executing
+            started-at: "2023-03-17T04:57:00Z"
+            status: failed
         required:
             - id
             - parameters
@@ -3122,76 +3148,76 @@ definitions:
         properties:
             constant:
                 type: boolean
-                example: false
+                example: true
             default:
                 type: string
-                example: At est alias.
+                example: Facere deserunt.
             description:
                 type: string
-                example: Non et nemo excepturi ex.
+                example: Ducimus autem est illo dolor nostrum eveniet.
             label:
                 type: string
-                example: Dolorem pariatur repudiandae excepturi commodi autem ad.
+                example: Vel quis rerum.
             name:
                 type: string
-                example: Aut accusantium quo suscipit ducimus fugiat.
+                example: Dolore et itaque non.
             optional:
                 type: boolean
-                example: false
+                example: true
             options:
                 type: array
                 items:
                     $ref: '#/definitions/ParameterOptT'
                 example:
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
-                    - description: Ut fuga ea sapiente quo quo.
-                      value: Repudiandae non corporis.
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
+                    - description: Cupiditate est omnis quo aut neque numquam.
+                      value: Autem dolore eos rerum tempora optio.
             type:
                 type: string
-                example: Doloremque dolorem facilis et.
+                example: Molestiae perferendis quis a aut nihil.
             unit:
                 type: string
-                example: Corrupti laborum qui incidunt.
+                example: Eius similique.
         example:
-            constant: false
-            default: Autem est.
-            description: Non ut vel quis.
-            label: Non sapiente labore iste.
-            name: Perferendis tempora ipsa.
+            constant: true
+            default: Vel odio quibusdam iusto.
+            description: Officiis quo vitae aspernatur.
+            label: Est accusantium ipsa et voluptatem assumenda.
+            name: Qui est.
             optional: true
             options:
-                - description: Ut fuga ea sapiente quo quo.
-                  value: Repudiandae non corporis.
-                - description: Ut fuga ea sapiente quo quo.
-                  value: Repudiandae non corporis.
-                - description: Ut fuga ea sapiente quo quo.
-                  value: Repudiandae non corporis.
-            type: Ab aspernatur architecto ullam dolore et.
-            unit: Voluptates molestiae perferendis quis a aut.
+                - description: Cupiditate est omnis quo aut neque numquam.
+                  value: Autem dolore eos rerum tempora optio.
+                - description: Cupiditate est omnis quo aut neque numquam.
+                  value: Autem dolore eos rerum tempora optio.
+                - description: Cupiditate est omnis quo aut neque numquam.
+                  value: Autem dolore eos rerum tempora optio.
+            type: Reiciendis voluptatem cum.
+            unit: Sed rerum.
     ParameterDefTResponseBody:
         title: ParameterDefTResponseBody
         type: object
         properties:
             constant:
                 type: boolean
-                example: false
+                example: true
             default:
                 type: string
-                example: Quasi quia ducimus culpa.
+                example: Odit autem blanditiis.
             description:
                 type: string
-                example: Quas autem ad architecto.
+                example: Repellat doloremque.
             label:
                 type: string
-                example: Ex tempora omnis ratione.
+                example: Quis sunt libero et.
             name:
                 type: string
-                example: Non et.
+                example: Dignissimos tempora.
             optional:
                 type: boolean
                 example: false
@@ -3200,84 +3226,88 @@ definitions:
                 items:
                     $ref: '#/definitions/ParameterOptTResponseBody'
                 example:
-                    - description: Error fugit quos ab et sed.
-                      value: Est hic.
-                    - description: Error fugit quos ab et sed.
-                      value: Est hic.
-                    - description: Error fugit quos ab et sed.
-                      value: Est hic.
+                    - description: Vero quis fugiat ducimus nostrum.
+                      value: Esse dolorem laudantium nisi laboriosam dolores.
+                    - description: Vero quis fugiat ducimus nostrum.
+                      value: Esse dolorem laudantium nisi laboriosam dolores.
+                    - description: Vero quis fugiat ducimus nostrum.
+                      value: Esse dolorem laudantium nisi laboriosam dolores.
             type:
                 type: string
-                example: Illum ducimus explicabo aspernatur.
+                example: Aperiam reiciendis earum minima laborum dicta dolorum.
             unit:
                 type: string
-                example: Omnis saepe rem eius nulla.
+                example: Dolor porro est inventore eius aperiam tempora.
         example:
-            constant: true
-            default: Reiciendis earum minima laborum.
-            description: Reiciendis atque id vel voluptas.
-            label: Qui maiores reprehenderit fuga harum impedit.
-            name: Ut consequatur pariatur rerum est et.
+            constant: false
+            default: Molestiae perferendis.
+            description: Expedita molestiae cupiditate qui ab cupiditate.
+            label: Fuga esse explicabo id.
+            name: Voluptatem cupiditate doloribus iste.
             optional: true
             options:
-                - description: Error fugit quos ab et sed.
-                  value: Est hic.
-                - description: Error fugit quos ab et sed.
-                  value: Est hic.
-            type: Voluptatibus doloremque ea molestiae ratione commodi.
-            unit: Autem dignissimos tempora suscipit quis sunt libero.
+                - description: Vero quis fugiat ducimus nostrum.
+                  value: Esse dolorem laudantium nisi laboriosam dolores.
+                - description: Vero quis fugiat ducimus nostrum.
+                  value: Esse dolorem laudantium nisi laboriosam dolores.
+                - description: Vero quis fugiat ducimus nostrum.
+                  value: Esse dolorem laudantium nisi laboriosam dolores.
+                - description: Vero quis fugiat ducimus nostrum.
+                  value: Esse dolorem laudantium nisi laboriosam dolores.
+            type: Perspiciatis quidem.
+            unit: Corrupti iusto ipsum modi.
     ParameterOptT:
         title: ParameterOptT
         type: object
         properties:
             description:
                 type: string
-                example: Quos inventore velit.
+                example: Laudantium provident.
             value:
                 type: string
-                example: Eaque explicabo.
+                example: Voluptate dicta architecto similique.
         example:
-            description: Alias sit qui occaecati id quis.
-            value: Mollitia velit.
+            description: Quis fuga.
+            value: Dolorum quod ducimus vero.
     ParameterOptTResponseBody:
         title: ParameterOptTResponseBody
         type: object
         properties:
             description:
                 type: string
-                example: Voluptate explicabo blanditiis eum.
+                example: Incidunt reprehenderit quaerat laudantium quo aut qui.
             value:
                 type: string
-                example: Quidem velit et eveniet.
+                example: Repudiandae et sed consequatur et.
         example:
-            description: Natus sit.
-            value: Omnis dolor dicta quo.
+            description: Qui et in.
+            value: Sed neque.
     ParameterT:
         title: ParameterT
         type: object
         properties:
             name:
                 type: string
-                example: Dicta omnis voluptatem deleniti ea.
+                example: Ut veniam sunt.
             value:
                 type: string
-                example: Adipisci eius facilis est praesentium.
+                example: Sit exercitationem et autem aut aut.
         example:
-            name: Blanditiis voluptas.
-            value: Ad quisquam voluptas.
+            name: Doloribus dolor sint.
+            value: Distinctio voluptatem culpa aut ducimus eos praesentium.
     ParameterTRequestBodyRequestBody:
         title: ParameterTRequestBodyRequestBody
         type: object
         properties:
             name:
                 type: string
-                example: Est quibusdam molestiae perferendis suscipit sit tempore.
+                example: Autem vel vel qui et fuga nostrum.
             value:
                 type: string
-                example: Dolorum perspiciatis non optio molestiae.
+                example: Aut quam illo aut.
         example:
-            name: Non quae consequatur quo.
-            value: Rerum dolorem.
+            name: Suscipit ut non quo quos.
+            value: Enim et est sed debitis ut.
     ParameterTResponseBody:
         title: ParameterTResponseBody
         type: object
@@ -3316,11 +3346,11 @@ definitions:
         example:
             id: Iusto ad sunt dolor tempore.
             links:
-                data: Quia ut pariatur.
+                data: Laboriosam sint sit cumque.
                 describedBy:
                     href: https://api.com/swagger/...
                     type: application/openapi3+json
-                self: Sit cumque corrupti excepturi.
+                self: Necessitatibus perferendis quo omnis voluptas.
             mime-type: Voluptate sit magnam blanditiis veritatis atque dolore.
             name: Quis nisi quia molestiae.
             size: 3657651879059651523
@@ -3331,12 +3361,12 @@ definitions:
         properties:
             id:
                 type: string
-                example: http://hauck.info/brett.kuvalis
+                example: http://connmurphy.biz/edmund
                 format: uri
             links:
                 $ref: '#/definitions/SelfTResponseBody'
         example:
-            id: http://legroszieme.org/kailyn
+            id: http://towne.info/nathen_reichel
             links:
                 describedBy:
                     href: https://api.com/swagger/...
@@ -3349,15 +3379,15 @@ definitions:
             title:
                 type: string
                 description: Title of reference document
-                example: Fuga eligendi hic nisi magni illum.
+                example: Laborum et qui autem placeat fugiat doloremque.
             uri:
                 type: string
                 description: Link to document
-                example: http://westsimonis.org/monty_feil
+                example: http://medhurst.org/julia.reichert
                 format: uri
         example:
-            title: Totam suscipit repellat.
-            uri: http://murray.info/river
+            title: Odit similique occaecati quia laudantium.
+            uri: http://ullrich.name/edna.runolfsson
     ResourceMemoryTRequestBodyRequestBody:
         title: ResourceMemoryTRequestBodyRequestBody
         type: object
@@ -3365,15 +3395,17 @@ definitions:
             limit:
                 type: string
                 description: minimal requirements [system limit]
-                example: Est dolores.
+                example: Ut sint dolorum qui corrupti.
             request:
                 type: string
                 description: minimal requirements [0]
-                example: Rerum officia et ut nam.
-        description: "See \nand https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/ for units"
+                example: Inventore at dolorem.
+        description: |-
+            See
+            and https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/ for units
         example:
-            limit: Reprehenderit quisquam dolorum corrupti nesciunt.
-            request: Excepturi odio laudantium nihil repudiandae aut ut.
+            limit: Dolorem pariatur repudiandae excepturi commodi autem ad.
+            request: Aut accusantium quo suscipit ducimus fugiat.
     SelfTResponseBody:
         title: SelfTResponseBody
         type: object
@@ -3382,12 +3414,12 @@ definitions:
                 $ref: '#/definitions/DescribedByTResponseBody'
             self:
                 type: string
-                example: Repellat ea repellat tempore.
+                example: Saepe minima non qui quos.
         example:
             describedBy:
                 href: https://api.com/swagger/...
                 type: application/openapi3+json
-            self: At vel reprehenderit doloribus.
+            self: Sit repellat nemo recusandae asperiores dolorum voluptas.
     SelfWithDataTResponseBody:
         title: SelfWithDataTResponseBody
         type: object
@@ -3406,8 +3438,8 @@ definitions:
                 href: https://api.com/swagger/...
                 type: application/openapi3+json
             self: Voluptate ut.
-    ServiceCreateAlreadyCreatedResponseBody:
-        title: ServiceCreateAlreadyCreatedResponseBody
+    ServiceCreateServiceAlreadyCreatedResponseBody:
+        title: ServiceCreateServiceAlreadyCreatedResponseBody
         type: object
         properties:
             id:
@@ -3426,46 +3458,46 @@ definitions:
         required:
             - message
             - id
-    ServiceCreateBadRequestResponseBody:
-        title: ServiceCreateBadRequestResponseBody
+    ServiceCreateServiceBadRequestResponseBody:
+        title: ServiceCreateServiceBadRequestResponseBody
         type: object
         properties:
             message:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Quasi incidunt.
+                example: Sapiente quam occaecati sunt omnis.
         description: Request contained problematic argument
         example:
-            message: Quaerat laudantium quo aut qui adipisci.
+            message: In accusantium vel nesciunt voluptas hic.
         required:
             - message
-    ServiceCreateInvalidParameterResponseBody:
-        title: ServiceCreateInvalidParameterResponseBody
+    ServiceCreateServiceInvalidParameterResponseBody:
+        title: ServiceCreateServiceInvalidParameterResponseBody
         type: object
         properties:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Neque qui qui et in hic.
+                example: Ut perspiciatis laborum debitis et placeat quia.
             name:
                 type: string
                 description: name of parameter.
-                example: Voluptatem cupiditate doloribus iste.
+                example: Sit non in aperiam et.
             value:
                 type: string
                 description: provided parameter value.
-                example: Fuga esse explicabo id.
+                example: Porro quo vitae.
         description: Invalide parameter value
         example:
-            message: Perspiciatis quidem.
-            name: Expedita molestiae cupiditate qui ab cupiditate.
-            value: Corrupti iusto ipsum modi.
+            message: Et optio eos dolore.
+            name: Ut quia temporibus temporibus.
+            value: Suscipit repellat vel architecto autem tempore eos.
         required:
             - name
             - message
-    ServiceCreateInvalidScopesResponseBody:
-        title: ServiceCreateInvalidScopesResponseBody
+    ServiceCreateServiceInvalidScopesResponseBody:
+        title: ServiceCreateServiceInvalidScopesResponseBody
         type: object
         properties:
             id:
@@ -3477,15 +3509,15 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Repellat doloremque.
+                example: In dolorum perspiciatis non optio molestiae at.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Dolor porro est inventore eius aperiam tempora.
+            message: Quae consequatur quo iste rerum dolorem.
         required:
             - message
-    ServiceCreateNotFoundResponseBody:
-        title: ServiceCreateNotFoundResponseBody
+    ServiceCreateServiceNotFoundResponseBody:
+        title: ServiceCreateServiceNotFoundResponseBody
         type: object
         properties:
             id:
@@ -3504,33 +3536,33 @@ definitions:
         required:
             - message
             - id
-    ServiceCreateNotImplementedResponseBody:
-        title: ServiceCreateNotImplementedResponseBody
+    ServiceCreateServiceNotImplementedResponseBody:
+        title: ServiceCreateServiceNotImplementedResponseBody
         type: object
         properties:
             message:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Dolorem nemo.
+                example: Non fuga eligendi hic.
         description: Method is not yet implemented
         example:
-            message: Autem blanditiis ratione repudiandae et sed consequatur.
+            message: Magni illum et dolorum qui est.
         required:
             - message
-    ServiceCreateRequestBody:
-        title: ServiceCreateRequestBody
+    ServiceCreateServiceRequestBody:
+        title: ServiceCreateServiceRequestBody
         type: object
         properties:
             account-id:
                 type: string
                 description: Reference to account revenues for this service should be credited to
-                example: cayp:account:acme
+                example: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
                 format: uri
             banner:
                 type: string
                 description: Link to banner image oprionally used for this service
-                example: http://reichertflatley.net/adella.kuhic
+                example: http://renner.info/michel
                 format: uri
             description:
                 type: string
@@ -3542,10 +3574,12 @@ definitions:
                     $ref: '#/definitions/ParameterTRequestBodyRequestBody'
                 description: Optional provider provided meta tags
                 example:
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
             name:
                 type: string
                 description: Optional provider provided name
@@ -3567,11 +3601,11 @@ definitions:
             policy-id:
                 type: string
                 description: Reference to policy controlling access
-                example: Incidunt iste ducimus facere sunt inventore.
+                example: Ipsa autem non sapiente labore iste voluptas.
             provider-id:
                 type: string
                 description: Reference to service provider
-                example: cayp:provider:acme
+                example: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
                 format: uri
             provider-ref:
                 type: string
@@ -3583,15 +3617,19 @@ definitions:
                     $ref: '#/definitions/ReferenceTRequestBodyRequestBody'
                 description: Reference to account revenues for this service should be credited to
                 example:
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
             tags:
                 type: array
                 items:
                     type: string
-                    example: Dolorem dolores ut sint dolorum qui corrupti.
+                    example: Aspernatur architecto.
                 description: Optional provider provided tags
                 example:
                     - tag1
@@ -3599,14 +3637,18 @@ definitions:
             workflow:
                 $ref: '#/definitions/WorkflowTRequestBodyRequestBody'
         example:
-            account-id: cayp:account:acme
-            banner: http://purdy.org/gaylord
+            account-id: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
+            banner: http://brakusbuckridge.name/jaylin
             description: This service ...
             metadata:
-                - name: Et ut et.
-                  value: Possimus et id harum iste dolores esse.
-                - name: Et ut et.
-                  value: Possimus et id harum iste dolores esse.
+                - name: Voluptatum qui error ipsam.
+                  value: Hic voluptates error fugit.
+                - name: Voluptatum qui error ipsam.
+                  value: Hic voluptates error fugit.
+                - name: Voluptatum qui error ipsam.
+                  value: Hic voluptates error fugit.
+                - name: Voluptatum qui error ipsam.
+                  value: Hic voluptates error fugit.
             name: Fire risk for Lot2
             parameters:
                 - description: The name of the region as according to ...
@@ -3617,45 +3659,39 @@ definitions:
                   name: threshold
                   type: float
                   unit: m
-            policy-id: Aliquid sed rerum consequuntur tempora.
-            provider-id: cayp:provider:acme
+            policy-id: Aut minus ut ullam.
+            provider-id: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
             provider-ref: service_foo_patch_1
             references:
-                - title: Minus sed sit expedita enim.
-                  uri: http://doylemarks.org/krystal_douglas
-                - title: Minus sed sit expedita enim.
-                  uri: http://doylemarks.org/krystal_douglas
-                - title: Minus sed sit expedita enim.
-                  uri: http://doylemarks.org/krystal_douglas
-                - title: Minus sed sit expedita enim.
-                  uri: http://doylemarks.org/krystal_douglas
+                - title: Et sed.
+                  uri: http://howe.com/jeremie_gutkowski
+                - title: Et sed.
+                  uri: http://howe.com/jeremie_gutkowski
             tags:
                 - tag1
                 - tag2
             workflow:
-                argo: Temporibus eum quo corporis qui molestiae.
+                argo: Fugiat repudiandae mollitia aliquam labore.
                 basic:
                     command:
-                        - Quis fugiat.
-                        - Nostrum ex.
-                        - Laborum qui.
-                        - Rem assumenda sit magnam accusamus enim.
+                        - Et voluptas vitae qui commodi nemo occaecati.
+                        - Et consectetur ex.
                     cpu:
-                        limit: Quaerat nulla iure illum eum.
-                        request: Est iusto eum rerum dolores sed.
-                    image: Esse dolorem laudantium nisi laboriosam dolores.
+                        limit: At eligendi.
+                        request: Doloribus optio laborum incidunt nihil molestias.
+                    image: Qui omnis minus illum nisi dolorum.
                     memory:
-                        limit: Quaerat nulla iure illum eum.
-                        request: Est iusto eum rerum dolores sed.
-                opts: Minus dignissimos fuga facere minus.
-                type: Illo odit et.
+                        limit: At eligendi.
+                        request: Doloribus optio laborum incidunt nihil molestias.
+                opts: Molestiae minima sint.
+                type: Veritatis dolorum.
         required:
             - description
             - provider-id
             - account-id
             - workflow
             - parameters
-    ServiceCreateResponseBody:
+    ServiceCreateServiceResponseBody:
         title: 'Mediatype identifier: application/vnd.cayp.service.status; view=default'
         type: object
         properties:
@@ -3677,14 +3713,12 @@ definitions:
                     $ref: '#/definitions/ParameterTResponseBody'
                 description: Optional provider provided meta tags
                 example:
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
             name:
                 type: string
                 description: Optional provider provided name
@@ -3709,15 +3743,15 @@ definitions:
                 type: array
                 items:
                     type: string
-                    example: Distinctio voluptatem culpa aut ducimus eos praesentium.
+                    example: Reiciendis atque id vel voluptas.
                 description: Optional provider provided tags
                 example:
                     - tag1
                     - tag2
-        description: CreateResponseBody result type (default view)
+        description: create_service_response_body result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -3731,14 +3765,14 @@ definitions:
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
             metadata:
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
             name: Fire risk for Lot2
             parameters:
                 - description: The name of the region as according to ...
@@ -3750,7 +3784,7 @@ definitions:
                   type: float
                   unit: m
             provider:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -3771,10 +3805,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Commodi dolorem provident ab et.
+                example: Accusamus maxime.
         description: Request contained problematic argument
         example:
-            message: Nostrum reprehenderit quia.
+            message: Iste iusto.
         required:
             - message
     ServiceDeleteInvalidScopesResponseBody:
@@ -3790,11 +3824,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Omnis et.
+                example: Earum aliquid quia repellat ipsum.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Exercitationem blanditiis omnis magnam repellat impedit ullam.
+            message: Adipisci optio aut officia.
         required:
             - message
     ServiceDeleteNotImplementedResponseBody:
@@ -3805,10 +3839,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Cupiditate incidunt eius voluptatem distinctio.
+                example: Iure consequuntur commodi.
         description: Method is not yet implemented
         example:
-            message: Quas sed magni aliquam in voluptatem doloremque.
+            message: Commodi optio et magni reprehenderit reprehenderit.
         required:
             - message
     ServiceListBadRequestResponseBody:
@@ -3819,10 +3853,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Id ratione.
+                example: Quasi quia ducimus culpa.
         description: Request contained problematic argument
         example:
-            message: Quaerat placeat molestias.
+            message: Quidem velit et eveniet.
         required:
             - message
     ServiceListInvalidParameterResponseBody:
@@ -3832,20 +3866,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Quaerat et aut velit in.
+                example: Voluptate explicabo blanditiis eum.
             name:
                 type: string
                 description: name of parameter.
-                example: Aut quidem et et et.
+                example: Omnis dolor dicta quo.
             value:
                 type: string
                 description: provided parameter value.
-                example: Recusandae et voluptatibus.
+                example: Natus sit.
         description: Invalide parameter value
         example:
-            message: Ut veniam sunt.
-            name: Sit exercitationem et autem aut aut.
-            value: Doloribus dolor sint.
+            message: Ex ut consequatur pariatur rerum est et.
+            name: Qui maiores reprehenderit fuga harum impedit.
+            value: Voluptatibus doloremque ea molestiae ratione commodi.
         required:
             - name
             - message
@@ -3862,11 +3896,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Quae nihil.
+                example: Et qui ex tempora omnis ratione fuga.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Qui sint hic.
+            message: Ducimus explicabo aspernatur autem quas autem ad.
         required:
             - message
     ServiceListItemResponseBody:
@@ -3899,7 +3933,7 @@ definitions:
                 self: Ipsam deleniti magnam nihil et.
             name: Fire risk for region
             provider:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -3915,10 +3949,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Hic eos voluptatem quia dignissimos blanditiis pariatur.
+                example: Laboriosam omnis.
         description: Method is not yet implemented
         example:
-            message: Tempora veniam excepturi repellat tempore debitis.
+            message: Rem eius nulla similique officiis.
         required:
             - message
     ServiceListResponseBody:
@@ -3947,7 +3981,7 @@ definitions:
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for region
                       provider:
-                        id: http://klingdicki.info/creola
+                        id: http://bednar.name/rupert_hickle
                         links:
                             describedBy:
                                 href: https://api.com/swagger/...
@@ -3962,7 +3996,37 @@ definitions:
                         self: Ipsam deleniti magnam nihil et.
                       name: Fire risk for region
                       provider:
-                        id: http://klingdicki.info/creola
+                        id: http://bednar.name/rupert_hickle
+                        links:
+                            describedBy:
+                                href: https://api.com/swagger/...
+                                type: application/openapi3+json
+                            self: Ipsam deleniti magnam nihil et.
+                    - description: Some lengthy description of fire risk
+                      id: service:acme:oracle
+                      links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                      name: Fire risk for region
+                      provider:
+                        id: http://bednar.name/rupert_hickle
+                        links:
+                            describedBy:
+                                href: https://api.com/swagger/...
+                                type: application/openapi3+json
+                            self: Ipsam deleniti magnam nihil et.
+                    - description: Some lengthy description of fire risk
+                      id: service:acme:oracle
+                      links:
+                        describedBy:
+                            href: https://api.com/swagger/...
+                            type: application/openapi3+json
+                        self: Ipsam deleniti magnam nihil et.
+                      name: Fire risk for region
+                      provider:
+                        id: http://bednar.name/rupert_hickle
                         links:
                             describedBy:
                                 href: https://api.com/swagger/...
@@ -3985,7 +4049,7 @@ definitions:
                     self: Ipsam deleniti magnam nihil et.
                   name: Fire risk for region
                   provider:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
@@ -4000,7 +4064,7 @@ definitions:
                     self: Ipsam deleniti magnam nihil et.
                   name: Fire risk for region
                   provider:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
@@ -4015,7 +4079,7 @@ definitions:
                     self: Ipsam deleniti magnam nihil et.
                   name: Fire risk for region
                   provider:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
@@ -4030,7 +4094,7 @@ definitions:
                     self: Ipsam deleniti magnam nihil et.
                   name: Fire risk for region
                   provider:
-                    id: http://klingdicki.info/creola
+                    id: http://bednar.name/rupert_hickle
                     links:
                         describedBy:
                             href: https://api.com/swagger/...
@@ -4048,10 +4112,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Corporis laudantium qui aliquid sit.
+                example: Vel a aut temporibus.
         description: Request contained problematic argument
         example:
-            message: Id accusamus commodi dolores repellat reiciendis.
+            message: Dolores quod ipsa.
         required:
             - message
     ServiceReadInvalidScopesResponseBody:
@@ -4067,11 +4131,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Fugit repellendus.
+                example: Facere quas.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Et ut dolores expedita voluptatibus qui.
+            message: Laborum autem delectus.
         required:
             - message
     ServiceReadNotFoundResponseBody:
@@ -4102,10 +4166,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Exercitationem sunt ut molestiae quia voluptatem.
+                example: Quo et aut quas.
         description: Method is not yet implemented
         example:
-            message: Provident minus ratione quas molestiae non qui.
+            message: Animi minus sapiente incidunt quas.
         required:
             - message
     ServiceReadResponseBody:
@@ -4130,12 +4194,14 @@ definitions:
                     $ref: '#/definitions/ParameterTResponseBody'
                 description: Optional provider provided meta tags
                 example:
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
             name:
                 type: string
                 description: Optional provider provided name
@@ -4160,7 +4226,7 @@ definitions:
                 type: array
                 items:
                     type: string
-                    example: Vel odio quibusdam iusto.
+                    example: Ad alias unde sapiente.
                 description: Optional provider provided tags
                 example:
                     - tag1
@@ -4168,7 +4234,7 @@ definitions:
         description: ReadResponseBody result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -4182,14 +4248,14 @@ definitions:
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
             metadata:
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
             name: Fire risk for Lot2
             parameters:
                 - description: The name of the region as according to ...
@@ -4201,7 +4267,7 @@ definitions:
                   type: float
                   unit: m
             provider:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -4222,10 +4288,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Having problem with some of the supplied information
-                example: Quas id animi minus sapiente incidunt quas.
+                example: Et iusto et magni vitae ut.
         description: Request contained problematic argument
         example:
-            message: Vel a aut temporibus.
+            message: Minus et ad eius commodi non pariatur.
         required:
             - message
     ServiceUpdateInvalidParameterResponseBody:
@@ -4235,20 +4301,20 @@ definitions:
             message:
                 type: string
                 description: message describing expected type or pattern.
-                example: Dolores quod ipsa.
+                example: Repellendus vel nulla repellendus eum neque autem.
             name:
                 type: string
                 description: name of parameter.
-                example: Soluta est iure accusamus tenetur dolorem.
+                example: Maxime hic soluta quis reprehenderit dignissimos.
             value:
                 type: string
                 description: provided parameter value.
-                example: Assumenda dolore.
+                example: Accusamus aut sint et ut molestias expedita.
         description: Invalide parameter value
         example:
-            message: Assumenda dolorem eveniet illo repellendus atque ad.
-            name: Adipisci atque itaque aut nostrum maiores.
-            value: Placeat tenetur qui libero et iusto et.
+            message: Recusandae rerum dolor eum vitae esse.
+            name: Eligendi est.
+            value: Sit quibusdam illo dignissimos est autem id.
         required:
             - name
             - message
@@ -4265,11 +4331,11 @@ definitions:
                 type: string
                 description: Message of error
                 default: Not authorized to perform this action
-                example: Minus ut.
+                example: Animi assumenda dolorem.
         description: Token scopes are invalid
         example:
             id: 123e4567-e89b-12d3-a456-426614174000
-            message: Quisquam ad alias unde.
+            message: Illo repellendus atque ad doloremque adipisci.
         required:
             - message
     ServiceUpdateNotFoundResponseBody:
@@ -4300,10 +4366,10 @@ definitions:
                 type: string
                 description: Information message
                 default: Method not implemented
-                example: Ea asperiores fugiat facere.
+                example: Itaque aut.
         description: Method is not yet implemented
         example:
-            message: Facilis laborum autem delectus repellat quo et.
+            message: Maiores deleniti placeat tenetur qui.
         required:
             - message
     ServiceUpdateRequestBody:
@@ -4313,12 +4379,12 @@ definitions:
             account-id:
                 type: string
                 description: Reference to account revenues for this service should be credited to
-                example: cayp:account:acme
+                example: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
                 format: uri
             banner:
                 type: string
                 description: Link to banner image oprionally used for this service
-                example: http://nitzschewitting.com/irma
+                example: http://hesseljakubowski.com/alexa
                 format: uri
             description:
                 type: string
@@ -4330,12 +4396,10 @@ definitions:
                     $ref: '#/definitions/ParameterTRequestBodyRequestBody'
                 description: Optional provider provided meta tags
                 example:
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
-                    - name: Et ut et.
-                      value: Possimus et id harum iste dolores esse.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
+                    - name: Voluptatum qui error ipsam.
+                      value: Hic voluptates error fugit.
             name:
                 type: string
                 description: Optional provider provided name
@@ -4357,11 +4421,11 @@ definitions:
             policy-id:
                 type: string
                 description: Reference to policy controlling access
-                example: Illo dignissimos.
+                example: Quis laborum mollitia animi sapiente eos libero.
             provider-id:
                 type: string
                 description: Reference to service provider
-                example: cayp:provider:acme
+                example: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
                 format: uri
             provider-ref:
                 type: string
@@ -4373,19 +4437,15 @@ definitions:
                     $ref: '#/definitions/ReferenceTRequestBodyRequestBody'
                 description: Reference to account revenues for this service should be credited to
                 example:
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
-                    - title: Minus sed sit expedita enim.
-                      uri: http://doylemarks.org/krystal_douglas
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
+                    - title: Et sed.
+                      uri: http://howe.com/jeremie_gutkowski
             tags:
                 type: array
                 items:
                     type: string
-                    example: Autem id dolorum sed voluptatem.
+                    example: Quis delectus omnis.
                 description: Optional provider provided tags
                 example:
                     - tag1
@@ -4393,16 +4453,14 @@ definitions:
             workflow:
                 $ref: '#/definitions/WorkflowTRequestBodyRequestBody'
         example:
-            account-id: cayp:account:acme
-            banner: http://beatty.com/vicenta
+            account-id: urn:ivcap:account:0f0e3f57-80f7-4899-9b69-459af2efd789
+            banner: http://erdmansanford.org/xzavier.larson
             description: This service ...
             metadata:
-                - name: Et ut et.
-                  value: Possimus et id harum iste dolores esse.
-                - name: Et ut et.
-                  value: Possimus et id harum iste dolores esse.
-                - name: Et ut et.
-                  value: Possimus et id harum iste dolores esse.
+                - name: Voluptatum qui error ipsam.
+                  value: Hic voluptates error fugit.
+                - name: Voluptatum qui error ipsam.
+                  value: Hic voluptates error fugit.
             name: Fire risk for Lot2
             parameters:
                 - description: The name of the region as according to ...
@@ -4413,34 +4471,32 @@ definitions:
                   name: threshold
                   type: float
                   unit: m
-            policy-id: Animi sapiente eos libero mollitia quis.
-            provider-id: cayp:provider:acme
+            policy-id: Consequatur qui voluptatem.
+            provider-id: urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789
             provider-ref: service_foo_patch_1
             references:
-                - title: Minus sed sit expedita enim.
-                  uri: http://doylemarks.org/krystal_douglas
-                - title: Minus sed sit expedita enim.
-                  uri: http://doylemarks.org/krystal_douglas
+                - title: Et sed.
+                  uri: http://howe.com/jeremie_gutkowski
+                - title: Et sed.
+                  uri: http://howe.com/jeremie_gutkowski
             tags:
                 - tag1
                 - tag2
             workflow:
-                argo: Temporibus eum quo corporis qui molestiae.
+                argo: Fugiat repudiandae mollitia aliquam labore.
                 basic:
                     command:
-                        - Quis fugiat.
-                        - Nostrum ex.
-                        - Laborum qui.
-                        - Rem assumenda sit magnam accusamus enim.
+                        - Et voluptas vitae qui commodi nemo occaecati.
+                        - Et consectetur ex.
                     cpu:
-                        limit: Quaerat nulla iure illum eum.
-                        request: Est iusto eum rerum dolores sed.
-                    image: Esse dolorem laudantium nisi laboriosam dolores.
+                        limit: At eligendi.
+                        request: Doloribus optio laborum incidunt nihil molestias.
+                    image: Qui omnis minus illum nisi dolorum.
                     memory:
-                        limit: Quaerat nulla iure illum eum.
-                        request: Est iusto eum rerum dolores sed.
-                opts: Minus dignissimos fuga facere minus.
-                type: Illo odit et.
+                        limit: At eligendi.
+                        request: Doloribus optio laborum incidunt nihil molestias.
+                opts: Molestiae minima sint.
+                type: Veritatis dolorum.
         required:
             - description
             - provider-id
@@ -4469,10 +4525,14 @@ definitions:
                     $ref: '#/definitions/ParameterTResponseBody'
                 description: Optional provider provided meta tags
                 example:
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
-                    - name: Quia quis aut quia veniam est dignissimos.
-                      value: Rem incidunt dolorum vitae magni.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
+                    - name: Beatae qui repellendus molestias culpa aut.
+                      value: Quia quis aut quia veniam est dignissimos.
             name:
                 type: string
                 description: Optional provider provided name
@@ -4497,7 +4557,7 @@ definitions:
                 type: array
                 items:
                     type: string
-                    example: Nulla nostrum et deleniti.
+                    example: Soluta est iure accusamus tenetur dolorem.
                 description: Optional provider provided tags
                 example:
                     - tag1
@@ -4505,7 +4565,7 @@ definitions:
         description: UpdateResponseBody result type (default view)
         example:
             account:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -4519,14 +4579,14 @@ definitions:
                     type: application/openapi3+json
                 self: Ipsam deleniti magnam nihil et.
             metadata:
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
-                - name: Quia quis aut quia veniam est dignissimos.
-                  value: Rem incidunt dolorum vitae magni.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
+                - name: Beatae qui repellendus molestias culpa aut.
+                  value: Quia quis aut quia veniam est dignissimos.
             name: Fire risk for Lot2
             parameters:
                 - description: The name of the region as according to ...
@@ -4538,7 +4598,7 @@ definitions:
                   type: float
                   unit: m
             provider:
-                id: http://klingdicki.info/creola
+                id: http://bednar.name/rupert_hickle
                 links:
                     describedBy:
                         href: https://api.com/swagger/...
@@ -4558,40 +4618,38 @@ definitions:
             argo:
                 type: string
                 description: Defines the workflow using argo's WF schema
-                example: Totam earum aliquid aut cum numquam.
+                example: Cumque consequatur at est.
                 format: binary
             basic:
                 $ref: '#/definitions/BasicWorkflowOptsTRequestBodyRequestBody'
             opts:
                 type: string
                 description: Type specific options - left for backward compatibility, if possible use type specific elements
-                example: Rerum explicabo consequatur rerum veniam.
+                example: Praesentium eaque explicabo facilis quos.
                 format: binary
             type:
                 type: string
                 description: Type of workflow
-                example: Natus eligendi asperiores.
+                example: Totam earum aliquid aut cum numquam.
         description: |-
             Defines the workflow to use to execute this service. Currently supported 'types' are 'basic'
             	and 'argo'. In case of 'basic', use the 'basic' element for further parameters. In the current implementation
             	'opts' is expected to contain the same schema as 'basic'
         example:
-            argo: Quibusdam eius vel deleniti quaerat cupiditate.
+            argo: Alias sit qui occaecati id quis.
             basic:
                 command:
-                    - Quis fugiat.
-                    - Nostrum ex.
-                    - Laborum qui.
-                    - Rem assumenda sit magnam accusamus enim.
+                    - Et voluptas vitae qui commodi nemo occaecati.
+                    - Et consectetur ex.
                 cpu:
-                    limit: Quaerat nulla iure illum eum.
-                    request: Est iusto eum rerum dolores sed.
-                image: Esse dolorem laudantium nisi laboriosam dolores.
+                    limit: At eligendi.
+                    request: Doloribus optio laborum incidunt nihil molestias.
+                image: Qui omnis minus illum nisi dolorum.
                 memory:
-                    limit: Quaerat nulla iure illum eum.
-                    request: Est iusto eum rerum dolores sed.
-            opts: Corporis debitis nobis exercitationem.
-            type: Quibusdam dolores officiis.
+                    limit: At eligendi.
+                    request: Doloribus optio laborum incidunt nihil molestias.
+            opts: Nisi perferendis.
+            type: Velit nihil mollitia velit.
 securityDefinitions:
     jwt_header_Authorization:
         type: apiKey

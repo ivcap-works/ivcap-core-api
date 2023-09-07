@@ -23,6 +23,27 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
+// ReadResponseBody is the type of the "metadata" service "read" endpoint HTTP
+// response body.
+type ReadResponseBody struct {
+	// Record ID
+	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
+	// Entity ID
+	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
+	// Schema ID
+	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
+	// Attached metadata aspect
+	Aspect interface{} `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
+	// Time this record was asserted
+	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
+	// Time this record was revoked
+	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter *string `form:"asserter,omitempty" json:"asserter,omitempty" xml:"asserter,omitempty"`
+	// Entity revoking this record at 'valid-to'
+	Revoker *string `form:"revoker,omitempty" json:"revoker,omitempty" xml:"revoker,omitempty"`
+}
+
 // ListResponseBody is the type of the "metadata" service "list" endpoint HTTP
 // response body.
 type ListResponseBody struct {
@@ -38,27 +59,6 @@ type ListResponseBody struct {
 	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
 	// Navigation links
 	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
-// ReadResponseBody is the type of the "metadata" service "read" endpoint HTTP
-// response body.
-type ReadResponseBody struct {
-	// Record ID
-	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
-	// Entity ID
-	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
-	// Schema ID
-	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
-	// Attached metadata aspect
-	Aspect *string `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
-	// Time this record was asserted
-	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
-	// Time this record was revoked
-	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
-	// Entity asserting this metadata record at 'valid-from'
-	Asserter *string `form:"asserter,omitempty" json:"asserter,omitempty" xml:"asserter,omitempty"`
-	// Entity revoking this record at 'valid-to'
-	Revoker *string `form:"revoker,omitempty" json:"revoker,omitempty" xml:"revoker,omitempty"`
 }
 
 // AddResponseBody is the type of the "metadata" service "add" endpoint HTTP
@@ -80,6 +80,38 @@ type UpdateOneResponseBody struct {
 type UpdateRecordResponseBody struct {
 	// Reference to record created
 	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
+}
+
+// ReadBadRequestResponseBody is the type of the "metadata" service "read"
+// endpoint HTTP response body for the "bad-request" error.
+type ReadBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ReadInvalidScopesResponseBody is the type of the "metadata" service "read"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type ReadInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ReadNotImplementedResponseBody is the type of the "metadata" service "read"
+// endpoint HTTP response body for the "not-implemented" error.
+type ReadNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ReadNotFoundResponseBody is the type of the "metadata" service "read"
+// endpoint HTTP response body for the "not-found" error.
+type ReadNotFoundResponseBody struct {
+	// ID of missing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
 // ListBadRequestResponseBody is the type of the "metadata" service "list"
@@ -113,38 +145,6 @@ type ListInvalidScopesResponseBody struct {
 // endpoint HTTP response body for the "not-implemented" error.
 type ListNotImplementedResponseBody struct {
 	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ReadBadRequestResponseBody is the type of the "metadata" service "read"
-// endpoint HTTP response body for the "bad-request" error.
-type ReadBadRequestResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ReadInvalidScopesResponseBody is the type of the "metadata" service "read"
-// endpoint HTTP response body for the "invalid-scopes" error.
-type ReadInvalidScopesResponseBody struct {
-	// ID of involved resource
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message of error
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ReadNotImplementedResponseBody is the type of the "metadata" service "read"
-// endpoint HTTP response body for the "not-implemented" error.
-type ReadNotImplementedResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// ReadNotFoundResponseBody is the type of the "metadata" service "read"
-// endpoint HTTP response body for the "not-found" error.
-type ReadNotFoundResponseBody struct {
-	// ID of missing resource
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -295,7 +295,7 @@ type MetadataListItemRTResponseBody struct {
 	// Schema ID
 	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
 	// Attached metadata aspect
-	Aspect *string `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
+	Aspect interface{} `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
 	// If aspectPath was defined, this is what matched the query
 	AspectContext *string `form:"aspectContext,omitempty" json:"aspectContext,omitempty" xml:"aspectContext,omitempty"`
 }
@@ -305,6 +305,79 @@ type NavTResponseBody struct {
 	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
 	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
 	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
+}
+
+// NewReadMetadataRecordRTOK builds a "metadata" service "read" endpoint result
+// from a HTTP "OK" response.
+func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadataviews.MetadataRecordRTView {
+	v := &metadataviews.MetadataRecordRTView{
+		RecordID:  body.RecordID,
+		Entity:    body.Entity,
+		Schema:    body.Schema,
+		Aspect:    body.Aspect,
+		ValidFrom: body.ValidFrom,
+		ValidTo:   body.ValidTo,
+		Asserter:  body.Asserter,
+		Revoker:   body.Revoker,
+	}
+
+	return v
+}
+
+// NewReadBadRequest builds a metadata service read endpoint bad-request error.
+func NewReadBadRequest(body *ReadBadRequestResponseBody) *metadata.BadRequestT {
+	v := &metadata.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewReadInvalidCredential builds a metadata service read endpoint
+// invalid-credential error.
+func NewReadInvalidCredential() *metadata.InvalidCredentialsT {
+	v := &metadata.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewReadInvalidScopes builds a metadata service read endpoint invalid-scopes
+// error.
+func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *metadata.InvalidScopesT {
+	v := &metadata.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewReadNotImplemented builds a metadata service read endpoint
+// not-implemented error.
+func NewReadNotImplemented(body *ReadNotImplementedResponseBody) *metadata.NotImplementedT {
+	v := &metadata.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewReadNotFound builds a metadata service read endpoint not-found error.
+func NewReadNotFound(body *ReadNotFoundResponseBody) *metadata.ResourceNotFoundT {
+	v := &metadata.ResourceNotFoundT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewReadNotAuthorized builds a metadata service read endpoint not-authorized
+// error.
+func NewReadNotAuthorized() *metadata.UnauthorizedT {
+	v := &metadata.UnauthorizedT{}
+
+	return v
 }
 
 // NewListMetaRTViewOK builds a "metadata" service "list" endpoint result from
@@ -378,79 +451,6 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *metadata.NotIm
 // NewListNotAuthorized builds a metadata service list endpoint not-authorized
 // error.
 func NewListNotAuthorized() *metadata.UnauthorizedT {
-	v := &metadata.UnauthorizedT{}
-
-	return v
-}
-
-// NewReadMetadataRecordRTOK builds a "metadata" service "read" endpoint result
-// from a HTTP "OK" response.
-func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadataviews.MetadataRecordRTView {
-	v := &metadataviews.MetadataRecordRTView{
-		RecordID:  body.RecordID,
-		Entity:    body.Entity,
-		Schema:    body.Schema,
-		Aspect:    body.Aspect,
-		ValidFrom: body.ValidFrom,
-		ValidTo:   body.ValidTo,
-		Asserter:  body.Asserter,
-		Revoker:   body.Revoker,
-	}
-
-	return v
-}
-
-// NewReadBadRequest builds a metadata service read endpoint bad-request error.
-func NewReadBadRequest(body *ReadBadRequestResponseBody) *metadata.BadRequestT {
-	v := &metadata.BadRequestT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewReadInvalidCredential builds a metadata service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
-// NewReadInvalidScopes builds a metadata service read endpoint invalid-scopes
-// error.
-func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *metadata.InvalidScopesT {
-	v := &metadata.InvalidScopesT{
-		ID:      body.ID,
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewReadNotImplemented builds a metadata service read endpoint
-// not-implemented error.
-func NewReadNotImplemented(body *ReadNotImplementedResponseBody) *metadata.NotImplementedT {
-	v := &metadata.NotImplementedT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewReadNotFound builds a metadata service read endpoint not-found error.
-func NewReadNotFound(body *ReadNotFoundResponseBody) *metadata.ResourceNotFoundT {
-	v := &metadata.ResourceNotFoundT{
-		ID:      *body.ID,
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewReadNotAuthorized builds a metadata service read endpoint not-authorized
-// error.
-func NewReadNotAuthorized() *metadata.UnauthorizedT {
 	v := &metadata.UnauthorizedT{}
 
 	return v
@@ -721,48 +721,6 @@ func NewRevokeNotAuthorized() *metadata.UnauthorizedT {
 	return v
 }
 
-// ValidateListBadRequestResponseBody runs the validations defined on
-// list_bad-request_response_body
-func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateListInvalidParameterResponseBody runs the validations defined on
-// list_invalid-parameter_response_body
-func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateListInvalidScopesResponseBody runs the validations defined on
-// list_invalid-scopes_response_body
-func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
-	}
-	return
-}
-
-// ValidateListNotImplementedResponseBody runs the validations defined on
-// list_not-implemented_response_body
-func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
 // ValidateReadBadRequestResponseBody runs the validations defined on
 // read_bad-request_response_body
 func ValidateReadBadRequestResponseBody(body *ReadBadRequestResponseBody) (err error) {
@@ -804,6 +762,48 @@ func ValidateReadNotFoundResponseBody(body *ReadNotFoundResponseBody) (err error
 	}
 	if body.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateListBadRequestResponseBody runs the validations defined on
+// list_bad-request_response_body
+func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListInvalidParameterResponseBody runs the validations defined on
+// list_invalid-parameter_response_body
+func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListInvalidScopesResponseBody runs the validations defined on
+// list_invalid-scopes_response_body
+func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateListNotImplementedResponseBody runs the validations defined on
+// list_not-implemented_response_body
+func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
@@ -987,12 +987,6 @@ func ValidateMetadataListItemRTResponseBody(body *MetadataListItemRTResponseBody
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
-	}
-	if body.Aspect != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.aspect", *body.Aspect, goa.FormatJSON))
-	}
-	if body.AspectContext != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.aspectContext", *body.AspectContext, goa.FormatJSON))
 	}
 	return
 }
