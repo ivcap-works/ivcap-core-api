@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,8 +17,9 @@
 package metadata
 
 import (
-	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
 	"context"
+
+	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
 
 	"goa.design/goa/v3/security"
 )
@@ -630,13 +631,4 @@ func transformNavTToMetadataviewsNavTView(v *NavT) *metadataviews.NavTView {
 	}
 
 	return res
-}
-
-// AddRequestData holds both the payload and the HTTP request body reader of
-// the add method.
-type AddRequestData struct {
-        // Payload is the method payload.
-        Payload *AddPayload
-        // Body streams the HTTP request body.
-        Body io.ReadCloser
 }
