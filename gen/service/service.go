@@ -70,7 +70,7 @@ type BadRequestT struct {
 
 type BasicWorkflowOptsT struct {
 	// container image name
-	Image *string
+	Image string
 	// Command to start the container - needed for some container runtimes
 	Command []string
 	// Defines memory resource requests and limits
@@ -220,8 +220,7 @@ type ResourceAlreadyCreatedT struct {
 }
 
 // See
-// and
-// https://kubernetes.io/docs/reference/kubernetes-api/common-definitions/quantity/
+// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
 // for units
 type ResourceMemoryT struct {
 	// minimal requirements [0]

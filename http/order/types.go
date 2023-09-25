@@ -34,6 +34,8 @@ type CreateRequestBody struct {
 	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Optional customer provided tags
+	Tags []string `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
 	// Service parameters
 	Parameters []*ParameterT `form:"parameters" json:"parameters" xml:"parameters"`
 }
@@ -60,6 +62,8 @@ type ReadResponseBody struct {
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Optional customer provided tags
+	Tags []string `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
 	// Service parameters
 	Parameters []*ParameterTResponseBody `form:"parameters,omitempty" json:"parameters,omitempty" xml:"parameters,omitempty"`
 }
@@ -97,6 +101,8 @@ type CreateResponseBody struct {
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Optional customer provided tags
+	Tags []string `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
 	// Service parameters
 	Parameters []*ParameterTResponseBody `form:"parameters,omitempty" json:"parameters,omitempty" xml:"parameters,omitempty"`
 }
@@ -294,6 +300,12 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 		PolicyID:  p.Orders.PolicyID,
 		Name:      p.Orders.Name,
 	}
+	if p.Orders.Tags != nil {
+		body.Tags = make([]string, len(p.Orders.Tags))
+		for i, val := range p.Orders.Tags {
+			body.Tags[i] = val
+		}
+	}
 	if p.Orders.Parameters != nil {
 		body.Parameters = make([]*ParameterT, len(p.Orders.Parameters))
 		for i, val := range p.Orders.Parameters {
@@ -328,6 +340,12 @@ func NewReadOrderStatusRTOK(body *ReadResponseBody) *orderviews.OrderStatusRTVie
 	}
 	if body.Links != nil {
 		v.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(body.Links)
+	}
+	if body.Tags != nil {
+		v.Tags = make([]string, len(body.Tags))
+		for i, val := range body.Tags {
+			v.Tags[i] = val
+		}
 	}
 	v.Parameters = make([]*orderviews.ParameterTView, len(body.Parameters))
 	for i, val := range body.Parameters {
@@ -491,6 +509,12 @@ func NewCreateOrderStatusRTOK(body *CreateResponseBody) *orderviews.OrderStatusR
 	}
 	if body.Links != nil {
 		v.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(body.Links)
+	}
+	if body.Tags != nil {
+		v.Tags = make([]string, len(body.Tags))
+		for i, val := range body.Tags {
+			v.Tags[i] = val
+		}
 	}
 	v.Parameters = make([]*orderviews.ParameterTView, len(body.Parameters))
 	for i, val := range body.Parameters {

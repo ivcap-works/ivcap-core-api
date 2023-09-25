@@ -643,12 +643,3 @@ func transformRefTToArtifactviewsRefTView(v *RefT) *artifactviews.RefTView {
 
 	return res
 }
-
-// UploadRequestData holds both the payload and the HTTP request body reader of
-// the "upload" method.
-type UploadRequestData struct {
-	// Payload is the method payload.
-	Payload *UploadPayload
-	// Body streams the HTTP request body.
-	Body io.ReadCloser
-}

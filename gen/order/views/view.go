@@ -57,6 +57,8 @@ type OrderStatusRTView struct {
 	Links   *SelfTView
 	// Optional customer provided name
 	Name *string
+	// Optional customer provided tags
+	Tags []string
 	// Service parameters
 	Parameters []*ParameterTView
 }

@@ -178,6 +178,8 @@ type OrderRequestT struct {
 	PolicyID *string
 	// Optional customer provided name
 	Name *string
+	// Optional customer provided tags
+	Tags []string
 	// Service parameters
 	Parameters []*ParameterT
 }
@@ -203,6 +205,8 @@ type OrderStatusRT struct {
 	Links   *SelfT
 	// Optional customer provided name
 	Name *string
+	// Optional customer provided tags
+	Tags []string
 	// Service parameters
 	Parameters []*ParameterT
 }

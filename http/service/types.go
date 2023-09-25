@@ -432,9 +432,9 @@ type WorkflowTRequestBodyRequestBody struct {
 // body types.
 type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	// container image name
-	Image *string `form:"image,omitempty" json:"image,omitempty" xml:"image,omitempty"`
+	Image string `form:"image" json:"image" xml:"image"`
 	// Command to start the container - needed for some container runtimes
-	Command []string `form:"command,omitempty" json:"command,omitempty" xml:"command,omitempty"`
+	Command []string `form:"command" json:"command" xml:"command"`
 	// Defines memory resource requests and limits
 	Memory *ResourceMemoryTRequestBodyRequestBody `form:"memory,omitempty" json:"memory,omitempty" xml:"memory,omitempty"`
 	// Defines cpu resource requests and limits
@@ -1333,6 +1333,26 @@ func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
 func ValidateReferenceTRequestBodyRequestBody(body *ReferenceTRequestBodyRequestBody) (err error) {
 	if body.URI != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.uri", *body.URI, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateWorkflowTRequestBodyRequestBody runs the validations defined on
+// WorkflowTRequestBodyRequestBody
+func ValidateWorkflowTRequestBodyRequestBody(body *WorkflowTRequestBodyRequestBody) (err error) {
+	if body.Basic != nil {
+		if err2 := ValidateBasicWorkflowOptsTRequestBodyRequestBody(body.Basic); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateBasicWorkflowOptsTRequestBodyRequestBody runs the validations
+// defined on BasicWorkflowOptsTRequestBodyRequestBody
+func ValidateBasicWorkflowOptsTRequestBodyRequestBody(body *BasicWorkflowOptsTRequestBodyRequestBody) (err error) {
+	if body.Command == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("command", "body"))
 	}
 	return
 }
