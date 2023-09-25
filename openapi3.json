@@ -3400,7 +3400,7 @@
           "aspect": {
             "type": "object",
             "description": "Attached metadata aspect",
-            "example": "{...}",
+            "example": "{...}"
           },
           "aspectContext": {
             "type": "string",
