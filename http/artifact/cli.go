@@ -121,7 +121,7 @@ func BuildReadPayload(artifactReadID string, artifactReadJWT string) (*artifact.
 
 // BuildUploadPayload builds the payload for the artifact upload endpoint from
 // CLI flags.
-func BuildUploadPayload(artifactUploadJWT string, artifactUploadContentType string, artifactUploadContentEncoding string, artifactUploadContentLength string, artifactUploadName string, artifactUploadCollection string, artifactUploadXContentType string, artifactUploadXContentLength string, artifactUploadUploadLength string, artifactUploadTusResumable string) (*artifact.UploadPayload, error) {
+func BuildUploadPayload(artifactUploadJWT string, artifactUploadContentType string, artifactUploadContentEncoding string, artifactUploadContentLength string, artifactUploadName string, artifactUploadCollection string, artifactUploadPolicy string, artifactUploadXContentType string, artifactUploadXContentLength string, artifactUploadUploadLength string, artifactUploadTusResumable string) (*artifact.UploadPayload, error) {
 	var err error
 	var jwt string
 	{
@@ -161,6 +161,12 @@ func BuildUploadPayload(artifactUploadJWT string, artifactUploadContentType stri
 	{
 		if artifactUploadCollection != "" {
 			collection = &artifactUploadCollection
+		}
+	}
+	var policy *string
+	{
+		if artifactUploadPolicy != "" {
+			policy = &artifactUploadPolicy
 		}
 	}
 	var xContentType *string
@@ -206,6 +212,7 @@ func BuildUploadPayload(artifactUploadJWT string, artifactUploadContentType stri
 	v.ContentLength = contentLength
 	v.Name = name
 	v.Collection = collection
+	v.Policy = policy
 	v.XContentType = xContentType
 	v.XContentLength = xContentLength
 	v.UploadLength = uploadLength

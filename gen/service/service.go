@@ -79,6 +79,10 @@ type BasicWorkflowOptsT struct {
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
 	CPU *ResourceMemoryT
+	// Defines ephemeral storage resource requests and limits
+	// (see
+	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
+	EphemeralStorage *ResourceMemoryT
 }
 
 // CreateServicePayload is the payload type of the service service

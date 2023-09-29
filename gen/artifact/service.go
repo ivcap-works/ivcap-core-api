@@ -230,6 +230,9 @@ type UploadPayload struct {
 	// X-Collection header, MAY define an collection name as a simple way of
 	// grouping artifacts
 	Collection *string
+	// X-Policy header, MAY define a specific policy to control access to this
+	// artifact
+	Policy *string
 	// X-Content-Type header, used for initial, empty content creation requests.
 	XContentType *string
 	// X-Content-Length header, used for initial, empty content creation requests.

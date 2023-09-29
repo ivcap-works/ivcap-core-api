@@ -1010,6 +1010,9 @@ func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(
 	if v.CPU != nil {
 		res.CPU = marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v.CPU)
 	}
+	if v.EphemeralStorage != nil {
+		res.EphemeralStorage = marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v.EphemeralStorage)
+	}
 
 	return res
 }
@@ -1133,6 +1136,9 @@ func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(
 	}
 	if v.CPU != nil {
 		res.CPU = marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v.CPU)
+	}
+	if v.EphemeralStorage != nil {
+		res.EphemeralStorage = marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v.EphemeralStorage)
 	}
 
 	return res

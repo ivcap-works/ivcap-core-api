@@ -441,6 +441,10 @@ type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
 	CPU *ResourceMemoryTRequestBodyRequestBody `form:"cpu,omitempty" json:"cpu,omitempty" xml:"cpu,omitempty"`
+	// Defines ephemeral storage resource requests and limits
+	// (see
+	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
+	EphemeralStorage *ResourceMemoryTRequestBodyRequestBody `form:"ephemeral-storage,omitempty" json:"ephemeral-storage,omitempty" xml:"ephemeral-storage,omitempty"`
 }
 
 // ResourceMemoryTRequestBodyRequestBody is used to define fields on request

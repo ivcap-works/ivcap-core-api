@@ -424,6 +424,10 @@ func EncodeUploadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 			head := *p.Collection
 			req.Header.Set("X-Collection", head)
 		}
+		if p.Policy != nil {
+			head := *p.Policy
+			req.Header.Set("X-Policy", head)
+		}
 		if p.XContentType != nil {
 			head := *p.XContentType
 			req.Header.Set("X-Content-Type", head)
