@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,23 @@ type CreateRequestBody struct {
 	Tags []string `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
 	// Service parameters
 	Parameters []*ParameterT `form:"parameters" json:"parameters" xml:"parameters"`
+}
+
+// LogsRequestBody is the type of the "order" service "logs" endpoint HTTP
+// request body.
+type LogsRequestBody struct {
+	// From unix time, seconds since 1970-01-01
+	From *int64 `form:"from,omitempty" json:"from,omitempty" xml:"from,omitempty"`
+	// To unix time, seconds since 1970-01-01
+	To *int64 `form:"to,omitempty" json:"to,omitempty" xml:"to,omitempty"`
+	// Reference to namespace name
+	NamespaceName *string `form:"namespace-name,omitempty" json:"namespace-name,omitempty" xml:"namespace-name,omitempty"`
+	// Reference to container name
+	ContainerName *string `form:"container-name,omitempty" json:"container-name,omitempty" xml:"container-name,omitempty"`
+	// Reference to order requested
+	OrderID string `form:"order-id" json:"order-id" xml:"order-id"`
+	// Policy to control access to record an all generated artifacts
+	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
 }
 
 // ReadResponseBody is the type of the "order" service "read" endpoint HTTP
@@ -216,6 +233,49 @@ type CreateNotFoundResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// LogsBadRequestResponseBody is the type of the "order" service "logs"
+// endpoint HTTP response body for the "bad-request" error.
+type LogsBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// LogsInvalidParameterResponseBody is the type of the "order" service "logs"
+// endpoint HTTP response body for the "invalid-parameter" error.
+type LogsInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// LogsInvalidScopesResponseBody is the type of the "order" service "logs"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type LogsInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// LogsNotImplementedResponseBody is the type of the "order" service "logs"
+// endpoint HTTP response body for the "not-implemented" error.
+type LogsNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// LogsNotFoundResponseBody is the type of the "order" service "logs" endpoint
+// HTTP response body for the "not-found" error.
+type LogsNotFoundResponseBody struct {
+	// ID of missing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ProductTResponseBody is used to define fields on response body types.
 type ProductTResponseBody struct {
 	ID       *string                    `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
@@ -311,6 +371,20 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 		for i, val := range p.Orders.Parameters {
 			body.Parameters[i] = marshalOrderParameterTToParameterT(val)
 		}
+	}
+	return body
+}
+
+// NewLogsRequestBody builds the HTTP request body from the payload of the
+// "logs" endpoint of the "order" service.
+func NewLogsRequestBody(p *order.LogsPayload) *LogsRequestBody {
+	body := &LogsRequestBody{
+		From:          p.DownloadLogRequest.From,
+		To:            p.DownloadLogRequest.To,
+		NamespaceName: p.DownloadLogRequest.NamespaceName,
+		ContainerName: p.DownloadLogRequest.ContainerName,
+		OrderID:       p.DownloadLogRequest.OrderID,
+		PolicyID:      p.DownloadLogRequest.PolicyID,
 	}
 	return body
 }
@@ -600,6 +674,74 @@ func NewCreateNotAuthorized() *order.UnauthorizedT {
 	return v
 }
 
+// NewLogsBadRequest builds a order service logs endpoint bad-request error.
+func NewLogsBadRequest(body *LogsBadRequestResponseBody) *order.BadRequestT {
+	v := &order.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewLogsInvalidCredential builds a order service logs endpoint
+// invalid-credential error.
+func NewLogsInvalidCredential() *order.InvalidCredentialsT {
+	v := &order.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewLogsInvalidParameter builds a order service logs endpoint
+// invalid-parameter error.
+func NewLogsInvalidParameter(body *LogsInvalidParameterResponseBody) *order.InvalidParameterValue {
+	v := &order.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewLogsInvalidScopes builds a order service logs endpoint invalid-scopes
+// error.
+func NewLogsInvalidScopes(body *LogsInvalidScopesResponseBody) *order.InvalidScopesT {
+	v := &order.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewLogsNotImplemented builds a order service logs endpoint not-implemented
+// error.
+func NewLogsNotImplemented(body *LogsNotImplementedResponseBody) *order.NotImplementedT {
+	v := &order.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewLogsNotFound builds a order service logs endpoint not-found error.
+func NewLogsNotFound(body *LogsNotFoundResponseBody) *order.ResourceNotFoundT {
+	v := &order.ResourceNotFoundT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewLogsNotAuthorized builds a order service logs endpoint not-authorized
+// error.
+func NewLogsNotAuthorized() *order.UnauthorizedT {
+	v := &order.UnauthorizedT{}
+
+	return v
+}
+
 // ValidateReadBadRequestResponseBody runs the validations defined on
 // read_bad-request_response_body
 func ValidateReadBadRequestResponseBody(body *ReadBadRequestResponseBody) (err error) {
@@ -732,6 +874,63 @@ func ValidateCreateNotImplementedResponseBody(body *CreateNotImplementedResponse
 // ValidateCreateNotFoundResponseBody runs the validations defined on
 // create_not-found_response_body
 func ValidateCreateNotFoundResponseBody(body *CreateNotFoundResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateLogsBadRequestResponseBody runs the validations defined on
+// logs_bad-request_response_body
+func ValidateLogsBadRequestResponseBody(body *LogsBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateLogsInvalidParameterResponseBody runs the validations defined on
+// logs_invalid-parameter_response_body
+func ValidateLogsInvalidParameterResponseBody(body *LogsInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateLogsInvalidScopesResponseBody runs the validations defined on
+// logs_invalid-scopes_response_body
+func ValidateLogsInvalidScopesResponseBody(body *LogsInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateLogsNotImplementedResponseBody runs the validations defined on
+// logs_not-implemented_response_body
+func ValidateLogsNotImplementedResponseBody(body *LogsNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateLogsNotFoundResponseBody runs the validations defined on
+// logs_not-found_response_body
+func ValidateLogsNotFoundResponseBody(body *LogsNotFoundResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -18,6 +18,7 @@ package order
 
 import (
 	"context"
+	"io"
 
 	goa "goa.design/goa/v3/pkg"
 	"goa.design/goa/v3/security"
@@ -28,6 +29,14 @@ type Endpoints struct {
 	Read   goa.Endpoint
 	List   goa.Endpoint
 	Create goa.Endpoint
+	Logs   goa.Endpoint
+}
+
+// LogsResponseData holds both the result and the HTTP response body reader of
+// the "logs" method.
+type LogsResponseData struct {
+	// Body streams the HTTP response body.
+	Body io.ReadCloser
 }
 
 // NewEndpoints wraps the methods of the "order" service with endpoints.
@@ -38,6 +47,7 @@ func NewEndpoints(s Service) *Endpoints {
 		Read:   NewReadEndpoint(s, a.JWTAuth),
 		List:   NewListEndpoint(s, a.JWTAuth),
 		Create: NewCreateEndpoint(s, a.JWTAuth),
+		Logs:   NewLogsEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -46,6 +56,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Read = m(e.Read)
 	e.List = m(e.List)
 	e.Create = m(e.Create)
+	e.Logs = m(e.Logs)
 }
 
 // NewReadEndpoint returns an endpoint function that calls the method "read" of
@@ -117,5 +128,28 @@ func NewCreateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		}
 		vres := NewViewedOrderStatusRT(res, view)
 		return vres, nil
+	}
+}
+
+// NewLogsEndpoint returns an endpoint function that calls the method "logs" of
+// service "order".
+func NewLogsEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*LogsPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:read"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		body, err := s.Logs(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		return &LogsResponseData{Body: body}, nil
 	}
 }

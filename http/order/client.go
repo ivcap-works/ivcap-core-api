@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,7 @@
 package client
 
 import (
+	order "github.com/reinventingscience/ivcap-core-api/gen/order"
 	"context"
 	"net/http"
 
@@ -34,6 +35,9 @@ type Client struct {
 
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
+
+	// Logs Doer is the HTTP client used to make requests to the logs endpoint.
+	LogsDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -61,6 +65,7 @@ func NewClient(
 		ReadDoer:            doer,
 		ListDoer:            doer,
 		CreateDoer:          doer,
+		LogsDoer:            doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -139,5 +144,34 @@ func (c *Client) Create() goa.Endpoint {
 			return nil, goahttp.ErrRequestError("order", "create", err)
 		}
 		return decodeResponse(resp)
+	}
+}
+
+// Logs returns an endpoint that makes HTTP requests to the order service logs
+// server.
+func (c *Client) Logs() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeLogsRequest(c.encoder)
+		decodeResponse = DecodeLogsResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildLogsRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.LogsDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("order", "logs", err)
+		}
+		_, err = decodeResponse(resp)
+		if err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		return &order.LogsResponseData{Body: resp.Body}, nil
 	}
 }
