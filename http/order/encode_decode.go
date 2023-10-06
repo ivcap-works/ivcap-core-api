@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -534,6 +534,160 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 	}
 }
 
+// BuildLogsRequest instantiates a HTTP request object with method and path set
+// to call the "order" service "logs" endpoint
+func (c *Client) BuildLogsRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: LogsOrderPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("order", "logs", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeLogsRequest returns an encoder for requests sent to the order logs
+// server.
+func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*order.LogsPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("order", "logs", "*order.LogsPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewLogsRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("order", "logs", err)
+		}
+		return nil
+	}
+}
+
+// DecodeLogsResponse returns a decoder for responses returned by the order
+// logs endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeLogsResponse may return the following errors:
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
+//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			return nil, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body LogsBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("order", "logs", err)
+				}
+				err = ValidateLogsBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("order", "logs", err)
+				}
+				return nil, NewLogsBadRequest(&body)
+			case "invalid-credential":
+				return nil, NewLogsInvalidCredential()
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("order", "logs", resp.StatusCode, string(body))
+			}
+		case http.StatusUnprocessableEntity:
+			var (
+				body LogsInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "logs", err)
+			}
+			err = ValidateLogsInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "logs", err)
+			}
+			return nil, NewLogsInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body LogsInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "logs", err)
+			}
+			err = ValidateLogsInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "logs", err)
+			}
+			return nil, NewLogsInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body LogsNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "logs", err)
+			}
+			err = ValidateLogsNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "logs", err)
+			}
+			return nil, NewLogsNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body LogsNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "logs", err)
+			}
+			err = ValidateLogsNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "logs", err)
+			}
+			return nil, NewLogsNotFound(&body)
+		case http.StatusUnauthorized:
+			return nil, NewLogsNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("order", "logs", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalProductTResponseBodyToOrderviewsProductTView builds a value of type
 // *orderviews.ProductTView from a value of type *ProductTResponseBody.
 func unmarshalProductTResponseBodyToOrderviewsProductTView(v *ProductTResponseBody) *orderviews.ProductTView {
@@ -619,6 +773,21 @@ func unmarshalSelfTResponseBodyToOrderviewsSelfTView(v *SelfTResponseBody) *orde
 	return res
 }
 
+// unmarshalNavTResponseBodyToOrderviewsNavTView builds a value of type
+// *orderviews.NavTView from a value of type *NavTResponseBody.
+func unmarshalNavTResponseBodyToOrderviewsNavTView(v *NavTResponseBody) *orderviews.NavTView {
+	if v == nil {
+		return nil
+	}
+	res := &orderviews.NavTView{
+		Self:  v.Self,
+		First: v.First,
+		Next:  v.Next,
+	}
+
+	return res
+}
+
 // unmarshalParameterTResponseBodyToOrderviewsParameterTView builds a value of
 // type *orderviews.ParameterTView from a value of type *ParameterTResponseBody.
 func unmarshalParameterTResponseBodyToOrderviewsParameterTView(v *ParameterTResponseBody) *orderviews.ParameterTView {
@@ -645,18 +814,6 @@ func unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(v *OrderLis
 		AccountID:  v.AccountID,
 	}
 	res.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(v.Links)
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToOrderviewsNavTView builds a value of type
-// *orderviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToOrderviewsNavTView(v *NavTResponseBody) *orderviews.NavTView {
-	res := &orderviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
 
 	return res
 }

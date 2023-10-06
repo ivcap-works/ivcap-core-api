@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -19,6 +19,7 @@ package order
 import (
 	orderviews "github.com/reinventingscience/ivcap-core-api/gen/order/views"
 	"context"
+	"io"
 
 	"goa.design/goa/v3/security"
 )
@@ -37,6 +38,8 @@ type Service interface {
 	//	- "default"
 	//	- "tiny"
 	Create(context.Context, *CreatePayload) (res *OrderStatusRT, view string, err error)
+	// download order logs
+	Logs(context.Context, *LogsPayload) (body io.ReadCloser, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -53,7 +56,7 @@ const ServiceName = "order"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"read", "list", "create"}
+var MethodNames = [4]string{"read", "list", "create", "logs"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -72,6 +75,21 @@ type CreatePayload struct {
 type DescribedByT struct {
 	Href *string
 	Type *string
+}
+
+type DownloadLogRequestT struct {
+	// From unix time, seconds since 1970-01-01
+	From *int64
+	// To unix time, seconds since 1970-01-01
+	To *int64
+	// Reference to namespace name
+	NamespaceName *string
+	// Reference to container name
+	ContainerName *string
+	// Reference to order requested
+	OrderID string
+	// Policy to control access to record an all generated artifacts
+	PolicyID *string
 }
 
 // Provided credential is not valid.
@@ -123,6 +141,14 @@ type ListPayload struct {
 	// The content of 'page' is returned in the 'links' part of a previous query and
 	// will when set, ALL other parameters, except for 'limit' are ignored.
 	Page *string
+	// JWT used for authentication
+	JWT string
+}
+
+// LogsPayload is the payload type of the order service logs method.
+type LogsPayload struct {
+	// Download orders request
+	DownloadLogRequest *DownloadLogRequestT
 	// JWT used for authentication
 	JWT string
 }
@@ -203,6 +229,8 @@ type OrderStatusRT struct {
 	// Reference to billable account
 	Account *RefT
 	Links   *SelfT
+	// Product metadata links
+	ProductLinks *NavT
 	// Optional customer provided name
 	Name *string
 	// Optional customer provided tags

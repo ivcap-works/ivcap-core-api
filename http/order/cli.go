@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -168,6 +168,44 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	}
 	res := &order.CreatePayload{
 		Orders: v,
+	}
+	res.JWT = jwt
+
+	return res, nil
+}
+
+// BuildLogsPayload builds the payload for the order logs endpoint from CLI
+// flags.
+func BuildLogsPayload(orderLogsBody string, orderLogsJWT string) (*order.LogsPayload, error) {
+	var err error
+	var body LogsRequestBody
+	{
+		err = json.Unmarshal([]byte(orderLogsBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"container-name\": \"main\",\n      \"from\": 1257894000,\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order-id\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"to\": 1257894000\n   }'")
+		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.order-id", body.OrderID, goa.FormatURI))
+		if body.PolicyID != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	var jwt string
+	{
+		jwt = orderLogsJWT
+	}
+	v := &order.DownloadLogRequestT{
+		From:          body.From,
+		To:            body.To,
+		NamespaceName: body.NamespaceName,
+		ContainerName: body.ContainerName,
+		OrderID:       body.OrderID,
+		PolicyID:      body.PolicyID,
+	}
+	res := &order.LogsPayload{
+		DownloadLogRequest: v,
 	}
 	res.JWT = jwt
 
