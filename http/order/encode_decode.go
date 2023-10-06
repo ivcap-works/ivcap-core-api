@@ -773,6 +773,21 @@ func unmarshalSelfTResponseBodyToOrderviewsSelfTView(v *SelfTResponseBody) *orde
 	return res
 }
 
+// unmarshalNavTResponseBodyToOrderviewsNavTView builds a value of type
+// *orderviews.NavTView from a value of type *NavTResponseBody.
+func unmarshalNavTResponseBodyToOrderviewsNavTView(v *NavTResponseBody) *orderviews.NavTView {
+	if v == nil {
+		return nil
+	}
+	res := &orderviews.NavTView{
+		Self:  v.Self,
+		First: v.First,
+		Next:  v.Next,
+	}
+
+	return res
+}
+
 // unmarshalParameterTResponseBodyToOrderviewsParameterTView builds a value of
 // type *orderviews.ParameterTView from a value of type *ParameterTResponseBody.
 func unmarshalParameterTResponseBodyToOrderviewsParameterTView(v *ParameterTResponseBody) *orderviews.ParameterTView {
@@ -799,18 +814,6 @@ func unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(v *OrderLis
 		AccountID:  v.AccountID,
 	}
 	res.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(v.Links)
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToOrderviewsNavTView builds a value of type
-// *orderviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToOrderviewsNavTView(v *NavTResponseBody) *orderviews.NavTView {
-	res := &orderviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
 
 	return res
 }

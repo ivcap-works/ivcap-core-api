@@ -229,6 +229,8 @@ type OrderStatusRT struct {
 	// Reference to billable account
 	Account *RefT
 	Links   *SelfT
+	// Product metadata links
+	ProductLinks *NavT
 	// Optional customer provided name
 	Name *string
 	// Optional customer provided tags

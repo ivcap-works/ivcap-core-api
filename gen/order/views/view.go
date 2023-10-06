@@ -55,6 +55,8 @@ type OrderStatusRTView struct {
 	// Reference to billable account
 	Account *RefTView
 	Links   *SelfTView
+	// Product metadata links
+	ProductLinks *NavTView
 	// Optional customer provided name
 	Name *string
 	// Optional customer provided tags
@@ -98,6 +100,13 @@ type SelfTView struct {
 	DescribedBy *DescribedByTView
 }
 
+// NavTView is a type that runs validations on a projected type.
+type NavTView struct {
+	Self  *string
+	First *string
+	Next  *string
+}
+
 // ParameterTView is a type that runs validations on a projected type.
 type ParameterTView struct {
 	Name  *string
@@ -133,13 +142,6 @@ type OrderListItemView struct {
 	// ID of ordered service
 	AccountID *string
 	Links     *SelfTView
-}
-
-// NavTView is a type that runs validations on a projected type.
-type NavTView struct {
-	Self  *string
-	First *string
-	Next  *string
 }
 
 var (
@@ -311,6 +313,20 @@ func ValidateSelfTView(result *SelfTView) (err error) {
 	return
 }
 
+// ValidateNavTView runs the validations defined on NavTView.
+func ValidateNavTView(result *NavTView) (err error) {
+	if result.Self != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.self", *result.Self, goa.FormatURI))
+	}
+	if result.First != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.first", *result.First, goa.FormatURI))
+	}
+	if result.Next != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.next", *result.Next, goa.FormatURI))
+	}
+	return
+}
+
 // ValidateParameterTView runs the validations defined on ParameterTView.
 func ValidateParameterTView(result *ParameterTView) (err error) {
 
@@ -361,20 +377,6 @@ func ValidateOrderListItemView(result *OrderListItemView) (err error) {
 		if err2 := ValidateSelfTView(result.Links); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
-	}
-	return
-}
-
-// ValidateNavTView runs the validations defined on NavTView.
-func ValidateNavTView(result *NavTView) (err error) {
-	if result.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.self", *result.Self, goa.FormatURI))
-	}
-	if result.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.first", *result.First, goa.FormatURI))
-	}
-	if result.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.next", *result.Next, goa.FormatURI))
 	}
 	return
 }

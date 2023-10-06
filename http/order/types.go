@@ -77,6 +77,8 @@ type ReadResponseBody struct {
 	// Reference to billable account
 	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	// Product metadata links
+	ProductLinks *NavTResponseBody `form:"product-links,omitempty" json:"product-links,omitempty" xml:"product-links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -116,6 +118,8 @@ type CreateResponseBody struct {
 	// Reference to billable account
 	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	// Product metadata links
+	ProductLinks *NavTResponseBody `form:"product-links,omitempty" json:"product-links,omitempty" xml:"product-links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -311,6 +315,13 @@ type SelfTResponseBody struct {
 	DescribedBy *DescribedByTResponseBody `form:"describedBy,omitempty" json:"describedBy,omitempty" xml:"describedBy,omitempty"`
 }
 
+// NavTResponseBody is used to define fields on response body types.
+type NavTResponseBody struct {
+	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
+	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
+	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
+}
+
 // ParameterTResponseBody is used to define fields on response body types.
 type ParameterTResponseBody struct {
 	Name  *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -336,13 +347,6 @@ type OrderListItemResponseBody struct {
 	// ID of ordered service
 	AccountID *string            `form:"account-id,omitempty" json:"account-id,omitempty" xml:"account-id,omitempty"`
 	Links     *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
-// NavTResponseBody is used to define fields on response body types.
-type NavTResponseBody struct {
-	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
 }
 
 // ParameterT is used to define fields on request body types.
@@ -414,6 +418,9 @@ func NewReadOrderStatusRTOK(body *ReadResponseBody) *orderviews.OrderStatusRTVie
 	}
 	if body.Links != nil {
 		v.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(body.Links)
+	}
+	if body.ProductLinks != nil {
+		v.ProductLinks = unmarshalNavTResponseBodyToOrderviewsNavTView(body.ProductLinks)
 	}
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
@@ -583,6 +590,9 @@ func NewCreateOrderStatusRTOK(body *CreateResponseBody) *orderviews.OrderStatusR
 	}
 	if body.Links != nil {
 		v.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(body.Links)
+	}
+	if body.ProductLinks != nil {
+		v.ProductLinks = unmarshalNavTResponseBodyToOrderviewsNavTView(body.ProductLinks)
 	}
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
@@ -997,6 +1007,20 @@ func ValidateSelfTResponseBody(body *SelfTResponseBody) (err error) {
 	return
 }
 
+// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
+func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
+	if body.Self != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
+	}
+	if body.First != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
+	}
+	if body.Next != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
+	}
+	return
+}
+
 // ValidateOrderListItemResponseBody runs the validations defined on
 // OrderListItemResponseBody
 func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err error) {
@@ -1012,20 +1036,6 @@ func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err err
 		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
-	}
-	return
-}
-
-// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
-func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
-	if body.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
-	}
-	if body.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
-	}
-	if body.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
 	}
 	return
 }

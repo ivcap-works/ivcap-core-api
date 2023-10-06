@@ -182,7 +182,7 @@ func BuildLogsPayload(orderLogsBody string, orderLogsJWT string) (*order.LogsPay
 	{
 		err = json.Unmarshal([]byte(orderLogsBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"container-name\": \"main\",\n      \"from\": 1257894000,\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order-id\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\",\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"to\": 1257894000\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"container-name\": \"main\",\n      \"from\": 1257894000,\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order-id\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"to\": 1257894000\n   }'")
 		}
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.order-id", body.OrderID, goa.FormatURI))
 		if body.PolicyID != nil {
