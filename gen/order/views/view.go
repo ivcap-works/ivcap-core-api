@@ -160,6 +160,7 @@ var (
 			"service",
 			"account",
 			"links",
+			"product-links",
 		},
 		"tiny": {
 			"name",
@@ -240,6 +241,11 @@ func ValidateOrderStatusRTView(result *OrderStatusRTView) (err error) {
 	}
 	if result.Links != nil {
 		if err2 := ValidateSelfTView(result.Links); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if result.ProductLinks != nil {
+		if err2 := ValidateNavTView(result.ProductLinks); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
 	}
