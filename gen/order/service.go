@@ -506,6 +506,9 @@ func newOrderStatusRT(vres *orderviews.OrderStatusRTView) *OrderStatusRT {
 	if vres.Links != nil {
 		res.Links = transformOrderviewsSelfTViewToSelfT(vres.Links)
 	}
+	if vres.ProductLinks != nil {
+		res.ProductLinks = transformOrderviewsNavTViewToNavT(vres.ProductLinks)
+	}
 	return res
 }
 
@@ -547,6 +550,9 @@ func newOrderStatusRTView(res *OrderStatusRT) *orderviews.OrderStatusRTView {
 	}
 	if res.Links != nil {
 		vres.Links = transformSelfTToOrderviewsSelfTView(res.Links)
+	}
+	if res.ProductLinks != nil {
+		vres.ProductLinks = transformNavTToOrderviewsNavTView(res.ProductLinks)
 	}
 	if res.Parameters != nil {
 		vres.Parameters = make([]*orderviews.ParameterTView, len(res.Parameters))
@@ -704,6 +710,21 @@ func transformOrderviewsSelfTViewToSelfT(v *orderviews.SelfTView) *SelfT {
 	return res
 }
 
+// transformOrderviewsNavTViewToNavT builds a value of type *NavT from a value
+// of type *orderviews.NavTView.
+func transformOrderviewsNavTViewToNavT(v *orderviews.NavTView) *NavT {
+	if v == nil {
+		return nil
+	}
+	res := &NavT{
+		Self:  v.Self,
+		First: v.First,
+		Next:  v.Next,
+	}
+
+	return res
+}
+
 // transformProductTToOrderviewsProductTView builds a value of type
 // *orderviews.ProductTView from a value of type *ProductT.
 func transformProductTToOrderviewsProductTView(v *ProductT) *orderviews.ProductTView {
@@ -787,6 +808,21 @@ func transformSelfTToOrderviewsSelfTView(v *SelfT) *orderviews.SelfTView {
 	return res
 }
 
+// transformNavTToOrderviewsNavTView builds a value of type
+// *orderviews.NavTView from a value of type *NavT.
+func transformNavTToOrderviewsNavTView(v *NavT) *orderviews.NavTView {
+	if v == nil {
+		return nil
+	}
+	res := &orderviews.NavTView{
+		Self:  v.Self,
+		First: v.First,
+		Next:  v.Next,
+	}
+
+	return res
+}
+
 // transformParameterTToOrderviewsParameterTView builds a value of type
 // *orderviews.ParameterTView from a value of type *ParameterT.
 func transformParameterTToOrderviewsParameterTView(v *ParameterT) *orderviews.ParameterTView {
@@ -821,21 +857,6 @@ func transformOrderviewsOrderListItemViewToOrderListItem(v *orderviews.OrderList
 	return res
 }
 
-// transformOrderviewsNavTViewToNavT builds a value of type *NavT from a value
-// of type *orderviews.NavTView.
-func transformOrderviewsNavTViewToNavT(v *orderviews.NavTView) *NavT {
-	if v == nil {
-		return nil
-	}
-	res := &NavT{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
 // transformOrderListItemToOrderviewsOrderListItemView builds a value of type
 // *orderviews.OrderListItemView from a value of type *OrderListItem.
 func transformOrderListItemToOrderviewsOrderListItemView(v *OrderListItem) *orderviews.OrderListItemView {
@@ -851,18 +872,6 @@ func transformOrderListItemToOrderviewsOrderListItemView(v *OrderListItem) *orde
 	}
 	if v.Links != nil {
 		res.Links = transformSelfTToOrderviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// transformNavTToOrderviewsNavTView builds a value of type
-// *orderviews.NavTView from a value of type *NavT.
-func transformNavTToOrderviewsNavTView(v *NavT) *orderviews.NavTView {
-	res := &orderviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
 	}
 
 	return res
