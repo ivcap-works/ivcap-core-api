@@ -67,15 +67,15 @@ type AddMetaRT struct {
 // AddPayload is the payload type of the metadata service add method.
 type AddPayload struct {
 	// Entity to which attach metadata
-	EntityID string
+	EntityID string `json:"entity-id,omitempty"`
 	// Schema of metadata
 	Schema string
 	// Aspect content
 	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
-	ContentType string
+	ContentType string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
-	PolicyID *string
+	PolicyID *string `json:"policy-id,omitempty"`
 	// JWT used for authentication
 	JWT string
 }
@@ -128,14 +128,14 @@ type ListMetaRT struct {
 // ListPayload is the payload type of the metadata service list method.
 type ListPayload struct {
 	// Entity for which to request metadata
-	EntityID *string
+	EntityID *string `json:"entity-id,omitempty"`
 	// Schema prefix using '%' as wildcard indicator
 	Schema *string
 	// To learn more about the supported format, see
 	// https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
-	AspectPath *string
+	AspectPath *string `json:"aspect-path,omitempty"`
 	// Return metadata which where valid at that time [now]
-	AtTime *string
+	AtTime *string `json:"at-time,omitempty"`
 	// The 'limit' system query option requests the number of items in the queried
 	// collection to be included in the result.
 	Limit int
@@ -152,9 +152,9 @@ type ListPayload struct {
 	// then the resources will be ordered in ascending order. The request below
 	// orders Trips on
 	// property EndsAt in descending order.
-	OrderBy string
+	OrderBy string `json:"order-by,omitempty"`
 	// When set order result in descending order. Ascending order is the default.
-	OrderDesc *bool
+	OrderDesc *bool `json:"order-desc,omitempty"`
 	// The content of '$page' is returned in the 'links' part of a previous query
 	// and
 	// will when set, ALL other parameters, except for 'limit' are ignored.
@@ -248,15 +248,15 @@ type UpdateOnePayload struct {
 	// Record ID to update
 	ID *string
 	// Entity to which attach metadata
-	EntityID string
+	EntityID string `json:"entity-id,omitempty"`
 	// Schema of metadata
 	Schema string
 	// Aspect content
 	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
-	ContentType *string
+	ContentType *string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
-	PolicyID *string
+	PolicyID *string `json:"policy-id,omitempty"`
 	// JWT used for authentication
 	JWT string
 }
@@ -267,15 +267,15 @@ type UpdateRecordPayload struct {
 	// Record ID to update
 	ID string
 	// Entity to which attach metadata
-	EntityID *string
+	EntityID *string `json:"entity-id,omitempty"`
 	// Schema of metadata
 	Schema *string
 	// Aspect content
 	Aspect interface{}
 	// Content-Type header, MUST be of application/json.
-	ContentType *string
+	ContentType *string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
-	PolicyID *string
+	PolicyID *string `json:"policy-id,omitempty"`
 	// JWT used for authentication
 	JWT string
 }

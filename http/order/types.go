@@ -27,11 +27,11 @@ import (
 // request body.
 type CreateRequestBody struct {
 	// Reference to service requested
-	ServiceID string `form:"service-id" json:"service-id" xml:"service-id"`
+	ServiceID string `json:"service-id,omitempty"`
 	// Reference to billable account
-	AccountID *string `form:"account-id,omitempty" json:"account-id,omitempty" xml:"account-id,omitempty"`
+	AccountID *string `json:"account-id,omitempty"`
 	// Policy to control access to record an all generated artifacts
-	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
+	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -48,13 +48,13 @@ type LogsRequestBody struct {
 	// To unix time, seconds since 1970-01-01
 	To *int64 `form:"to,omitempty" json:"to,omitempty" xml:"to,omitempty"`
 	// Reference to namespace name
-	NamespaceName *string `form:"namespace-name,omitempty" json:"namespace-name,omitempty" xml:"namespace-name,omitempty"`
+	NamespaceName *string `json:"namespace-name,omitempty"`
 	// Reference to container name
-	ContainerName *string `form:"container-name,omitempty" json:"container-name,omitempty" xml:"container-name,omitempty"`
+	ContainerName *string `json:"container-name,omitempty"`
 	// Reference to order requested
-	OrderID string `form:"order-id" json:"order-id" xml:"order-id"`
+	OrderID string `json:"order-id,omitempty"`
 	// Policy to control access to record an all generated artifacts
-	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
+	PolicyID *string `json:"policy-id,omitempty"`
 }
 
 // ReadResponseBody is the type of the "order" service "read" endpoint HTTP

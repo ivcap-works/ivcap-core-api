@@ -28,15 +28,15 @@ import (
 type CreateServiceRequestBody struct {
 	// Provider provided reference. Should to be a single string with punctuations
 	// allowed. Might be changed, so please check result
-	ProviderRef *string `form:"provider-ref,omitempty" json:"provider-ref,omitempty" xml:"provider-ref,omitempty"`
+	ProviderRef *string `json:"provider-ref,omitempty"`
 	// Reference to service provider
-	ProviderID string `form:"provider-id" json:"provider-id" xml:"provider-id"`
+	ProviderID string `json:"provider-id,omitempty"`
 	// More detailed description of the service
 	Description string `form:"description" json:"description" xml:"description"`
 	// Optional provider provided meta tags
 	Metadata []*ParameterTRequestBodyRequestBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to account revenues for this service should be credited to
-	AccountID string `form:"account-id" json:"account-id" xml:"account-id"`
+	AccountID string `json:"account-id,omitempty"`
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceTRequestBodyRequestBody `form:"references,omitempty" json:"references,omitempty" xml:"references,omitempty"`
 	// Link to banner image oprionally used for this service
@@ -44,7 +44,7 @@ type CreateServiceRequestBody struct {
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
 	// Reference to policy controlling access
-	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
+	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -58,15 +58,15 @@ type CreateServiceRequestBody struct {
 type UpdateRequestBody struct {
 	// Provider provided reference. Should to be a single string with punctuations
 	// allowed. Might be changed, so please check result
-	ProviderRef *string `form:"provider-ref,omitempty" json:"provider-ref,omitempty" xml:"provider-ref,omitempty"`
+	ProviderRef *string `json:"provider-ref,omitempty"`
 	// Reference to service provider
-	ProviderID string `form:"provider-id" json:"provider-id" xml:"provider-id"`
+	ProviderID string `json:"provider-id,omitempty"`
 	// More detailed description of the service
 	Description string `form:"description" json:"description" xml:"description"`
 	// Optional provider provided meta tags
 	Metadata []*ParameterTRequestBodyRequestBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to account revenues for this service should be credited to
-	AccountID string `form:"account-id" json:"account-id" xml:"account-id"`
+	AccountID string `json:"account-id,omitempty"`
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceTRequestBodyRequestBody `form:"references,omitempty" json:"references,omitempty" xml:"references,omitempty"`
 	// Link to banner image oprionally used for this service
@@ -74,7 +74,7 @@ type UpdateRequestBody struct {
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
 	// Reference to policy controlling access
-	PolicyID *string `form:"policy-id,omitempty" json:"policy-id,omitempty" xml:"policy-id,omitempty"`
+	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -444,7 +444,7 @@ type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	// Defines ephemeral storage resource requests and limits
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
-	EphemeralStorage *ResourceMemoryTRequestBodyRequestBody `form:"ephemeral-storage,omitempty" json:"ephemeral-storage,omitempty" xml:"ephemeral-storage,omitempty"`
+	EphemeralStorage *ResourceMemoryTRequestBodyRequestBody `json:"ephemeral-storage,omitempty"`
 }
 
 // ResourceMemoryTRequestBodyRequestBody is used to define fields on request

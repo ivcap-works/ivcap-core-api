@@ -82,7 +82,7 @@ type BasicWorkflowOptsT struct {
 	// Defines ephemeral storage resource requests and limits
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
-	EphemeralStorage *ResourceMemoryT
+	EphemeralStorage *ResourceMemoryT `json:"ephemeral-storage,omitempty"`
 }
 
 // CreateServicePayload is the payload type of the service service
@@ -250,15 +250,15 @@ type SelfT struct {
 type ServiceDescriptionT struct {
 	// Provider provided reference. Should to be a single string with punctuations
 	// allowed. Might be changed, so please check result
-	ProviderRef *string
+	ProviderRef *string `json:"provider-ref,omitempty"`
 	// Reference to service provider
-	ProviderID string
+	ProviderID string `json:"provider-id,omitempty"`
 	// More detailed description of the service
 	Description string
 	// Optional provider provided meta tags
 	Metadata []*ParameterT
 	// Reference to account revenues for this service should be credited to
-	AccountID string
+	AccountID string `json:"account-id,omitempty"`
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceT
 	// Link to banner image oprionally used for this service
@@ -266,7 +266,7 @@ type ServiceDescriptionT struct {
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowT
 	// Reference to policy controlling access
-	PolicyID *string
+	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional provider provided name
 	Name *string
 	// Optional provider provided tags
