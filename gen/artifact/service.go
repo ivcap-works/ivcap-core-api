@@ -219,11 +219,11 @@ type UnauthorizedT struct {
 // UploadPayload is the payload type of the artifact service upload method.
 type UploadPayload struct {
 	// Content-Type header, MUST define type of uploaded content.
-	ContentType *string
+	ContentType *string `json:"content-type,omitempty"`
 	// Content-Encoding header, MAY define encoding of content.
-	ContentEncoding *string
+	ContentEncoding *string `json:"content-encoding,omitempty"`
 	// Content-Length header, MAY define size of expected upload.
-	ContentLength *int
+	ContentLength *int `json:"content-length,omitempty"`
 	// X-Name header, MAY define a more human friendly name. Reusing a name will
 	// NOT override an existing artifact with the same name
 	Name *string
@@ -234,14 +234,14 @@ type UploadPayload struct {
 	// artifact
 	Policy *string
 	// X-Content-Type header, used for initial, empty content creation requests.
-	XContentType *string
+	XContentType *string `json:"x-content-type,omitempty"`
 	// X-Content-Length header, used for initial, empty content creation requests.
-	XContentLength *int
+	XContentLength *int `json:"x-content-length,omitempty"`
 	// Upload-Length header, sets the expected content size part of the TUS
 	// protocol.
-	UploadLength *int
+	UploadLength *int `json:"upload-length,omitempty"`
 	// Tus-Resumable header, specifies TUS protocol version.
-	TusResumable *string
+	TusResumable *string `json:"tus-resumable,omitempty"`
 	// JWT used for authentication
 	JWT string
 }

@@ -83,13 +83,13 @@ type DownloadLogRequestT struct {
 	// To unix time, seconds since 1970-01-01
 	To *int64
 	// Reference to namespace name
-	NamespaceName *string
+	NamespaceName *string `json:"namespace-name,omitempty"`
 	// Reference to container name
-	ContainerName *string
+	ContainerName *string `json:"container-name,omitempty"`
 	// Reference to order requested
-	OrderID string
+	OrderID string `json:"order-id,omitempty"`
 	// Policy to control access to record an all generated artifacts
-	PolicyID *string
+	PolicyID *string `json:"policy-id,omitempty"`
 }
 
 // Provided credential is not valid.
@@ -197,11 +197,11 @@ type OrderListRT struct {
 
 type OrderRequestT struct {
 	// Reference to service requested
-	ServiceID string
+	ServiceID string `json:"service-id,omitempty"`
 	// Reference to billable account
-	AccountID *string
+	AccountID *string `json:"account-id,omitempty"`
 	// Policy to control access to record an all generated artifacts
-	PolicyID *string
+	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional customer provided name
 	Name *string
 	// Optional customer provided tags
