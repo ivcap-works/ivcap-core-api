@@ -39,6 +39,9 @@ type Client struct {
 	// Logs Doer is the HTTP client used to make requests to the logs endpoint.
 	LogsDoer goahttp.Doer
 
+	// Top Doer is the HTTP client used to make requests to the top endpoint.
+	TopDoer goahttp.Doer
+
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
 
@@ -66,6 +69,7 @@ func NewClient(
 		ListDoer:            doer,
 		CreateDoer:          doer,
 		LogsDoer:            doer,
+		TopDoer:             doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -173,5 +177,29 @@ func (c *Client) Logs() goa.Endpoint {
 			return nil, err
 		}
 		return &order.LogsResponseData{Body: resp.Body}, nil
+	}
+}
+
+// Top returns an endpoint that makes HTTP requests to the order service top
+// server.
+func (c *Client) Top() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeTopRequest(c.encoder)
+		decodeResponse = DecodeTopResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v interface{}) (interface{}, error) {
+		req, err := c.BuildTopRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.TopDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("order", "top", err)
+		}
+		return decodeResponse(resp)
 	}
 }

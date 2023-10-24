@@ -39,3 +39,8 @@ func CreateOrderPath() string {
 func LogsOrderPath() string {
 	return "/1/orders/logs"
 }
+
+// TopOrderPath returns the URL path to the order service top HTTP endpoint.
+func TopOrderPath() string {
+	return "/1/orders/top"
+}
