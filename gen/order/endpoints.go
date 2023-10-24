@@ -30,6 +30,7 @@ type Endpoints struct {
 	List   goa.Endpoint
 	Create goa.Endpoint
 	Logs   goa.Endpoint
+	Top    goa.Endpoint
 }
 
 // LogsResponseData holds both the result and the HTTP response body reader of
@@ -48,6 +49,7 @@ func NewEndpoints(s Service) *Endpoints {
 		List:   NewListEndpoint(s, a.JWTAuth),
 		Create: NewCreateEndpoint(s, a.JWTAuth),
 		Logs:   NewLogsEndpoint(s, a.JWTAuth),
+		Top:    NewTopEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -57,6 +59,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.List = m(e.List)
 	e.Create = m(e.Create)
 	e.Logs = m(e.Logs)
+	e.Top = m(e.Top)
 }
 
 // NewReadEndpoint returns an endpoint function that calls the method "read" of
@@ -151,5 +154,29 @@ func NewLogsEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 			return nil, err
 		}
 		return &LogsResponseData{Body: body}, nil
+	}
+}
+
+// NewTopEndpoint returns an endpoint function that calls the method "top" of
+// service "order".
+func NewTopEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req interface{}) (interface{}, error) {
+		p := req.(*TopPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:read"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, err := s.Top(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedOrderTopResultItemCollection(res, "default")
+		return vres, nil
 	}
 }

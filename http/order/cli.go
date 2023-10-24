@@ -211,3 +211,37 @@ func BuildLogsPayload(orderLogsBody string, orderLogsJWT string) (*order.LogsPay
 
 	return res, nil
 }
+
+// BuildTopPayload builds the payload for the order top endpoint from CLI flags.
+func BuildTopPayload(orderTopBody string, orderTopJWT string) (*order.TopPayload, error) {
+	var err error
+	var body TopRequestBody
+	{
+		err = json.Unmarshal([]byte(orderTopBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order-id\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
+		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.order-id", body.OrderID, goa.FormatURI))
+		if body.PolicyID != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
+		}
+		if err != nil {
+			return nil, err
+		}
+	}
+	var jwt string
+	{
+		jwt = orderTopJWT
+	}
+	v := &order.OrderTopRequestT{
+		OrderID:       body.OrderID,
+		NamespaceName: body.NamespaceName,
+		PolicyID:      body.PolicyID,
+	}
+	res := &order.TopPayload{
+		OrderTopRequest: v,
+	}
+	res.JWT = jwt
+
+	return res, nil
+}

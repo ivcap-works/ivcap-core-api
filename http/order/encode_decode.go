@@ -688,6 +688,177 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 	}
 }
 
+// BuildTopRequest instantiates a HTTP request object with method and path set
+// to call the "order" service "top" endpoint
+func (c *Client) BuildTopRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: TopOrderPath()}
+	req, err := http.NewRequest("POST", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("order", "top", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeTopRequest returns an encoder for requests sent to the order top
+// server.
+func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
+	return func(req *http.Request, v interface{}) error {
+		p, ok := v.(*order.TopPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("order", "top", "*order.TopPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewTopRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("order", "top", err)
+		}
+		return nil
+	}
+}
+
+// DecodeTopResponse returns a decoder for responses returned by the order top
+// endpoint. restoreBody controls whether the response body should be restored
+// after having been read.
+// DecodeTopResponse may return the following errors:
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
+//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
+	return func(resp *http.Response) (interface{}, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body TopResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "top", err)
+			}
+			p := NewTopOrderTopResultItemCollectionOK(body)
+			view := "default"
+			vres := orderviews.OrderTopResultItemCollection{Projected: p, View: view}
+			if err = orderviews.ValidateOrderTopResultItemCollection(vres); err != nil {
+				return nil, goahttp.ErrValidationError("order", "top", err)
+			}
+			res := order.NewOrderTopResultItemCollection(vres)
+			return res, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body TopBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("order", "top", err)
+				}
+				err = ValidateTopBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("order", "top", err)
+				}
+				return nil, NewTopBadRequest(&body)
+			case "invalid-credential":
+				return nil, NewTopInvalidCredential()
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("order", "top", resp.StatusCode, string(body))
+			}
+		case http.StatusUnprocessableEntity:
+			var (
+				body TopInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "top", err)
+			}
+			err = ValidateTopInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "top", err)
+			}
+			return nil, NewTopInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body TopInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "top", err)
+			}
+			err = ValidateTopInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "top", err)
+			}
+			return nil, NewTopInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body TopNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "top", err)
+			}
+			err = ValidateTopNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "top", err)
+			}
+			return nil, NewTopNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body TopNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "top", err)
+			}
+			err = ValidateTopNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "top", err)
+			}
+			return nil, NewTopNotFound(&body)
+		case http.StatusUnauthorized:
+			return nil, NewTopNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("order", "top", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalProductTResponseBodyToOrderviewsProductTView builds a value of type
 // *orderviews.ProductTView from a value of type *ProductTResponseBody.
 func unmarshalProductTResponseBodyToOrderviewsProductTView(v *ProductTResponseBody) *orderviews.ProductTView {
@@ -835,6 +1006,21 @@ func marshalParameterTToOrderParameterT(v *ParameterT) *order.ParameterT {
 	res := &order.ParameterT{
 		Name:  v.Name,
 		Value: v.Value,
+	}
+
+	return res
+}
+
+// unmarshalOrderTopResultItemResponseToOrderviewsOrderTopResultItemView builds
+// a value of type *orderviews.OrderTopResultItemView from a value of type
+// *OrderTopResultItemResponse.
+func unmarshalOrderTopResultItemResponseToOrderviewsOrderTopResultItemView(v *OrderTopResultItemResponse) *orderviews.OrderTopResultItemView {
+	res := &orderviews.OrderTopResultItemView{
+		Container:        v.Container,
+		CPU:              v.CPU,
+		Memory:           v.Memory,
+		Storage:          v.Storage,
+		EphemeralStorage: v.EphemeralStorage,
 	}
 
 	return res

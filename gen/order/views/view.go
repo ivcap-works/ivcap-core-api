@@ -36,6 +36,15 @@ type OrderListRT struct {
 	View string
 }
 
+// OrderTopResultItemCollection is the viewed result type that is projected
+// based on a view.
+type OrderTopResultItemCollection struct {
+	// Type to project
+	Projected OrderTopResultItemCollectionView
+	// View to render
+	View string
+}
+
 // OrderStatusRTView is a type that runs validations on a projected type.
 type OrderStatusRTView struct {
 	// Order ID
@@ -144,6 +153,24 @@ type OrderListItemView struct {
 	Links     *SelfTView
 }
 
+// OrderTopResultItemCollectionView is a type that runs validations on a
+// projected type.
+type OrderTopResultItemCollectionView []*OrderTopResultItemView
+
+// OrderTopResultItemView is a type that runs validations on a projected type.
+type OrderTopResultItemView struct {
+	// container
+	Container *string
+	// cpu
+	CPU *string
+	// memory
+	Memory *string
+	// storage
+	Storage *string
+	// ephemeral-storage
+	EphemeralStorage *string
+}
+
 var (
 	// OrderStatusRTMap is a map indexing the attribute names of OrderStatusRT by
 	// view name.
@@ -177,6 +204,28 @@ var (
 			"links",
 		},
 	}
+	// OrderTopResultItemCollectionMap is a map indexing the attribute names of
+	// OrderTopResultItemCollection by view name.
+	OrderTopResultItemCollectionMap = map[string][]string{
+		"default": {
+			"container",
+			"cpu",
+			"memory",
+			"storage",
+			"ephemeral-storage",
+		},
+	}
+	// OrderTopResultItemMap is a map indexing the attribute names of
+	// OrderTopResultItem by view name.
+	OrderTopResultItemMap = map[string][]string{
+		"default": {
+			"container",
+			"cpu",
+			"memory",
+			"storage",
+			"ephemeral-storage",
+		},
+	}
 )
 
 // ValidateOrderStatusRT runs the validations defined on the viewed result type
@@ -199,6 +248,18 @@ func ValidateOrderListRT(result *OrderListRT) (err error) {
 	switch result.View {
 	case "default", "":
 		err = ValidateOrderListRTView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+	}
+	return
+}
+
+// ValidateOrderTopResultItemCollection runs the validations defined on the
+// viewed result type OrderTopResultItemCollection.
+func ValidateOrderTopResultItemCollection(result OrderTopResultItemCollection) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateOrderTopResultItemCollectionView(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
 	}
@@ -383,6 +444,38 @@ func ValidateOrderListItemView(result *OrderListItemView) (err error) {
 		if err2 := ValidateSelfTView(result.Links); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
+	}
+	return
+}
+
+// ValidateOrderTopResultItemCollectionView runs the validations defined on
+// OrderTopResultItemCollectionView using the "default" view.
+func ValidateOrderTopResultItemCollectionView(result OrderTopResultItemCollectionView) (err error) {
+	for _, item := range result {
+		if err2 := ValidateOrderTopResultItemView(item); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	return
+}
+
+// ValidateOrderTopResultItemView runs the validations defined on
+// OrderTopResultItemView using the "default" view.
+func ValidateOrderTopResultItemView(result *OrderTopResultItemView) (err error) {
+	if result.Container == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("container", "result"))
+	}
+	if result.CPU == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("cpu", "result"))
+	}
+	if result.Memory == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("memory", "result"))
+	}
+	if result.Storage == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("storage", "result"))
+	}
+	if result.EphemeralStorage == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("ephemeral-storage", "result"))
 	}
 	return
 }

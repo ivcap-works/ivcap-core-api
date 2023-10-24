@@ -40,6 +40,8 @@ type Service interface {
 	Create(context.Context, *CreatePayload) (res *OrderStatusRT, view string, err error)
 	// download order logs
 	Logs(context.Context, *LogsPayload) (body io.ReadCloser, err error)
+	// top order resources
+	Top(context.Context, *TopPayload) (res OrderTopResultItemCollection, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -56,7 +58,7 @@ const ServiceName = "order"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [4]string{"read", "list", "create", "logs"}
+var MethodNames = [5]string{"read", "list", "create", "logs", "top"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -239,6 +241,32 @@ type OrderStatusRT struct {
 	Parameters []*ParameterT
 }
 
+type OrderTopRequestT struct {
+	// Reference to order requested
+	OrderID string `json:"order-id,omitempty"`
+	// Reference to namespace name
+	NamespaceName *string `json:"namespace-name,omitempty"`
+	// Policy to control access to record an all generated artifacts
+	PolicyID *string `json:"policy-id,omitempty"`
+}
+
+type OrderTopResultItem struct {
+	// container
+	Container string
+	// cpu
+	CPU string
+	// memory
+	Memory string
+	// storage
+	Storage string
+	// ephemeral-storage
+	EphemeralStorage string
+}
+
+// OrderTopResultItemCollection is the result type of the order service top
+// method.
+type OrderTopResultItemCollection []*OrderTopResultItem
+
 type ParameterT struct {
 	Name  *string
 	Value *string
@@ -289,6 +317,14 @@ type SelfWithDataT struct {
 // ServiceNotAvailable is the type returned when the service necessary to
 // fulfill the request is currently not available.
 type ServiceNotAvailableT struct {
+}
+
+// TopPayload is the payload type of the order service top method.
+type TopPayload struct {
+	// orders order request
+	OrderTopRequest *OrderTopRequestT
+	// JWT used for authentication
+	JWT string
 }
 
 // Unauthorized access to resource
@@ -472,6 +508,21 @@ func NewViewedOrderListRT(res *OrderListRT, view string) *orderviews.OrderListRT
 	return &orderviews.OrderListRT{Projected: p, View: "default"}
 }
 
+// NewOrderTopResultItemCollection initializes result type
+// OrderTopResultItemCollection from viewed result type
+// OrderTopResultItemCollection.
+func NewOrderTopResultItemCollection(vres orderviews.OrderTopResultItemCollection) OrderTopResultItemCollection {
+	return newOrderTopResultItemCollection(vres.Projected)
+}
+
+// NewViewedOrderTopResultItemCollection initializes viewed result type
+// OrderTopResultItemCollection from result type OrderTopResultItemCollection
+// using the given view.
+func NewViewedOrderTopResultItemCollection(res OrderTopResultItemCollection, view string) orderviews.OrderTopResultItemCollection {
+	p := newOrderTopResultItemCollectionView(res)
+	return orderviews.OrderTopResultItemCollection{Projected: p, View: "default"}
+}
+
 // newOrderStatusRT converts projected type OrderStatusRT to service type
 // OrderStatusRT.
 func newOrderStatusRT(vres *orderviews.OrderStatusRTView) *OrderStatusRT {
@@ -609,6 +660,62 @@ func newOrderListRTView(res *OrderListRT) *orderviews.OrderListRTView {
 	}
 	if res.Links != nil {
 		vres.Links = transformNavTToOrderviewsNavTView(res.Links)
+	}
+	return vres
+}
+
+// newOrderTopResultItemCollection converts projected type
+// OrderTopResultItemCollection to service type OrderTopResultItemCollection.
+func newOrderTopResultItemCollection(vres orderviews.OrderTopResultItemCollectionView) OrderTopResultItemCollection {
+	res := make(OrderTopResultItemCollection, len(vres))
+	for i, n := range vres {
+		res[i] = newOrderTopResultItem(n)
+	}
+	return res
+}
+
+// newOrderTopResultItemCollectionView projects result type
+// OrderTopResultItemCollection to projected type
+// OrderTopResultItemCollectionView using the "default" view.
+func newOrderTopResultItemCollectionView(res OrderTopResultItemCollection) orderviews.OrderTopResultItemCollectionView {
+	vres := make(orderviews.OrderTopResultItemCollectionView, len(res))
+	for i, n := range res {
+		vres[i] = newOrderTopResultItemView(n)
+	}
+	return vres
+}
+
+// newOrderTopResultItem converts projected type OrderTopResultItem to service
+// type OrderTopResultItem.
+func newOrderTopResultItem(vres *orderviews.OrderTopResultItemView) *OrderTopResultItem {
+	res := &OrderTopResultItem{}
+	if vres.Container != nil {
+		res.Container = *vres.Container
+	}
+	if vres.CPU != nil {
+		res.CPU = *vres.CPU
+	}
+	if vres.Memory != nil {
+		res.Memory = *vres.Memory
+	}
+	if vres.Storage != nil {
+		res.Storage = *vres.Storage
+	}
+	if vres.EphemeralStorage != nil {
+		res.EphemeralStorage = *vres.EphemeralStorage
+	}
+	return res
+}
+
+// newOrderTopResultItemView projects result type OrderTopResultItem to
+// projected type OrderTopResultItemView using the "default" view.
+func newOrderTopResultItemView(res *OrderTopResultItem) *orderviews.OrderTopResultItemView {
+	vres := &orderviews.OrderTopResultItemView{
+		Container:        &res.Container,
+		CPU:              &res.CPU,
+		Memory:           &res.Memory,
+		Storage:          &res.Storage,
+		EphemeralStorage: &res.EphemeralStorage,
 	}
 	return vres
 }

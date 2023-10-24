@@ -57,6 +57,17 @@ type LogsRequestBody struct {
 	PolicyID *string `json:"policy-id,omitempty"`
 }
 
+// TopRequestBody is the type of the "order" service "top" endpoint HTTP
+// request body.
+type TopRequestBody struct {
+	// Reference to order requested
+	OrderID string `json:"order-id,omitempty"`
+	// Reference to namespace name
+	NamespaceName *string `json:"namespace-name,omitempty"`
+	// Policy to control access to record an all generated artifacts
+	PolicyID *string `json:"policy-id,omitempty"`
+}
+
 // ReadResponseBody is the type of the "order" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
@@ -127,6 +138,10 @@ type CreateResponseBody struct {
 	// Service parameters
 	Parameters []*ParameterTResponseBody `form:"parameters,omitempty" json:"parameters,omitempty" xml:"parameters,omitempty"`
 }
+
+// TopResponseBody is the type of the "order" service "top" endpoint HTTP
+// response body.
+type TopResponseBody []*OrderTopResultItemResponse
 
 // ReadBadRequestResponseBody is the type of the "order" service "read"
 // endpoint HTTP response body for the "bad-request" error.
@@ -280,6 +295,49 @@ type LogsNotFoundResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// TopBadRequestResponseBody is the type of the "order" service "top" endpoint
+// HTTP response body for the "bad-request" error.
+type TopBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// TopInvalidParameterResponseBody is the type of the "order" service "top"
+// endpoint HTTP response body for the "invalid-parameter" error.
+type TopInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// TopInvalidScopesResponseBody is the type of the "order" service "top"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type TopInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// TopNotImplementedResponseBody is the type of the "order" service "top"
+// endpoint HTTP response body for the "not-implemented" error.
+type TopNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// TopNotFoundResponseBody is the type of the "order" service "top" endpoint
+// HTTP response body for the "not-found" error.
+type TopNotFoundResponseBody struct {
+	// ID of missing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ProductTResponseBody is used to define fields on response body types.
 type ProductTResponseBody struct {
 	ID       *string                    `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
@@ -355,6 +413,20 @@ type ParameterT struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
+// OrderTopResultItemResponse is used to define fields on response body types.
+type OrderTopResultItemResponse struct {
+	// container
+	Container *string `form:"container,omitempty" json:"container,omitempty" xml:"container,omitempty"`
+	// cpu
+	CPU *string `form:"cpu,omitempty" json:"cpu,omitempty" xml:"cpu,omitempty"`
+	// memory
+	Memory *string `form:"memory,omitempty" json:"memory,omitempty" xml:"memory,omitempty"`
+	// storage
+	Storage *string `form:"storage,omitempty" json:"storage,omitempty" xml:"storage,omitempty"`
+	// ephemeral-storage
+	EphemeralStorage *string `form:"ephemeral-storage,omitempty" json:"ephemeral-storage,omitempty" xml:"ephemeral-storage,omitempty"`
+}
+
 // NewCreateRequestBody builds the HTTP request body from the payload of the
 // "create" endpoint of the "order" service.
 func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
@@ -389,6 +461,17 @@ func NewLogsRequestBody(p *order.LogsPayload) *LogsRequestBody {
 		ContainerName: p.DownloadLogRequest.ContainerName,
 		OrderID:       p.DownloadLogRequest.OrderID,
 		PolicyID:      p.DownloadLogRequest.PolicyID,
+	}
+	return body
+}
+
+// NewTopRequestBody builds the HTTP request body from the payload of the "top"
+// endpoint of the "order" service.
+func NewTopRequestBody(p *order.TopPayload) *TopRequestBody {
+	body := &TopRequestBody{
+		OrderID:       p.OrderTopRequest.OrderID,
+		NamespaceName: p.OrderTopRequest.NamespaceName,
+		PolicyID:      p.OrderTopRequest.PolicyID,
 	}
 	return body
 }
@@ -752,6 +835,83 @@ func NewLogsNotAuthorized() *order.UnauthorizedT {
 	return v
 }
 
+// NewTopOrderTopResultItemCollectionOK builds a "order" service "top" endpoint
+// result from a HTTP "OK" response.
+func NewTopOrderTopResultItemCollectionOK(body TopResponseBody) orderviews.OrderTopResultItemCollectionView {
+	v := make([]*orderviews.OrderTopResultItemView, len(body))
+	for i, val := range body {
+		v[i] = unmarshalOrderTopResultItemResponseToOrderviewsOrderTopResultItemView(val)
+	}
+
+	return v
+}
+
+// NewTopBadRequest builds a order service top endpoint bad-request error.
+func NewTopBadRequest(body *TopBadRequestResponseBody) *order.BadRequestT {
+	v := &order.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewTopInvalidCredential builds a order service top endpoint
+// invalid-credential error.
+func NewTopInvalidCredential() *order.InvalidCredentialsT {
+	v := &order.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewTopInvalidParameter builds a order service top endpoint invalid-parameter
+// error.
+func NewTopInvalidParameter(body *TopInvalidParameterResponseBody) *order.InvalidParameterValue {
+	v := &order.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewTopInvalidScopes builds a order service top endpoint invalid-scopes error.
+func NewTopInvalidScopes(body *TopInvalidScopesResponseBody) *order.InvalidScopesT {
+	v := &order.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewTopNotImplemented builds a order service top endpoint not-implemented
+// error.
+func NewTopNotImplemented(body *TopNotImplementedResponseBody) *order.NotImplementedT {
+	v := &order.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewTopNotFound builds a order service top endpoint not-found error.
+func NewTopNotFound(body *TopNotFoundResponseBody) *order.ResourceNotFoundT {
+	v := &order.ResourceNotFoundT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewTopNotAuthorized builds a order service top endpoint not-authorized error.
+func NewTopNotAuthorized() *order.UnauthorizedT {
+	v := &order.UnauthorizedT{}
+
+	return v
+}
+
 // ValidateReadBadRequestResponseBody runs the validations defined on
 // read_bad-request_response_body
 func ValidateReadBadRequestResponseBody(body *ReadBadRequestResponseBody) (err error) {
@@ -953,6 +1113,63 @@ func ValidateLogsNotFoundResponseBody(body *LogsNotFoundResponseBody) (err error
 	return
 }
 
+// ValidateTopBadRequestResponseBody runs the validations defined on
+// top_bad-request_response_body
+func ValidateTopBadRequestResponseBody(body *TopBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateTopInvalidParameterResponseBody runs the validations defined on
+// top_invalid-parameter_response_body
+func ValidateTopInvalidParameterResponseBody(body *TopInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateTopInvalidScopesResponseBody runs the validations defined on
+// top_invalid-scopes_response_body
+func ValidateTopInvalidScopesResponseBody(body *TopInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateTopNotImplementedResponseBody runs the validations defined on
+// top_not-implemented_response_body
+func ValidateTopNotImplementedResponseBody(body *TopNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateTopNotFoundResponseBody runs the validations defined on
+// top_not-found_response_body
+func ValidateTopNotFoundResponseBody(body *TopNotFoundResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
 // ValidateProductTResponseBody runs the validations defined on
 // ProductTResponseBody
 func ValidateProductTResponseBody(body *ProductTResponseBody) (err error) {
@@ -1036,6 +1253,27 @@ func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err err
 		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
 			err = goa.MergeErrors(err, err2)
 		}
+	}
+	return
+}
+
+// ValidateOrderTopResultItemResponse runs the validations defined on
+// OrderTopResultItemResponse
+func ValidateOrderTopResultItemResponse(body *OrderTopResultItemResponse) (err error) {
+	if body.Container == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("container", "body"))
+	}
+	if body.CPU == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("cpu", "body"))
+	}
+	if body.Memory == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("memory", "body"))
+	}
+	if body.Storage == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("storage", "body"))
+	}
+	if body.EphemeralStorage == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("ephemeral-storage", "body"))
 	}
 	return
 }
