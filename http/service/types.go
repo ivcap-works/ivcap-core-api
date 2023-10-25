@@ -467,6 +467,7 @@ type ParameterDefT struct {
 	Optional    *bool            `form:"optional,omitempty" json:"optional,omitempty" xml:"optional,omitempty"`
 	Default     *string          `form:"default,omitempty" json:"default,omitempty" xml:"default,omitempty"`
 	Options     []*ParameterOptT `form:"options,omitempty" json:"options,omitempty" xml:"options,omitempty"`
+	Unary       *bool            `form:"unary,omitempty" json:"unary,omitempty" xml:"unary,omitempty"`
 }
 
 // ParameterOptT is used to define fields on request body types.
@@ -492,6 +493,7 @@ type ParameterDefTResponseBody struct {
 	Optional    *bool                        `form:"optional,omitempty" json:"optional,omitempty" xml:"optional,omitempty"`
 	Default     *string                      `form:"default,omitempty" json:"default,omitempty" xml:"default,omitempty"`
 	Options     []*ParameterOptTResponseBody `form:"options,omitempty" json:"options,omitempty" xml:"options,omitempty"`
+	Unary       *bool                        `form:"unary,omitempty" json:"unary,omitempty" xml:"unary,omitempty"`
 }
 
 // ParameterOptTResponseBody is used to define fields on response body types.
