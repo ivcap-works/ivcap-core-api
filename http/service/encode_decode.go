@@ -1044,6 +1044,7 @@ func marshalServiceParameterDefTToParameterDefT(v *service.ParameterDefT) *Param
 		Constant:    v.Constant,
 		Optional:    v.Optional,
 		Default:     v.Default,
+		Unary:       v.Unary,
 	}
 	if v.Options != nil {
 		res.Options = make([]*ParameterOptT, len(v.Options))
@@ -1171,6 +1172,7 @@ func marshalParameterDefTToServiceParameterDefT(v *ParameterDefT) *service.Param
 		Constant:    v.Constant,
 		Optional:    v.Optional,
 		Default:     v.Default,
+		Unary:       v.Unary,
 	}
 	if v.Options != nil {
 		res.Options = make([]*service.ParameterOptT, len(v.Options))
@@ -1224,6 +1226,7 @@ func unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView(v *Parame
 		Constant:    v.Constant,
 		Optional:    v.Optional,
 		Default:     v.Default,
+		Unary:       v.Unary,
 	}
 	if v.Options != nil {
 		res.Options = make([]*serviceviews.ParameterOptTView, len(v.Options))

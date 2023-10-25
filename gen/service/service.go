@@ -182,6 +182,7 @@ type ParameterDefT struct {
 	Optional    *bool
 	Default     *string
 	Options     []*ParameterOptT
+	Unary       *bool
 }
 
 type ParameterOptT struct {
@@ -860,6 +861,7 @@ func transformServiceviewsParameterDefTViewToParameterDefT(v *serviceviews.Param
 		Constant:    v.Constant,
 		Optional:    v.Optional,
 		Default:     v.Default,
+		Unary:       v.Unary,
 	}
 	if v.Options != nil {
 		res.Options = make([]*ParameterOptT, len(v.Options))
@@ -911,6 +913,7 @@ func transformParameterDefTToServiceviewsParameterDefTView(v *ParameterDefT) *se
 		Constant:    v.Constant,
 		Optional:    v.Optional,
 		Default:     v.Default,
+		Unary:       v.Unary,
 	}
 	if v.Options != nil {
 		res.Options = make([]*serviceviews.ParameterOptTView, len(v.Options))

@@ -127,6 +127,7 @@ type ParameterDefTView struct {
 	Optional    *bool
 	Default     *string
 	Options     []*ParameterOptTView
+	Unary       *bool
 }
 
 // ParameterOptTView is a type that runs validations on a projected type.
