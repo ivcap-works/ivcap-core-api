@@ -36,8 +36,6 @@ type CreateServiceRequestBody struct {
 	// Optional provider provided meta tags
 	Metadata []*ParameterTRequestBodyRequestBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to account revenues for this service should be credited to
-	AccountID string `json:"account-id,omitempty"`
-	// Reference to account revenues for this service should be credited to
 	References []*ReferenceTRequestBodyRequestBody `form:"references,omitempty" json:"references,omitempty" xml:"references,omitempty"`
 	// Link to banner image oprionally used for this service
 	Banner *string `form:"banner,omitempty" json:"banner,omitempty" xml:"banner,omitempty"`
@@ -65,8 +63,6 @@ type UpdateRequestBody struct {
 	Description string `form:"description" json:"description" xml:"description"`
 	// Optional provider provided meta tags
 	Metadata []*ParameterTRequestBodyRequestBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
-	// Reference to account revenues for this service should be credited to
-	AccountID string `json:"account-id,omitempty"`
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceTRequestBodyRequestBody `form:"references,omitempty" json:"references,omitempty" xml:"references,omitempty"`
 	// Link to banner image oprionally used for this service
@@ -509,7 +505,6 @@ func NewCreateServiceRequestBody(p *service.CreateServicePayload) *CreateService
 		ProviderRef: p.Services.ProviderRef,
 		ProviderID:  p.Services.ProviderID,
 		Description: p.Services.Description,
-		AccountID:   p.Services.AccountID,
 		Banner:      p.Services.Banner,
 		PolicyID:    p.Services.PolicyID,
 		Name:        p.Services.Name,
@@ -551,7 +546,6 @@ func NewUpdateRequestBody(p *service.UpdatePayload) *UpdateRequestBody {
 		ProviderRef: p.Services.ProviderRef,
 		ProviderID:  p.Services.ProviderID,
 		Description: p.Services.Description,
-		AccountID:   p.Services.AccountID,
 		Banner:      p.Services.Banner,
 		PolicyID:    p.Services.PolicyID,
 		Name:        p.Services.Name,

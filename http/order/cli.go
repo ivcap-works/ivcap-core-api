@@ -128,15 +128,12 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	{
 		err = json.Unmarshal([]byte(orderCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account-id\": \"urn:ivcap:account:123e4567-e89b-12d3-a456-426614174000\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": \"10\"\n         }\n      ],\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"service-id\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\",\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ]\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": \"10\"\n         }\n      ],\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"service-id\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\",\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ]\n   }'")
 		}
 		if body.Parameters == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 		}
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.service-id", body.ServiceID, goa.FormatURI))
-		if body.AccountID != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.account-id", *body.AccountID, goa.FormatURI))
-		}
 		if body.PolicyID != nil {
 			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
 		}
@@ -150,7 +147,6 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	}
 	v := &order.OrderRequestT{
 		ServiceID: body.ServiceID,
-		AccountID: body.AccountID,
 		PolicyID:  body.PolicyID,
 		Name:      body.Name,
 	}

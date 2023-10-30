@@ -259,8 +259,6 @@ type ServiceDescriptionT struct {
 	// Optional provider provided meta tags
 	Metadata []*ParameterT
 	// Reference to account revenues for this service should be credited to
-	AccountID string `json:"account-id,omitempty"`
-	// Reference to account revenues for this service should be credited to
 	References []*ReferenceT
 	// Link to banner image oprionally used for this service
 	Banner *string
