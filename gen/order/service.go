@@ -200,8 +200,6 @@ type OrderListRT struct {
 type OrderRequestT struct {
 	// Reference to service requested
 	ServiceID string `json:"service-id,omitempty"`
-	// Reference to billable account
-	AccountID *string `json:"account-id,omitempty"`
 	// Policy to control access to record an all generated artifacts
 	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional customer provided name

@@ -28,8 +28,6 @@ import (
 type CreateRequestBody struct {
 	// Reference to service requested
 	ServiceID string `json:"service-id,omitempty"`
-	// Reference to billable account
-	AccountID *string `json:"account-id,omitempty"`
 	// Policy to control access to record an all generated artifacts
 	PolicyID *string `json:"policy-id,omitempty"`
 	// Optional customer provided name
@@ -432,7 +430,6 @@ type OrderTopResultItemResponse struct {
 func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 	body := &CreateRequestBody{
 		ServiceID: p.Orders.ServiceID,
-		AccountID: p.Orders.AccountID,
 		PolicyID:  p.Orders.PolicyID,
 		Name:      p.Orders.Name,
 	}
