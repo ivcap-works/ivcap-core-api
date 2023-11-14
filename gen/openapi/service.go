@@ -14,33 +14,18 @@
 
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
-package client
+package openapi
 
-import (
-	"fmt"
-)
-
-// ReadOrderPath returns the URL path to the order service read HTTP endpoint.
-func ReadOrderPath(id string) string {
-	return fmt.Sprintf("/1/orders/%v", id)
+// The openapi service serves the OpenAPI definition.
+type Service interface {
 }
 
-// ListOrderPath returns the URL path to the order service list HTTP endpoint.
-func ListOrderPath() string {
-	return "/1/orders"
-}
+// ServiceName is the name of the service as defined in the design. This is the
+// same value that is set in the endpoint request contexts under the ServiceKey
+// key.
+const ServiceName = "openapi"
 
-// CreateOrderPath returns the URL path to the order service create HTTP endpoint.
-func CreateOrderPath() string {
-	return "/1/orders"
-}
-
-// LogsOrderPath returns the URL path to the order service logs HTTP endpoint.
-func LogsOrderPath() string {
-	return "/1/orders/logs"
-}
-
-// TopOrderPath returns the URL path to the order service top HTTP endpoint.
-func TopOrderPath() string {
-	return "/1/orders/top"
-}
+// MethodNames lists the service method names as defined in the design. These
+// are the same values that are set in the endpoint request contexts under the
+// MethodKey key.
+var MethodNames = [0]string{}

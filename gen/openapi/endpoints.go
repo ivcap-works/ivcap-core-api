@@ -14,33 +14,21 @@
 
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
-package client
+package openapi
 
 import (
-	"fmt"
+	goa "goa.design/goa/v3/pkg"
 )
 
-// ReadOrderPath returns the URL path to the order service read HTTP endpoint.
-func ReadOrderPath(id string) string {
-	return fmt.Sprintf("/1/orders/%v", id)
+// Endpoints wraps the "openapi" service endpoints.
+type Endpoints struct {
 }
 
-// ListOrderPath returns the URL path to the order service list HTTP endpoint.
-func ListOrderPath() string {
-	return "/1/orders"
+// NewEndpoints wraps the methods of the "openapi" service with endpoints.
+func NewEndpoints(s Service) *Endpoints {
+	return &Endpoints{}
 }
 
-// CreateOrderPath returns the URL path to the order service create HTTP endpoint.
-func CreateOrderPath() string {
-	return "/1/orders"
-}
-
-// LogsOrderPath returns the URL path to the order service logs HTTP endpoint.
-func LogsOrderPath() string {
-	return "/1/orders/logs"
-}
-
-// TopOrderPath returns the URL path to the order service top HTTP endpoint.
-func TopOrderPath() string {
-	return "/1/orders/top"
+// Use applies the given middleware to all the "openapi" service endpoints.
+func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 }

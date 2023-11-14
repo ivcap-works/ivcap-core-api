@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -274,9 +274,10 @@ type ProductT struct {
 	ID       *string
 	Name     *string
 	Status   *string
-	MimeType *string
+	MimeType *string `json:"mime-type,omitempty"`
 	Size     *int64
 	Links    *SelfWithDataT
+	Etag     *string `json:"etag,omitempty"`
 }
 
 // ReadPayload is the payload type of the order service read method.
@@ -744,6 +745,7 @@ func transformOrderviewsProductTViewToProductT(v *orderviews.ProductTView) *Prod
 		Status:   v.Status,
 		MimeType: v.MimeType,
 		Size:     v.Size,
+		Etag:     v.Etag,
 	}
 	if v.Links != nil {
 		res.Links = transformOrderviewsSelfWithDataTViewToSelfWithDataT(v.Links)
@@ -842,6 +844,7 @@ func transformProductTToOrderviewsProductTView(v *ProductT) *orderviews.ProductT
 		Status:   v.Status,
 		MimeType: v.MimeType,
 		Size:     v.Size,
+		Etag:     v.Etag,
 	}
 	if v.Links != nil {
 		res.Links = transformSelfWithDataTToOrderviewsSelfWithDataTView(v.Links)

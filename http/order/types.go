@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -341,9 +341,10 @@ type ProductTResponseBody struct {
 	ID       *string                    `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	Name     *string                    `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	Status   *string                    `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	MimeType *string                    `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
+	MimeType *string                    `json:"mime-type,omitempty"`
 	Size     *int64                     `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
 	Links    *SelfWithDataTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Etag     *string                    `json:"etag,omitempty"`
 }
 
 // SelfWithDataTResponseBody is used to define fields on response body types.

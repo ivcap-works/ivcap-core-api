@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -79,9 +79,10 @@ type ProductTView struct {
 	ID       *string
 	Name     *string
 	Status   *string
-	MimeType *string
+	MimeType *string `json:"mime-type,omitempty"`
 	Size     *int64
 	Links    *SelfWithDataTView
+	Etag     *string `json:"etag,omitempty"`
 }
 
 // SelfWithDataTView is a type that runs validations on a projected type.
