@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package views
@@ -54,7 +40,7 @@ type ArtifactListItemView struct {
 	Name *string
 	// Artifact status
 	Status *string
-	// Size of aritfact in bytes
+	// Size of artifact in bytes
 	Size *int64
 	// Mime (content) type of artifact
 	MimeType *string
@@ -162,7 +148,7 @@ func ValidateArtifactListRT(result *ArtifactListRT) (err error) {
 	case "default", "":
 		err = ValidateArtifactListRTView(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
 	return
 }
@@ -174,7 +160,7 @@ func ValidateArtifactStatusRT(result *ArtifactStatusRT) (err error) {
 	case "default", "":
 		err = ValidateArtifactStatusRTView(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
 	return
 }
@@ -214,7 +200,7 @@ func ValidateArtifactListItemView(result *ArtifactListItemView) (err error) {
 	}
 	if result.Status != nil {
 		if !(*result.Status == "pending" || *result.Status == "partial" || *result.Status == "ready" || *result.Status == "error" || *result.Status == "unknown") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	if result.Links != nil {
@@ -271,7 +257,7 @@ func ValidateArtifactStatusRTView(result *ArtifactStatusRTView) (err error) {
 	}
 	if result.Status != nil {
 		if !(*result.Status == "pending" || *result.Status == "partial" || *result.Status == "ready" || *result.Status == "error" || *result.Status == "unknown") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	if result.Policy != nil {

@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package metadata
@@ -71,7 +57,7 @@ type AddPayload struct {
 	// Schema of metadata
 	Schema string
 	// Aspect content
-	Aspect interface{}
+	Aspect any
 	// Content-Type header, MUST be of application/json.
 	ContentType string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
@@ -171,7 +157,7 @@ type MetadataListItemRT struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect any
 	// If aspectPath was defined, this is what matched the query
 	AspectContext *string
 }
@@ -185,7 +171,7 @@ type MetadataRecordRT struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect any
 	// Time this record was asserted
 	ValidFrom *string
 	// Time this record was revoked
@@ -234,7 +220,7 @@ type RevokePayload struct {
 }
 
 // ServiceNotAvailable is the type returned when the service necessary to
-// fulfill the request is currently not available.
+// fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
 }
 
@@ -252,7 +238,7 @@ type UpdateOnePayload struct {
 	// Schema of metadata
 	Schema string
 	// Aspect content
-	Aspect interface{}
+	Aspect any
 	// Content-Type header, MUST be of application/json.
 	ContentType *string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
@@ -271,7 +257,7 @@ type UpdateRecordPayload struct {
 	// Schema of metadata
 	Schema *string
 	// Aspect content
-	Aspect interface{}
+	Aspect any
 	// Content-Type header, MUST be of application/json.
 	ContentType *string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
@@ -384,7 +370,7 @@ func (e *ResourceNotFoundT) GoaErrorName() string {
 
 // Error returns an error description.
 func (e *ServiceNotAvailableT) Error() string {
-	return "ServiceNotAvailable is the type returned when the service necessary to fulfill the request is currently not available."
+	return "ServiceNotAvailable is the type returned when the service necessary to fulfil the request is currently not available."
 }
 
 // ErrorName returns "ServiceNotAvailableT".
@@ -521,6 +507,8 @@ func newListMetaRTView(res *ListMetaRT) *metadataviews.ListMetaRTView {
 		for i, val := range res.Records {
 			vres.Records[i] = transformMetadataListItemRTToMetadataviewsMetadataListItemRTView(val)
 		}
+	} else {
+		vres.Records = []*metadataviews.MetadataListItemRTView{}
 	}
 	if res.Links != nil {
 		vres.Links = transformNavTToMetadataviewsNavTView(res.Links)

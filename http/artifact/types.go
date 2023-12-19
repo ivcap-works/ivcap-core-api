@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
@@ -197,7 +183,7 @@ type ArtifactListItemResponseBody struct {
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Artifact status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Size of aritfact in bytes
+	// Size of artifact in bytes
 	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
 	// Mime (content) type of artifact
 	MimeType *string            `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
@@ -592,7 +578,7 @@ func ValidateArtifactListItemResponseBody(body *ArtifactListItemResponseBody) (e
 	}
 	if body.Status != nil {
 		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	if body.Links != nil {

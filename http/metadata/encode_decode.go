@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
@@ -32,7 +18,7 @@ import (
 
 // BuildReadRequest instantiates a HTTP request object with method and path set
 // to call the "metadata" service "read" endpoint
-func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
@@ -57,8 +43,8 @@ func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeReadRequest returns an encoder for requests sent to the metadata read
 // server.
-func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*metadata.ReadPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("metadata", "read", "*metadata.ReadPayload", v)
@@ -86,8 +72,8 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-found" (type *metadata.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -194,7 +180,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildListRequest instantiates a HTTP request object with method and path set
 // to call the "metadata" service "list" endpoint
-func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListMetadataPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -209,8 +195,8 @@ func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeListRequest returns an encoder for requests sent to the metadata list
 // server.
-func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*metadata.ListPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("metadata", "list", "*metadata.ListPayload", v)
@@ -261,8 +247,8 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-implemented" (type *metadata.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -369,7 +355,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildAddRequest instantiates a HTTP request object with method and path set
 // to call the "metadata" service "add" endpoint
-func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildAddRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: AddMetadataPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
@@ -384,8 +370,8 @@ func (c *Client) BuildAddRequest(ctx context.Context, v interface{}) (*http.Requ
 
 // EncodeAddRequest returns an encoder for requests sent to the metadata add
 // server.
-func EncodeAddRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeAddRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*metadata.AddPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("metadata", "add", "*metadata.AddPayload", v)
@@ -428,8 +414,8 @@ func EncodeAddRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 //   - "not-implemented" (type *metadata.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -536,7 +522,7 @@ func DecodeAddResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 
 // BuildUpdateOneRequest instantiates a HTTP request object with method and
 // path set to call the "metadata" service "update_one" endpoint
-func (c *Client) BuildUpdateOneRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildUpdateOneRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateOneMetadataPath()}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
@@ -551,8 +537,8 @@ func (c *Client) BuildUpdateOneRequest(ctx context.Context, v interface{}) (*htt
 
 // EncodeUpdateOneRequest returns an encoder for requests sent to the metadata
 // update_one server.
-func EncodeUpdateOneRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeUpdateOneRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*metadata.UpdateOnePayload)
 		if !ok {
 			return goahttp.ErrInvalidType("metadata", "update_one", "*metadata.UpdateOnePayload", v)
@@ -595,8 +581,8 @@ func EncodeUpdateOneRequest(encoder func(*http.Request) goahttp.Encoder) func(*h
 //   - "not-implemented" (type *metadata.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeUpdateOneResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeUpdateOneResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -703,7 +689,7 @@ func DecodeUpdateOneResponse(decoder func(*http.Response) goahttp.Decoder, resto
 
 // BuildUpdateRecordRequest instantiates a HTTP request object with method and
 // path set to call the "metadata" service "update_record" endpoint
-func (c *Client) BuildUpdateRecordRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildUpdateRecordRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
@@ -728,8 +714,8 @@ func (c *Client) BuildUpdateRecordRequest(ctx context.Context, v interface{}) (*
 
 // EncodeUpdateRecordRequest returns an encoder for requests sent to the
 // metadata update_record server.
-func EncodeUpdateRecordRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeUpdateRecordRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*metadata.UpdateRecordPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("metadata", "update_record", "*metadata.UpdateRecordPayload", v)
@@ -776,8 +762,8 @@ func EncodeUpdateRecordRequest(encoder func(*http.Request) goahttp.Encoder) func
 //   - "not-implemented" (type *metadata.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeUpdateRecordResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeUpdateRecordResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -884,7 +870,7 @@ func DecodeUpdateRecordResponse(decoder func(*http.Response) goahttp.Decoder, re
 
 // BuildRevokeRequest instantiates a HTTP request object with method and path
 // set to call the "metadata" service "revoke" endpoint
-func (c *Client) BuildRevokeRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildRevokeRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
@@ -911,8 +897,8 @@ func (c *Client) BuildRevokeRequest(ctx context.Context, v interface{}) (*http.R
 
 // EncodeRevokeRequest returns an encoder for requests sent to the metadata
 // revoke server.
-func EncodeRevokeRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeRevokeRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*metadata.RevokePayload)
 		if !ok {
 			return goahttp.ErrInvalidType("metadata", "revoke", "*metadata.RevokePayload", v)
@@ -940,8 +926,8 @@ func EncodeRevokeRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 //   - "not-implemented" (type *metadata.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *metadata.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeRevokeResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeRevokeResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {

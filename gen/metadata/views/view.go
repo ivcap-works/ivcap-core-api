@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package views
@@ -53,7 +39,7 @@ type MetadataRecordRTView struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect any
 	// Time this record was asserted
 	ValidFrom *string
 	// Time this record was revoked
@@ -89,7 +75,7 @@ type MetadataListItemRTView struct {
 	// Schema ID
 	Schema *string
 	// Attached metadata aspect
-	Aspect interface{}
+	Aspect any
 	// If aspectPath was defined, this is what matched the query
 	AspectContext *string
 }
@@ -160,7 +146,7 @@ func ValidateMetadataRecordRT(result *MetadataRecordRT) (err error) {
 	case "default", "":
 		err = ValidateMetadataRecordRTView(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
 	return
 }
@@ -172,7 +158,7 @@ func ValidateListMetaRT(result *ListMetaRT) (err error) {
 	case "default", "":
 		err = ValidateListMetaRTView(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
 	return
 }
@@ -184,7 +170,7 @@ func ValidateAddMetaRT(result *AddMetaRT) (err error) {
 	case "default", "":
 		err = ValidateAddMetaRTView(result.Projected)
 	default:
-		err = goa.InvalidEnumValueError("view", result.View, []interface{}{"default"})
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
 	return
 }

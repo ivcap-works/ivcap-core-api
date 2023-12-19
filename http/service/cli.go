@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
@@ -80,7 +66,7 @@ func BuildListPayload(serviceListLimit string, serviceListPage string, serviceLi
 	{
 		if serviceListAtTime != "" {
 			atTime = &serviceListAtTime
-			err = goa.MergeErrors(err, goa.ValidateFormat("atTime", *atTime, goa.FormatDateTime))
+			err = goa.MergeErrors(err, goa.ValidateFormat("at-time", *atTime, goa.FormatDateTime))
 			if err != nil {
 				return nil, err
 			}
@@ -110,7 +96,7 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 	{
 		err = json.Unmarshal([]byte(serviceCreateServiceBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://hilllmoen.name/lourdes\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Ut cumque quia sit.\",\n            \"value\": \"Ratione esse modi inventore voluptatem incidunt.\"\n         },\n         {\n            \"name\": \"Ut cumque quia sit.\",\n            \"value\": \"Ratione esse modi inventore voluptatem incidunt.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Assumenda nobis.\",\n      \"provider-id\": \"urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         },\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         },\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         },\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Nobis perspiciatis voluptate.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Nihil facilis alias ab amet.\",\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://oreilly.net/sylvan.gutkowski\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Repudiandae non corporis.\",\n      \"references\": [\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         },\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         },\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Magni repellat nulla sunt.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Architecto sint.\",\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -118,7 +104,6 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 		if body.Parameters == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.provider-id", body.ProviderID, goa.FormatURI))
 		for _, e := range body.References {
 			if e != nil {
 				if err2 := ValidateReferenceTRequestBodyRequestBody(e); err2 != nil {
@@ -143,8 +128,6 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 		jwt = serviceCreateServiceJWT
 	}
 	v := &service.ServiceDescriptionT{
-		ProviderRef: body.ProviderRef,
-		ProviderID:  body.ProviderID,
 		Description: body.Description,
 		Banner:      body.Banner,
 		PolicyID:    body.PolicyID,
@@ -176,6 +159,8 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 		for i, val := range body.Parameters {
 			v.Parameters[i] = marshalParameterDefTToServiceParameterDefT(val)
 		}
+	} else {
+		v.Parameters = []*service.ParameterDefT{}
 	}
 	res := &service.CreateServicePayload{
 		Services: v,
@@ -211,7 +196,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		err = json.Unmarshal([]byte(serviceUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://marquardt.com/abby\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Ut cumque quia sit.\",\n            \"value\": \"Ratione esse modi inventore voluptatem incidunt.\"\n         },\n         {\n            \"name\": \"Ut cumque quia sit.\",\n            \"value\": \"Ratione esse modi inventore voluptatem incidunt.\"\n         },\n         {\n            \"name\": \"Ut cumque quia sit.\",\n            \"value\": \"Ratione esse modi inventore voluptatem incidunt.\"\n         },\n         {\n            \"name\": \"Ut cumque quia sit.\",\n            \"value\": \"Ratione esse modi inventore voluptatem incidunt.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Totam illo vel natus officia quae sed.\",\n      \"provider-id\": \"urn:ivcap:provider:0f0e3f57-80f7-4899-9b69-459af2efd789\",\n      \"provider-ref\": \"service_foo_patch_1\",\n      \"references\": [\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         },\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         },\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         },\n         {\n            \"title\": \"Voluptas voluptatem.\",\n            \"uri\": \"http://morissettegoldner.org/jayde.nolan\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Nobis perspiciatis voluptate.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Nihil facilis alias ab amet.\",\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://koelpin.info/isaias.jakubowski\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Exercitationem repellat dolorem in molestiae laboriosam ut.\",\n      \"references\": [\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         },\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Magni repellat nulla sunt.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Architecto sint.\",\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -219,7 +204,6 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 		if body.Parameters == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.provider-id", body.ProviderID, goa.FormatURI))
 		for _, e := range body.References {
 			if e != nil {
 				if err2 := ValidateReferenceTRequestBodyRequestBody(e); err2 != nil {
@@ -259,8 +243,6 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 		jwt = serviceUpdateJWT
 	}
 	v := &service.ServiceDescriptionT{
-		ProviderRef: body.ProviderRef,
-		ProviderID:  body.ProviderID,
 		Description: body.Description,
 		Banner:      body.Banner,
 		PolicyID:    body.PolicyID,
@@ -292,6 +274,8 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 		for i, val := range body.Parameters {
 			v.Parameters[i] = marshalParameterDefTToServiceParameterDefT(val)
 		}
+	} else {
+		v.Parameters = []*service.ParameterDefT{}
 	}
 	res := &service.UpdatePayload{
 		Services: v,

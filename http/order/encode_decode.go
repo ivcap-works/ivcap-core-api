@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
@@ -32,7 +18,7 @@ import (
 
 // BuildReadRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "read" endpoint
-func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
@@ -57,8 +43,8 @@ func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeReadRequest returns an encoder for requests sent to the order read
 // server.
-func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.ReadPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "read", "*order.ReadPayload", v)
@@ -86,8 +72,8 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -194,7 +180,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildListRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "list" endpoint
-func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListOrderPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -209,8 +195,8 @@ func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeListRequest returns an encoder for requests sent to the order list
 // server.
-func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.ListPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "list", "*order.ListPayload", v)
@@ -254,8 +240,8 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -362,7 +348,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildCreateRequest instantiates a HTTP request object with method and path
 // set to call the "order" service "create" endpoint
-func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateOrderPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
@@ -377,8 +363,8 @@ func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.R
 
 // EncodeCreateRequest returns an encoder for requests sent to the order create
 // server.
-func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.CreatePayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "create", "*order.CreatePayload", v)
@@ -412,8 +398,8 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 //   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -536,7 +522,7 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 
 // BuildLogsRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "logs" endpoint
-func (c *Client) BuildLogsRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildLogsRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: LogsOrderPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
@@ -551,8 +537,8 @@ func (c *Client) BuildLogsRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeLogsRequest returns an encoder for requests sent to the order logs
 // server.
-func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.LogsPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "logs", "*order.LogsPayload", v)
@@ -585,8 +571,8 @@ func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -690,7 +676,7 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildTopRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "top" endpoint
-func (c *Client) BuildTopRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildTopRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: TopOrderPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
@@ -705,8 +691,8 @@ func (c *Client) BuildTopRequest(ctx context.Context, v interface{}) (*http.Requ
 
 // EncodeTopRequest returns an encoder for requests sent to the order top
 // server.
-func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.TopPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "top", "*order.TopPayload", v)
@@ -739,8 +725,8 @@ func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {

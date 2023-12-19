@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package service
@@ -249,11 +235,6 @@ type SelfT struct {
 }
 
 type ServiceDescriptionT struct {
-	// Provider provided reference. Should to be a single string with punctuations
-	// allowed. Might be changed, so please check result
-	ProviderRef *string `json:"provider-ref,omitempty"`
-	// Reference to service provider
-	ProviderID string `json:"provider-id,omitempty"`
 	// More detailed description of the service
 	Description string
 	// Optional provider provided meta tags
@@ -281,9 +262,7 @@ type ServiceListItem struct {
 	Name *string
 	// Optional description of the service
 	Description *string
-	// Optional provider link
-	Provider *RefT
-	Links    *SelfT
+	Links       *SelfT
 }
 
 // ServiceListRT is the result type of the service service list method.
@@ -301,17 +280,12 @@ type ServiceListRT struct {
 type ServiceStatusRT struct {
 	// Service ID
 	ID string
-	// Provider provided ID. Needs to be a single string with punctuations allowed.
-	// Might have been changed
-	ProviderRef *string
 	// More detailed description of the service
 	Description *string
 	// Service status
 	Status *string
 	// Optional provider provided meta tags
 	Metadata []*ParameterT
-	// Reference to service provider
-	Provider *RefT
 	// Reference to billable account
 	Account *RefT
 	Links   *SelfT
@@ -350,10 +324,10 @@ type WorkflowT struct {
 	// Type of workflow
 	Basic *BasicWorkflowOptsT
 	// Defines the workflow using argo's WF schema
-	Argo interface{}
+	Argo any
 	// Type specific options - left for backward compatibility, if possible use
 	// type specific elements
-	Opts interface{}
+	Opts any
 }
 
 // Error returns an error description.
@@ -563,6 +537,8 @@ func newServiceListRTView(res *ServiceListRT) *serviceviews.ServiceListRTView {
 		for i, val := range res.Services {
 			vres.Services[i] = transformServiceListItemToServiceviewsServiceListItemView(val)
 		}
+	} else {
+		vres.Services = []*serviceviews.ServiceListItemView{}
 	}
 	if res.Links != nil {
 		vres.Links = transformNavTToServiceviewsNavTView(res.Links)
@@ -597,9 +573,6 @@ func newServiceStatusRT(vres *serviceviews.ServiceStatusRTView) *ServiceStatusRT
 		for i, val := range vres.Parameters {
 			res.Parameters[i] = transformServiceviewsParameterDefTViewToParameterDefT(val)
 		}
-	}
-	if vres.Provider != nil {
-		res.Provider = transformServiceviewsRefTViewToRefT(vres.Provider)
 	}
 	if vres.Account != nil {
 		res.Account = transformServiceviewsRefTViewToRefT(vres.Account)
@@ -636,9 +609,6 @@ func newServiceStatusRTView(res *ServiceStatusRT) *serviceviews.ServiceStatusRTV
 			vres.Metadata[i] = transformParameterTToServiceviewsParameterTView(val)
 		}
 	}
-	if res.Provider != nil {
-		vres.Provider = transformRefTToServiceviewsRefTView(res.Provider)
-	}
 	if res.Account != nil {
 		vres.Account = transformRefTToServiceviewsRefTView(res.Account)
 	}
@@ -656,6 +626,8 @@ func newServiceStatusRTView(res *ServiceStatusRT) *serviceviews.ServiceStatusRTV
 		for i, val := range res.Parameters {
 			vres.Parameters[i] = transformParameterDefTToServiceviewsParameterDefTView(val)
 		}
+	} else {
+		vres.Parameters = []*serviceviews.ParameterDefTView{}
 	}
 	return vres
 }
@@ -683,25 +655,6 @@ func transformServiceviewsServiceListItemViewToServiceListItem(v *serviceviews.S
 		Name:        v.Name,
 		Description: v.Description,
 	}
-	if v.Provider != nil {
-		res.Provider = transformServiceviewsRefTViewToRefT(v.Provider)
-	}
-	if v.Links != nil {
-		res.Links = transformServiceviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformServiceviewsRefTViewToRefT builds a value of type *RefT from a
-// value of type *serviceviews.RefTView.
-func transformServiceviewsRefTViewToRefT(v *serviceviews.RefTView) *RefT {
-	if v == nil {
-		return nil
-	}
-	res := &RefT{
-		ID: v.ID,
-	}
 	if v.Links != nil {
 		res.Links = transformServiceviewsSelfTViewToSelfT(v.Links)
 	}
@@ -712,9 +665,6 @@ func transformServiceviewsRefTViewToRefT(v *serviceviews.RefTView) *RefT {
 // transformServiceviewsSelfTViewToSelfT builds a value of type *SelfT from a
 // value of type *serviceviews.SelfTView.
 func transformServiceviewsSelfTViewToSelfT(v *serviceviews.SelfTView) *SelfT {
-	if v == nil {
-		return nil
-	}
 	res := &SelfT{
 		Self: v.Self,
 	}
@@ -762,25 +712,6 @@ func transformServiceListItemToServiceviewsServiceListItemView(v *ServiceListIte
 		Name:        v.Name,
 		Description: v.Description,
 	}
-	if v.Provider != nil {
-		res.Provider = transformRefTToServiceviewsRefTView(v.Provider)
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToServiceviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// transformRefTToServiceviewsRefTView builds a value of type
-// *serviceviews.RefTView from a value of type *RefT.
-func transformRefTToServiceviewsRefTView(v *RefT) *serviceviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.RefTView{
-		ID: v.ID,
-	}
 	if v.Links != nil {
 		res.Links = transformSelfTToServiceviewsSelfTView(v.Links)
 	}
@@ -791,9 +722,6 @@ func transformRefTToServiceviewsRefTView(v *RefT) *serviceviews.RefTView {
 // transformSelfTToServiceviewsSelfTView builds a value of type
 // *serviceviews.SelfTView from a value of type *SelfT.
 func transformSelfTToServiceviewsSelfTView(v *SelfT) *serviceviews.SelfTView {
-	if v == nil {
-		return nil
-	}
 	res := &serviceviews.SelfTView{
 		Self: v.Self,
 	}
@@ -885,6 +813,22 @@ func transformServiceviewsParameterOptTViewToParameterOptT(v *serviceviews.Param
 	return res
 }
 
+// transformServiceviewsRefTViewToRefT builds a value of type *RefT from a
+// value of type *serviceviews.RefTView.
+func transformServiceviewsRefTViewToRefT(v *serviceviews.RefTView) *RefT {
+	if v == nil {
+		return nil
+	}
+	res := &RefT{
+		ID: v.ID,
+	}
+	if v.Links != nil {
+		res.Links = transformServiceviewsSelfTViewToSelfT(v.Links)
+	}
+
+	return res
+}
+
 // transformParameterTToServiceviewsParameterTView builds a value of type
 // *serviceviews.ParameterTView from a value of type *ParameterT.
 func transformParameterTToServiceviewsParameterTView(v *ParameterT) *serviceviews.ParameterTView {
@@ -894,6 +838,22 @@ func transformParameterTToServiceviewsParameterTView(v *ParameterT) *serviceview
 	res := &serviceviews.ParameterTView{
 		Name:  v.Name,
 		Value: v.Value,
+	}
+
+	return res
+}
+
+// transformRefTToServiceviewsRefTView builds a value of type
+// *serviceviews.RefTView from a value of type *RefT.
+func transformRefTToServiceviewsRefTView(v *RefT) *serviceviews.RefTView {
+	if v == nil {
+		return nil
+	}
+	res := &serviceviews.RefTView{
+		ID: v.ID,
+	}
+	if v.Links != nil {
+		res.Links = transformSelfTToServiceviewsSelfTView(v.Links)
 	}
 
 	return res

@@ -3,7 +3,6 @@
 package client
 
 import (
-	order "github.com/reinventingscience/ivcap-core-api/gen/order"
 	"context"
 	"net/http"
 
@@ -11,7 +10,7 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// Client lists the order service endpoint HTTP clients.
+// Client lists the aspect service endpoint HTTP clients.
 type Client struct {
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
@@ -22,11 +21,12 @@ type Client struct {
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
 
-	// Logs Doer is the HTTP client used to make requests to the logs endpoint.
-	LogsDoer goahttp.Doer
+	// Update Doer is the HTTP client used to make requests to the update endpoint.
+	UpdateDoer goahttp.Doer
 
-	// Top Doer is the HTTP client used to make requests to the top endpoint.
-	TopDoer goahttp.Doer
+	// Retract Doer is the HTTP client used to make requests to the retract
+	// endpoint.
+	RetractDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -41,7 +41,7 @@ type Client struct {
 	decoder func(*http.Response) goahttp.Decoder
 }
 
-// NewClient instantiates HTTP clients for all the order service servers.
+// NewClient instantiates HTTP clients for all the aspect service servers.
 func NewClient(
 	scheme string,
 	host string,
@@ -54,8 +54,8 @@ func NewClient(
 		ReadDoer:            doer,
 		ListDoer:            doer,
 		CreateDoer:          doer,
-		LogsDoer:            doer,
-		TopDoer:             doer,
+		UpdateDoer:          doer,
+		RetractDoer:         doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -65,7 +65,7 @@ func NewClient(
 	}
 }
 
-// Read returns an endpoint that makes HTTP requests to the order service read
+// Read returns an endpoint that makes HTTP requests to the aspect service read
 // server.
 func (c *Client) Read() goa.Endpoint {
 	var (
@@ -83,13 +83,13 @@ func (c *Client) Read() goa.Endpoint {
 		}
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "read", err)
+			return nil, goahttp.ErrRequestError("aspect", "read", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the order service list
+// List returns an endpoint that makes HTTP requests to the aspect service list
 // server.
 func (c *Client) List() goa.Endpoint {
 	var (
@@ -107,13 +107,13 @@ func (c *Client) List() goa.Endpoint {
 		}
 		resp, err := c.ListDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "list", err)
+			return nil, goahttp.ErrRequestError("aspect", "list", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Create returns an endpoint that makes HTTP requests to the order service
+// Create returns an endpoint that makes HTTP requests to the aspect service
 // create server.
 func (c *Client) Create() goa.Endpoint {
 	var (
@@ -131,21 +131,21 @@ func (c *Client) Create() goa.Endpoint {
 		}
 		resp, err := c.CreateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "create", err)
+			return nil, goahttp.ErrRequestError("aspect", "create", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Logs returns an endpoint that makes HTTP requests to the order service logs
-// server.
-func (c *Client) Logs() goa.Endpoint {
+// Update returns an endpoint that makes HTTP requests to the aspect service
+// update server.
+func (c *Client) Update() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeLogsRequest(c.encoder)
-		decodeResponse = DecodeLogsResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeUpdateRequest(c.encoder)
+		decodeResponse = DecodeUpdateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildLogsRequest(ctx, v)
+		req, err := c.BuildUpdateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -153,28 +153,23 @@ func (c *Client) Logs() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.LogsDoer.Do(req)
+		resp, err := c.UpdateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "logs", err)
+			return nil, goahttp.ErrRequestError("aspect", "update", err)
 		}
-		_, err = decodeResponse(resp)
-		if err != nil {
-			resp.Body.Close()
-			return nil, err
-		}
-		return &order.LogsResponseData{Body: resp.Body}, nil
+		return decodeResponse(resp)
 	}
 }
 
-// Top returns an endpoint that makes HTTP requests to the order service top
-// server.
-func (c *Client) Top() goa.Endpoint {
+// Retract returns an endpoint that makes HTTP requests to the aspect service
+// retract server.
+func (c *Client) Retract() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeTopRequest(c.encoder)
-		decodeResponse = DecodeTopResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeRetractRequest(c.encoder)
+		decodeResponse = DecodeRetractResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildTopRequest(ctx, v)
+		req, err := c.BuildRetractRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -182,9 +177,9 @@ func (c *Client) Top() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.TopDoer.Do(req)
+		resp, err := c.RetractDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "top", err)
+			return nil, goahttp.ErrRequestError("aspect", "retract", err)
 		}
 		return decodeResponse(resp)
 	}

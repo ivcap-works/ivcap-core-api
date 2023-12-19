@@ -1,17 +1,3 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//      http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
 // $ goa gen github.com/reinventingscience/ivcap-core-api/design
 
 package client
@@ -26,11 +12,6 @@ import (
 // CreateServiceRequestBody is the type of the "service" service
 // "create_service" endpoint HTTP request body.
 type CreateServiceRequestBody struct {
-	// Provider provided reference. Should to be a single string with punctuations
-	// allowed. Might be changed, so please check result
-	ProviderRef *string `json:"provider-ref,omitempty"`
-	// Reference to service provider
-	ProviderID string `json:"provider-id,omitempty"`
 	// More detailed description of the service
 	Description string `form:"description" json:"description" xml:"description"`
 	// Optional provider provided meta tags
@@ -54,11 +35,6 @@ type CreateServiceRequestBody struct {
 // UpdateRequestBody is the type of the "service" service "update" endpoint
 // HTTP request body.
 type UpdateRequestBody struct {
-	// Provider provided reference. Should to be a single string with punctuations
-	// allowed. Might be changed, so please check result
-	ProviderRef *string `json:"provider-ref,omitempty"`
-	// Reference to service provider
-	ProviderID string `json:"provider-id,omitempty"`
 	// More detailed description of the service
 	Description string `form:"description" json:"description" xml:"description"`
 	// Optional provider provided meta tags
@@ -95,17 +71,12 @@ type ListResponseBody struct {
 type CreateServiceResponseBody struct {
 	// Service ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Provider provided ID. Needs to be a single string with punctuations allowed.
-	// Might have been changed
-	ProviderRef *string `form:"provider-ref,omitempty" json:"provider-ref,omitempty" xml:"provider-ref,omitempty"`
 	// More detailed description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Optional provider provided meta tags
 	Metadata []*ParameterTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
-	// Reference to service provider
-	Provider *RefTResponseBody `form:"provider,omitempty" json:"provider,omitempty" xml:"provider,omitempty"`
 	// Reference to billable account
 	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
@@ -122,17 +93,12 @@ type CreateServiceResponseBody struct {
 type ReadResponseBody struct {
 	// Service ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Provider provided ID. Needs to be a single string with punctuations allowed.
-	// Might have been changed
-	ProviderRef *string `form:"provider-ref,omitempty" json:"provider-ref,omitempty" xml:"provider-ref,omitempty"`
 	// More detailed description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Optional provider provided meta tags
 	Metadata []*ParameterTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
-	// Reference to service provider
-	Provider *RefTResponseBody `form:"provider,omitempty" json:"provider,omitempty" xml:"provider,omitempty"`
 	// Reference to billable account
 	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
@@ -149,17 +115,12 @@ type ReadResponseBody struct {
 type UpdateResponseBody struct {
 	// Service ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Provider provided ID. Needs to be a single string with punctuations allowed.
-	// Might have been changed
-	ProviderRef *string `form:"provider-ref,omitempty" json:"provider-ref,omitempty" xml:"provider-ref,omitempty"`
 	// More detailed description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Optional provider provided meta tags
 	Metadata []*ParameterTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
-	// Reference to service provider
-	Provider *RefTResponseBody `form:"provider,omitempty" json:"provider,omitempty" xml:"provider,omitempty"`
 	// Reference to billable account
 	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
@@ -363,16 +324,8 @@ type ServiceListItemResponseBody struct {
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional description of the service
-	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
-	// Optional provider link
-	Provider *RefTResponseBody  `form:"provider,omitempty" json:"provider,omitempty" xml:"provider,omitempty"`
-	Links    *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
-// RefTResponseBody is used to define fields on response body types.
-type RefTResponseBody struct {
-	ID    *string            `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Description *string            `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+	Links       *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // SelfTResponseBody is used to define fields on response body types.
@@ -418,10 +371,10 @@ type WorkflowTRequestBodyRequestBody struct {
 	// Type of workflow
 	Basic *BasicWorkflowOptsTRequestBodyRequestBody `form:"basic,omitempty" json:"basic,omitempty" xml:"basic,omitempty"`
 	// Defines the workflow using argo's WF schema
-	Argo interface{} `form:"argo,omitempty" json:"argo,omitempty" xml:"argo,omitempty"`
+	Argo any `form:"argo,omitempty" json:"argo,omitempty" xml:"argo,omitempty"`
 	// Type specific options - left for backward compatibility, if possible use
 	// type specific elements
-	Opts interface{} `form:"opts,omitempty" json:"opts,omitempty" xml:"opts,omitempty"`
+	Opts any `form:"opts,omitempty" json:"opts,omitempty" xml:"opts,omitempty"`
 }
 
 // BasicWorkflowOptsTRequestBodyRequestBody is used to define fields on request
@@ -478,6 +431,12 @@ type ParameterTResponseBody struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
+// RefTResponseBody is used to define fields on response body types.
+type RefTResponseBody struct {
+	ID    *string            `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+}
+
 // ParameterDefTResponseBody is used to define fields on response body types.
 type ParameterDefTResponseBody struct {
 	Name        *string                      `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -502,8 +461,6 @@ type ParameterOptTResponseBody struct {
 // the "create_service" endpoint of the "service" service.
 func NewCreateServiceRequestBody(p *service.CreateServicePayload) *CreateServiceRequestBody {
 	body := &CreateServiceRequestBody{
-		ProviderRef: p.Services.ProviderRef,
-		ProviderID:  p.Services.ProviderID,
 		Description: p.Services.Description,
 		Banner:      p.Services.Banner,
 		PolicyID:    p.Services.PolicyID,
@@ -535,6 +492,8 @@ func NewCreateServiceRequestBody(p *service.CreateServicePayload) *CreateService
 		for i, val := range p.Services.Parameters {
 			body.Parameters[i] = marshalServiceParameterDefTToParameterDefT(val)
 		}
+	} else {
+		body.Parameters = []*ParameterDefT{}
 	}
 	return body
 }
@@ -543,8 +502,6 @@ func NewCreateServiceRequestBody(p *service.CreateServicePayload) *CreateService
 // "update" endpoint of the "service" service.
 func NewUpdateRequestBody(p *service.UpdatePayload) *UpdateRequestBody {
 	body := &UpdateRequestBody{
-		ProviderRef: p.Services.ProviderRef,
-		ProviderID:  p.Services.ProviderID,
 		Description: p.Services.Description,
 		Banner:      p.Services.Banner,
 		PolicyID:    p.Services.PolicyID,
@@ -576,6 +533,8 @@ func NewUpdateRequestBody(p *service.UpdatePayload) *UpdateRequestBody {
 		for i, val := range p.Services.Parameters {
 			body.Parameters[i] = marshalServiceParameterDefTToParameterDefT(val)
 		}
+	} else {
+		body.Parameters = []*ParameterDefT{}
 	}
 	return body
 }
@@ -658,7 +617,6 @@ func NewListNotAuthorized() *service.UnauthorizedT {
 func NewCreateServiceServiceStatusRTCreated(body *CreateServiceResponseBody) *serviceviews.ServiceStatusRTView {
 	v := &serviceviews.ServiceStatusRTView{
 		ID:          body.ID,
-		ProviderRef: body.ProviderRef,
 		Description: body.Description,
 		Status:      body.Status,
 		Name:        body.Name,
@@ -668,9 +626,6 @@ func NewCreateServiceServiceStatusRTCreated(body *CreateServiceResponseBody) *se
 		for i, val := range body.Metadata {
 			v.Metadata[i] = unmarshalParameterTResponseBodyToServiceviewsParameterTView(val)
 		}
-	}
-	if body.Provider != nil {
-		v.Provider = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Provider)
 	}
 	if body.Account != nil {
 		v.Account = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Account)
@@ -776,7 +731,6 @@ func NewCreateServiceNotAuthorized() *service.UnauthorizedT {
 func NewReadServiceStatusRTOK(body *ReadResponseBody) *serviceviews.ServiceStatusRTView {
 	v := &serviceviews.ServiceStatusRTView{
 		ID:          body.ID,
-		ProviderRef: body.ProviderRef,
 		Description: body.Description,
 		Status:      body.Status,
 		Name:        body.Name,
@@ -786,9 +740,6 @@ func NewReadServiceStatusRTOK(body *ReadResponseBody) *serviceviews.ServiceStatu
 		for i, val := range body.Metadata {
 			v.Metadata[i] = unmarshalParameterTResponseBodyToServiceviewsParameterTView(val)
 		}
-	}
-	if body.Provider != nil {
-		v.Provider = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Provider)
 	}
 	if body.Account != nil {
 		v.Account = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Account)
@@ -869,7 +820,6 @@ func NewReadNotAuthorized() *service.UnauthorizedT {
 func NewUpdateServiceStatusRTOK(body *UpdateResponseBody) *serviceviews.ServiceStatusRTView {
 	v := &serviceviews.ServiceStatusRTView{
 		ID:          body.ID,
-		ProviderRef: body.ProviderRef,
 		Description: body.Description,
 		Status:      body.Status,
 		Name:        body.Name,
@@ -879,9 +829,6 @@ func NewUpdateServiceStatusRTOK(body *UpdateResponseBody) *serviceviews.ServiceS
 		for i, val := range body.Metadata {
 			v.Metadata[i] = unmarshalParameterTResponseBodyToServiceviewsParameterTView(val)
 		}
-	}
-	if body.Provider != nil {
-		v.Provider = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Provider)
 	}
 	if body.Account != nil {
 		v.Account = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Account)
@@ -1269,24 +1216,6 @@ func ValidateServiceListItemResponseBody(body *ServiceListItemResponseBody) (err
 	if body.Links == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
 	}
-	if body.Provider != nil {
-		if err2 := ValidateRefTResponseBody(body.Provider); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateRefTResponseBody runs the validations defined on RefTResponseBody
-func ValidateRefTResponseBody(body *RefTResponseBody) (err error) {
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
-	}
 	if body.Links != nil {
 		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
 			err = goa.MergeErrors(err, err2)
@@ -1353,6 +1282,19 @@ func ValidateWorkflowTRequestBodyRequestBody(body *WorkflowTRequestBodyRequestBo
 func ValidateBasicWorkflowOptsTRequestBodyRequestBody(body *BasicWorkflowOptsTRequestBodyRequestBody) (err error) {
 	if body.Command == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("command", "body"))
+	}
+	return
+}
+
+// ValidateRefTResponseBody runs the validations defined on RefTResponseBody
+func ValidateRefTResponseBody(body *RefTResponseBody) (err error) {
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	if body.Links != nil {
+		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
 	}
 	return
 }
