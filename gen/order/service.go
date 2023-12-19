@@ -1,9 +1,9 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package order
 
 import (
-	orderviews "github.com/reinventingscience/ivcap-core-api/gen/order/views"
+	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 	"context"
 	"io"
 

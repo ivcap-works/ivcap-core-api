@@ -1,9 +1,9 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package aspect
 
 import (
-	aspectviews "github.com/reinventingscience/ivcap-core-api/gen/aspect/views"
+	aspectviews "github.com/ivcap-works/ivcap-core-api/gen/aspect/views"
 	"context"
 
 	"goa.design/goa/v3/security"

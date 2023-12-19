@@ -1,9 +1,9 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package metadata
 
 import (
-	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
+	metadataviews "github.com/ivcap-works/ivcap-core-api/gen/metadata/views"
 	"context"
 
 	"goa.design/goa/v3/security"

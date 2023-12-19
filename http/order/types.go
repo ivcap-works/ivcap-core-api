@@ -1,10 +1,10 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
-	order "github.com/reinventingscience/ivcap-core-api/gen/order"
-	orderviews "github.com/reinventingscience/ivcap-core-api/gen/order/views"
+	order "github.com/ivcap-works/ivcap-core-api/gen/order"
+	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 
 	goa "goa.design/goa/v3/pkg"
 )

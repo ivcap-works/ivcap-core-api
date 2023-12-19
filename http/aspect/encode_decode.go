@@ -1,11 +1,11 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	aspect "github.com/reinventingscience/ivcap-core-api/gen/aspect"
-	aspectviews "github.com/reinventingscience/ivcap-core-api/gen/aspect/views"
+	aspect "github.com/ivcap-works/ivcap-core-api/gen/aspect"
+	aspectviews "github.com/ivcap-works/ivcap-core-api/gen/aspect/views"
 	"context"
 	"fmt"
 	"io"

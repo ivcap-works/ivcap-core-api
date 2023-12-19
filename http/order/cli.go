@@ -1,9 +1,9 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
-	order "github.com/reinventingscience/ivcap-core-api/gen/order"
+	order "github.com/ivcap-works/ivcap-core-api/gen/order"
 	"encoding/json"
 	"fmt"
 	"strconv"

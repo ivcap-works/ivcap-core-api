@@ -1,9 +1,9 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
-	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
+	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 	"fmt"
 	"strconv"
 

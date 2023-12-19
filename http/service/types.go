@@ -1,10 +1,10 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
-	service "github.com/reinventingscience/ivcap-core-api/gen/service"
-	serviceviews "github.com/reinventingscience/ivcap-core-api/gen/service/views"
+	service "github.com/ivcap-works/ivcap-core-api/gen/service"
+	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
 
 	goa "goa.design/goa/v3/pkg"
 )

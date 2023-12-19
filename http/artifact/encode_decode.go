@@ -1,11 +1,11 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
-	artifactviews "github.com/reinventingscience/ivcap-core-api/gen/artifact/views"
+	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
+	artifactviews "github.com/ivcap-works/ivcap-core-api/gen/artifact/views"
 	"context"
 	"fmt"
 	"io"

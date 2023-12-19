@@ -1,9 +1,9 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package artifact
 
 import (
-	artifactviews "github.com/reinventingscience/ivcap-core-api/gen/artifact/views"
+	artifactviews "github.com/ivcap-works/ivcap-core-api/gen/artifact/views"
 	"context"
 	"io"
 

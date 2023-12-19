@@ -1,11 +1,11 @@
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
-	metadataviews "github.com/reinventingscience/ivcap-core-api/gen/metadata/views"
+	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
+	metadataviews "github.com/ivcap-works/ivcap-core-api/gen/metadata/views"
 	"context"
 	"fmt"
 	"io"
