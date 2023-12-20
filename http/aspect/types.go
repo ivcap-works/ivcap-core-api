@@ -8,14 +8,6 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// ListRequestBody is the type of the "aspect" service "list" endpoint HTTP
-// request body.
-type ListRequestBody struct {
-	// To learn more about the supported format, see
-	// https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
-	ContentPath *string `json:"aspect-path,omitempty"`
-}
-
 // ReadResponseBody is the type of the "aspect" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
@@ -267,15 +259,6 @@ type AspectListItemRTResponseBody struct {
 	Content any `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
 	// Content-Type header, MUST be of application/json.
 	ContentType *string `json:"content-type,omitempty"`
-}
-
-// NewListRequestBody builds the HTTP request body from the payload of the
-// "list" endpoint of the "aspect" service.
-func NewListRequestBody(p *aspect.ListPayload) *ListRequestBody {
-	body := &ListRequestBody{
-		ContentPath: p.ContentPath,
-	}
-	return body
 }
 
 // NewReadAspectRTOK builds a "aspect" service "read" endpoint result from a

@@ -152,13 +152,13 @@ type LinkT struct {
 
 // ListPayload is the payload type of the aspect service list method.
 type ListPayload struct {
-	// Optioanl entity for which to request aspects
+	// Optional entity for which to request aspects
 	Entity *string `json:"entity,omitempty"`
 	// Schema prefix using '%' as wildcard indicator
 	Schema *string
 	// To learn more about the supported format, see
 	// https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
-	ContentPath *string `json:"aspect-path,omitempty"`
+	ContentPath *string `json:"content-path,omitempty"`
 	// Return aspect which where valid at that time [now]
 	AtTime *string `json:"at-time,omitempty"`
 	// The 'limit' system query option requests the number of items in the queried

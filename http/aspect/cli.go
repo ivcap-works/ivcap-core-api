@@ -31,15 +31,8 @@ func BuildReadPayload(aspectReadID string, aspectReadJWT string) (*aspect.ReadPa
 
 // BuildListPayload builds the payload for the aspect list endpoint from CLI
 // flags.
-func BuildListPayload(aspectListBody string, aspectListEntity string, aspectListSchema string, aspectListAtTime string, aspectListLimit string, aspectListFilter string, aspectListOrderBy string, aspectListOrderDesc string, aspectListPage string, aspectListJWT string) (*aspect.ListPayload, error) {
+func BuildListPayload(aspectListEntity string, aspectListSchema string, aspectListContentPath string, aspectListAtTime string, aspectListLimit string, aspectListFilter string, aspectListOrderBy string, aspectListOrderDesc string, aspectListPage string, aspectListJWT string) (*aspect.ListPayload, error) {
 	var err error
-	var body ListRequestBody
-	{
-		err = json.Unmarshal([]byte(aspectListBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"content-path\": \"$.images[*] ? (@.size \\u003e 10000)\"\n   }'")
-		}
-	}
 	var entity *string
 	{
 		if aspectListEntity != "" {
@@ -54,6 +47,12 @@ func BuildListPayload(aspectListBody string, aspectListEntity string, aspectList
 	{
 		if aspectListSchema != "" {
 			schema = &aspectListSchema
+		}
+	}
+	var contentPath *string
+	{
+		if aspectListContentPath != "" {
+			contentPath = &aspectListContentPath
 		}
 	}
 	var atTime *string
@@ -119,11 +118,10 @@ func BuildListPayload(aspectListBody string, aspectListEntity string, aspectList
 	{
 		jwt = aspectListJWT
 	}
-	v := &aspect.ListPayload{
-		ContentPath: body.ContentPath,
-	}
+	v := &aspect.ListPayload{}
 	v.Entity = entity
 	v.Schema = schema
+	v.ContentPath = contentPath
 	v.AtTime = atTime
 	v.Limit = limit
 	v.Filter = filter

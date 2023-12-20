@@ -213,6 +213,9 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		if p.Schema != nil {
 			values.Add("schema", *p.Schema)
 		}
+		if p.ContentPath != nil {
+			values.Add("content-path", *p.ContentPath)
+		}
 		if p.AtTime != nil {
 			values.Add("at-time", *p.AtTime)
 		}
@@ -226,10 +229,6 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 			values.Add("page", *p.Page)
 		}
 		req.URL.RawQuery = values.Encode()
-		body := NewListRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("aspect", "list", err)
-		}
 		return nil
 	}
 }
