@@ -96,7 +96,7 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 	{
 		err = json.Unmarshal([]byte(serviceCreateServiceBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://oreilly.net/sylvan.gutkowski\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Repudiandae non corporis.\",\n      \"references\": [\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         },\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         },\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Magni repellat nulla sunt.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Architecto sint.\",\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://romaguera.net/leonel\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         },\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         },\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         },\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Modi inventore voluptatem.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Vel et voluptas voluptatem ea.\",\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -119,6 +119,9 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 				err = goa.MergeErrors(err, err2)
 			}
 		}
+		if body.Policy != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
+		}
 		if err != nil {
 			return nil, err
 		}
@@ -127,17 +130,11 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 	{
 		jwt = serviceCreateServiceJWT
 	}
-	v := &service.ServiceDescriptionT{
+	v := &service.ServiceDefinitionT{
 		Description: body.Description,
 		Banner:      body.Banner,
-		PolicyID:    body.PolicyID,
+		Policy:      body.Policy,
 		Name:        body.Name,
-	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*service.ParameterT, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = marshalParameterTRequestBodyRequestBodyToServiceParameterT(val)
-		}
 	}
 	if body.References != nil {
 		v.References = make([]*service.ReferenceT, len(body.References))
@@ -196,7 +193,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		err = json.Unmarshal([]byte(serviceUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://koelpin.info/isaias.jakubowski\",\n      \"description\": \"This service ...\",\n      \"metadata\": [\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         },\n         {\n            \"name\": \"Magnam repellendus nihil.\",\n            \"value\": \"In sint tenetur repellat reprehenderit ea.\"\n         }\n      ],\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy-id\": \"Exercitationem repellat dolorem in molestiae laboriosam ut.\",\n      \"references\": [\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         },\n         {\n            \"title\": \"Corrupti placeat iusto illo voluptate.\",\n            \"uri\": \"http://millsparisian.info/dixie.rice\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Magni repellat nulla sunt.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Architecto sint.\",\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://smith.name/giuseppe_turner\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         },\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         },\n         {\n            \"title\": \"Sint aut ut magni voluptatem quae.\",\n            \"uri\": \"http://gerhold.net/ralph\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Modi inventore voluptatem.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Vel et voluptas voluptatem ea.\",\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -218,6 +215,9 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 			if err2 := ValidateWorkflowTRequestBodyRequestBody(body.Workflow); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
+		}
+		if body.Policy != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
 		}
 		if err != nil {
 			return nil, err
@@ -242,17 +242,11 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		jwt = serviceUpdateJWT
 	}
-	v := &service.ServiceDescriptionT{
+	v := &service.ServiceDefinitionT{
 		Description: body.Description,
 		Banner:      body.Banner,
-		PolicyID:    body.PolicyID,
+		Policy:      body.Policy,
 		Name:        body.Name,
-	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*service.ParameterT, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = marshalParameterTRequestBodyRequestBodyToServiceParameterT(val)
-		}
 	}
 	if body.References != nil {
 		v.References = make([]*service.ReferenceT, len(body.References))

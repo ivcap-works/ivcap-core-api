@@ -63,12 +63,7 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, view, err := s.Read(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedOrderStatusRT(res, view)
-		return vres, nil
+		return s.Read(ctx, p)
 	}
 }
 
@@ -111,12 +106,7 @@ func NewCreateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, view, err := s.Create(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedOrderStatusRT(res, view)
-		return vres, nil
+		return s.Create(ctx, p)
 	}
 }
 

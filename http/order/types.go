@@ -13,9 +13,9 @@ import (
 // request body.
 type CreateRequestBody struct {
 	// Reference to service requested
-	ServiceID string `json:"service-id,omitempty"`
-	// Policy to control access to record an all generated artifacts
-	PolicyID *string `json:"policy-id,omitempty"`
+	Service string `json:"service"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -35,27 +35,23 @@ type LogsRequestBody struct {
 	NamespaceName *string `json:"namespace-name,omitempty"`
 	// Reference to container name
 	ContainerName *string `json:"container-name,omitempty"`
-	// Reference to order requested
-	OrderID string `json:"order-id,omitempty"`
-	// Policy to control access to record an all generated artifacts
-	PolicyID *string `json:"policy-id,omitempty"`
+	// Reference to order
+	Order string `json:"order"`
 }
 
 // TopRequestBody is the type of the "order" service "top" endpoint HTTP
 // request body.
 type TopRequestBody struct {
-	// Reference to order requested
-	OrderID string `json:"order-id,omitempty"`
+	// Reference to order
+	Order string `json:"order"`
 	// Reference to namespace name
 	NamespaceName *string `json:"namespace-name,omitempty"`
-	// Policy to control access to record an all generated artifacts
-	PolicyID *string `json:"policy-id,omitempty"`
 }
 
 // ReadResponseBody is the type of the "order" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
-	// Order ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Order status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
@@ -64,16 +60,13 @@ type ReadResponseBody struct {
 	// DateTime order processing started
 	StartedAt *string `form:"started-at,omitempty" json:"started-at,omitempty" xml:"started-at,omitempty"`
 	// DateTime order processing finished
-	FinishedAt *string `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
-	// Products delivered for this order
-	Products []*ProductTResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
+	FinishedAt *string                          `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
+	Products   *PartialProductListTResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
 	// Reference to service requested
-	Service *RefTResponseBody `form:"service,omitempty" json:"service,omitempty" xml:"service,omitempty"`
+	Service *string `json:"service"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-	// Product metadata links
-	ProductLinks *NavTResponseBody `form:"product-links,omitempty" json:"product-links,omitempty" xml:"product-links,omitempty"`
+	Account *string              `json:"account"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -86,17 +79,16 @@ type ReadResponseBody struct {
 // response body.
 type ListResponseBody struct {
 	// Orders
-	Orders []*OrderListItemResponseBody `form:"orders,omitempty" json:"orders,omitempty" xml:"orders,omitempty"`
+	Items []*OrderListItemResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
 	// Time at which this list was valid
-	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-	// Navigation links
-	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // CreateResponseBody is the type of the "order" service "create" endpoint HTTP
 // response body.
 type CreateResponseBody struct {
-	// Order ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Order status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
@@ -105,16 +97,13 @@ type CreateResponseBody struct {
 	// DateTime order processing started
 	StartedAt *string `form:"started-at,omitempty" json:"started-at,omitempty" xml:"started-at,omitempty"`
 	// DateTime order processing finished
-	FinishedAt *string `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
-	// Products delivered for this order
-	Products []*ProductTResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
+	FinishedAt *string                          `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
+	Products   *PartialProductListTResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
 	// Reference to service requested
-	Service *RefTResponseBody `form:"service,omitempty" json:"service,omitempty" xml:"service,omitempty"`
+	Service *string `json:"service"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-	// Product metadata links
-	ProductLinks *NavTResponseBody `form:"product-links,omitempty" json:"product-links,omitempty" xml:"product-links,omitempty"`
+	Account *string              `json:"account"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -322,47 +311,34 @@ type TopNotFoundResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// ProductTResponseBody is used to define fields on response body types.
-type ProductTResponseBody struct {
-	ID       *string                    `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	Name     *string                    `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	Status   *string                    `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	MimeType *string                    `json:"mime-type,omitempty"`
-	Size     *int64                     `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
-	Links    *SelfWithDataTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-	Etag     *string                    `json:"etag,omitempty"`
+// PartialProductListTResponseBody is used to define fields on response body
+// types.
+type PartialProductListTResponseBody struct {
+	// (Partial) list of products delivered by this order
+	Items []*ProductListItemTResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
+	// Links to more products, if there are any
+	Links []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
-// SelfWithDataTResponseBody is used to define fields on response body types.
-type SelfWithDataTResponseBody struct {
-	Self        *string                   `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	DescribedBy *DescribedByTResponseBody `form:"describedBy,omitempty" json:"describedBy,omitempty" xml:"describedBy,omitempty"`
-	Data        *string                   `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
+// ProductListItemTResponseBody is used to define fields on response body types.
+type ProductListItemTResponseBody struct {
+	ID       *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	Name     *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Status   *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	MimeType *string `json:"mime-type,omitempty"`
+	Size     *int64  `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
+	Href     *string `json:"href,omitempty"`
+	DataHref *string `json:"dataRef,omitempty"`
 }
 
-// DescribedByTResponseBody is used to define fields on response body types.
-type DescribedByTResponseBody struct {
-	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+// LinkTResponseBody is used to define fields on response body types.
+type LinkTResponseBody struct {
+	// relation type
+	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
+	// mime type
 	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
-}
-
-// RefTResponseBody is used to define fields on response body types.
-type RefTResponseBody struct {
-	ID    *string            `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
-// SelfTResponseBody is used to define fields on response body types.
-type SelfTResponseBody struct {
-	Self        *string                   `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	DescribedBy *DescribedByTResponseBody `form:"describedBy,omitempty" json:"describedBy,omitempty" xml:"describedBy,omitempty"`
-}
-
-// NavTResponseBody is used to define fields on response body types.
-type NavTResponseBody struct {
-	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
+	// web link
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
 }
 
 // ParameterTResponseBody is used to define fields on response body types.
@@ -373,7 +349,7 @@ type ParameterTResponseBody struct {
 
 // OrderListItemResponseBody is used to define fields on response body types.
 type OrderListItemResponseBody struct {
-	// Order ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -381,15 +357,15 @@ type OrderListItemResponseBody struct {
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// DateTime order was placed
 	OrderedAt *string `form:"ordered-at,omitempty" json:"ordered-at,omitempty" xml:"ordered-at,omitempty"`
-	// DateTime processing of order started
+	// DateTime order processing started
 	StartedAt *string `form:"started-at,omitempty" json:"started-at,omitempty" xml:"started-at,omitempty"`
-	// DateTime order was finished
+	// DateTime order processing finished
 	FinishedAt *string `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
-	// ID of ordered service
-	ServiceID *string `form:"service-id,omitempty" json:"service-id,omitempty" xml:"service-id,omitempty"`
-	// ID of ordered service
-	AccountID *string            `form:"account-id,omitempty" json:"account-id,omitempty" xml:"account-id,omitempty"`
-	Links     *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	// Reference to service requested
+	Service *string `json:"service"`
+	// Reference to billable account
+	Account *string `json:"account"`
+	Href    *string `json:"href,omitempty"`
 }
 
 // ParameterT is used to define fields on request body types.
@@ -416,9 +392,9 @@ type OrderTopResultItemResponse struct {
 // "create" endpoint of the "order" service.
 func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 	body := &CreateRequestBody{
-		ServiceID: p.Orders.ServiceID,
-		PolicyID:  p.Orders.PolicyID,
-		Name:      p.Orders.Name,
+		Service: p.Orders.Service,
+		Policy:  p.Orders.Policy,
+		Name:    p.Orders.Name,
 	}
 	if p.Orders.Tags != nil {
 		body.Tags = make([]string, len(p.Orders.Tags))
@@ -445,8 +421,7 @@ func NewLogsRequestBody(p *order.LogsPayload) *LogsRequestBody {
 		To:            p.DownloadLogRequest.To,
 		NamespaceName: p.DownloadLogRequest.NamespaceName,
 		ContainerName: p.DownloadLogRequest.ContainerName,
-		OrderID:       p.DownloadLogRequest.OrderID,
-		PolicyID:      p.DownloadLogRequest.PolicyID,
+		Order:         p.DownloadLogRequest.Order,
 	}
 	return body
 }
@@ -455,41 +430,31 @@ func NewLogsRequestBody(p *order.LogsPayload) *LogsRequestBody {
 // endpoint of the "order" service.
 func NewTopRequestBody(p *order.TopPayload) *TopRequestBody {
 	body := &TopRequestBody{
-		OrderID:       p.OrderTopRequest.OrderID,
+		Order:         p.OrderTopRequest.Order,
 		NamespaceName: p.OrderTopRequest.NamespaceName,
-		PolicyID:      p.OrderTopRequest.PolicyID,
 	}
 	return body
 }
 
 // NewReadOrderStatusRTOK builds a "order" service "read" endpoint result from
 // a HTTP "OK" response.
-func NewReadOrderStatusRTOK(body *ReadResponseBody) *orderviews.OrderStatusRTView {
-	v := &orderviews.OrderStatusRTView{
-		ID:         body.ID,
-		Status:     body.Status,
+func NewReadOrderStatusRTOK(body *ReadResponseBody) *order.OrderStatusRT {
+	v := &order.OrderStatusRT{
+		ID:         *body.ID,
+		Status:     *body.Status,
 		OrderedAt:  body.OrderedAt,
 		StartedAt:  body.StartedAt,
 		FinishedAt: body.FinishedAt,
+		Service:    *body.Service,
+		Account:    *body.Account,
 		Name:       body.Name,
 	}
 	if body.Products != nil {
-		v.Products = make([]*orderviews.ProductTView, len(body.Products))
-		for i, val := range body.Products {
-			v.Products[i] = unmarshalProductTResponseBodyToOrderviewsProductTView(val)
-		}
+		v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
 	}
-	if body.Service != nil {
-		v.Service = unmarshalRefTResponseBodyToOrderviewsRefTView(body.Service)
-	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToOrderviewsRefTView(body.Account)
-	}
-	if body.Links != nil {
-		v.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(body.Links)
-	}
-	if body.ProductLinks != nil {
-		v.ProductLinks = unmarshalNavTResponseBodyToOrderviewsNavTView(body.ProductLinks)
+	v.Links = make([]*order.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
@@ -497,9 +462,9 @@ func NewReadOrderStatusRTOK(body *ReadResponseBody) *orderviews.OrderStatusRTVie
 			v.Tags[i] = val
 		}
 	}
-	v.Parameters = make([]*orderviews.ParameterTView, len(body.Parameters))
+	v.Parameters = make([]*order.ParameterT, len(body.Parameters))
 	for i, val := range body.Parameters {
-		v.Parameters[i] = unmarshalParameterTResponseBodyToOrderviewsParameterTView(val)
+		v.Parameters[i] = unmarshalParameterTResponseBodyToOrderParameterT(val)
 	}
 
 	return v
@@ -567,11 +532,14 @@ func NewListOrderListRTOK(body *ListResponseBody) *orderviews.OrderListRTView {
 	v := &orderviews.OrderListRTView{
 		AtTime: body.AtTime,
 	}
-	v.Orders = make([]*orderviews.OrderListItemView, len(body.Orders))
-	for i, val := range body.Orders {
-		v.Orders[i] = unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(val)
+	v.Items = make([]*orderviews.OrderListItemView, len(body.Items))
+	for i, val := range body.Items {
+		v.Items[i] = unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(val)
 	}
-	v.Links = unmarshalNavTResponseBodyToOrderviewsNavTView(body.Links)
+	v.Links = make([]*orderviews.LinkTView, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToOrderviewsLinkTView(val)
+	}
 
 	return v
 }
@@ -636,32 +604,23 @@ func NewListNotAuthorized() *order.UnauthorizedT {
 
 // NewCreateOrderStatusRTOK builds a "order" service "create" endpoint result
 // from a HTTP "OK" response.
-func NewCreateOrderStatusRTOK(body *CreateResponseBody) *orderviews.OrderStatusRTView {
-	v := &orderviews.OrderStatusRTView{
-		ID:         body.ID,
-		Status:     body.Status,
+func NewCreateOrderStatusRTOK(body *CreateResponseBody) *order.OrderStatusRT {
+	v := &order.OrderStatusRT{
+		ID:         *body.ID,
+		Status:     *body.Status,
 		OrderedAt:  body.OrderedAt,
 		StartedAt:  body.StartedAt,
 		FinishedAt: body.FinishedAt,
+		Service:    *body.Service,
+		Account:    *body.Account,
 		Name:       body.Name,
 	}
 	if body.Products != nil {
-		v.Products = make([]*orderviews.ProductTView, len(body.Products))
-		for i, val := range body.Products {
-			v.Products[i] = unmarshalProductTResponseBodyToOrderviewsProductTView(val)
-		}
+		v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
 	}
-	if body.Service != nil {
-		v.Service = unmarshalRefTResponseBodyToOrderviewsRefTView(body.Service)
-	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToOrderviewsRefTView(body.Account)
-	}
-	if body.Links != nil {
-		v.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(body.Links)
-	}
-	if body.ProductLinks != nil {
-		v.ProductLinks = unmarshalNavTResponseBodyToOrderviewsNavTView(body.ProductLinks)
+	v.Links = make([]*order.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
@@ -669,9 +628,9 @@ func NewCreateOrderStatusRTOK(body *CreateResponseBody) *orderviews.OrderStatusR
 			v.Tags[i] = val
 		}
 	}
-	v.Parameters = make([]*orderviews.ParameterTView, len(body.Parameters))
+	v.Parameters = make([]*order.ParameterT, len(body.Parameters))
 	for i, val := range body.Parameters {
-		v.Parameters[i] = unmarshalParameterTResponseBodyToOrderviewsParameterTView(val)
+		v.Parameters[i] = unmarshalParameterTResponseBodyToOrderParameterT(val)
 	}
 
 	return v
@@ -896,6 +855,122 @@ func NewTopNotAuthorized() *order.UnauthorizedT {
 	v := &order.UnauthorizedT{}
 
 	return v
+}
+
+// ValidateReadResponseBody runs the validations defined on ReadResponseBody
+func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Service == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("service", "body"))
+	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
+	if body.Parameters == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
+		}
+	}
+	if body.OrderedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.ordered-at", *body.OrderedAt, goa.FormatDateTime))
+	}
+	if body.StartedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.started-at", *body.StartedAt, goa.FormatDateTime))
+	}
+	if body.FinishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.finished-at", *body.FinishedAt, goa.FormatDateTime))
+	}
+	if body.Products != nil {
+		if err2 := ValidatePartialProductListTResponseBody(body.Products); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.Service != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.service", *body.Service, goa.FormatURI))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateCreateResponseBody runs the validations defined on CreateResponseBody
+func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Service == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("service", "body"))
+	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
+	if body.Parameters == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
+		}
+	}
+	if body.OrderedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.ordered-at", *body.OrderedAt, goa.FormatDateTime))
+	}
+	if body.StartedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.started-at", *body.StartedAt, goa.FormatDateTime))
+	}
+	if body.FinishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.finished-at", *body.FinishedAt, goa.FormatDateTime))
+	}
+	if body.Products != nil {
+		if err2 := ValidatePartialProductListTResponseBody(body.Products); err2 != nil {
+			err = goa.MergeErrors(err, err2)
+		}
+	}
+	if body.Service != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.service", *body.Service, goa.FormatURI))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
 }
 
 // ValidateReadBadRequestResponseBody runs the validations defined on
@@ -1156,70 +1231,57 @@ func ValidateTopNotFoundResponseBody(body *TopNotFoundResponseBody) (err error) 
 	return
 }
 
-// ValidateProductTResponseBody runs the validations defined on
-// ProductTResponseBody
-func ValidateProductTResponseBody(body *ProductTResponseBody) (err error) {
-	if body.Links != nil {
-		if err2 := ValidateSelfWithDataTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
+// ValidatePartialProductListTResponseBody runs the validations defined on
+// PartialProductListTResponseBody
+func ValidatePartialProductListTResponseBody(body *PartialProductListTResponseBody) (err error) {
+	if body.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	for _, e := range body.Items {
+		if e != nil {
+			if err2 := ValidateProductListItemTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
 		}
 	}
 	return
 }
 
-// ValidateSelfWithDataTResponseBody runs the validations defined on
-// SelfWithDataTResponseBody
-func ValidateSelfWithDataTResponseBody(body *SelfWithDataTResponseBody) (err error) {
-	if body.DescribedBy != nil {
-		if err2 := ValidateDescribedByTResponseBody(body.DescribedBy); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+// ValidateProductListItemTResponseBody runs the validations defined on
+// ProductListItemTResponseBody
+func ValidateProductListItemTResponseBody(body *ProductListItemTResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	return
 }
 
-// ValidateDescribedByTResponseBody runs the validations defined on
-// DescribedByTResponseBody
-func ValidateDescribedByTResponseBody(body *DescribedByTResponseBody) (err error) {
-	if body.Href != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.href", *body.Href, goa.FormatURI))
+// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
+func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
+	if body.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
 	}
-	return
-}
-
-// ValidateRefTResponseBody runs the validations defined on RefTResponseBody
-func ValidateRefTResponseBody(body *RefTResponseBody) (err error) {
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
 	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateSelfTResponseBody runs the validations defined on SelfTResponseBody
-func ValidateSelfTResponseBody(body *SelfTResponseBody) (err error) {
-	if body.DescribedBy != nil {
-		if err2 := ValidateDescribedByTResponseBody(body.DescribedBy); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
-func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
-	if body.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
-	}
-	if body.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
-	}
-	if body.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	return
 }
@@ -1227,18 +1289,43 @@ func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
 // ValidateOrderListItemResponseBody runs the validations defined on
 // OrderListItemResponseBody
 func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err error) {
-	if body.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Service == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("service", "body"))
+	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
 			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
 		}
 	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+	if body.OrderedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.ordered-at", *body.OrderedAt, goa.FormatDateTime))
+	}
+	if body.StartedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.started-at", *body.StartedAt, goa.FormatDateTime))
+	}
+	if body.FinishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.finished-at", *body.FinishedAt, goa.FormatDateTime))
+	}
+	if body.Service != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.service", *body.Service, goa.FormatURI))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
 	}
 	return
 }

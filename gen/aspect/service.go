@@ -3,7 +3,6 @@
 package aspect
 
 import (
-	aspectviews "github.com/ivcap-works/ivcap-core-api/gen/aspect/views"
 	"context"
 
 	"goa.design/goa/v3/security"
@@ -42,12 +41,12 @@ var MethodNames = [5]string{"read", "list", "create", "update", "retract"}
 
 // AspectIDRT is the result type of the aspect service create method.
 type AspectIDRT struct {
-	// ID to specific aspect
+	// ID
 	ID string
 }
 
 type AspectListItemRT struct {
-	// Record URN
+	// ID
 	ID string
 	// Entity URN
 	Entity string
@@ -71,30 +70,30 @@ type AspectListRT struct {
 	AspectPath *string
 	// Time at which this list was valid
 	AtTime string
-	// Navigation links
-	Links *NavT
+	Links  []*LinkT
 }
 
 // AspectRT is the result type of the aspect service read method.
 type AspectRT struct {
-	// Record URN
-	ID *string
+	// ID
+	ID string
 	// Entity URN
-	Entity *string
+	Entity string
 	// Schema URN
-	Schema *string
+	Schema string
 	// Description of aspect encoded as 'content-type'
 	Content any
 	// Content-Type header, MUST be of application/json.
-	ContentType *string `json:"content-type,omitempty"`
-	// Time this aspect was asserted
-	ValidFrom *string
-	// Time this aspect was retractd
+	ContentType string `json:"content-type,omitempty"`
+	// Time this record was asserted
+	ValidFrom string
+	// Time this record was retracted
 	ValidTo *string
-	// Entity asserting this aspect aspect at 'valid-from'
-	Asserter *string
-	// Entity retracting this aspect at 'valid-to'
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter string
+	// Entity retracting this record at 'valid-to'
 	Retracter *string
+	Links     []*LinkT
 }
 
 // Bad arguments supplied.
@@ -142,6 +141,15 @@ type InvalidScopesT struct {
 	Message string
 }
 
+type LinkT struct {
+	// relation type
+	Rel string
+	// mime type
+	Type string
+	// web link
+	Href string
+}
+
 // ListPayload is the payload type of the aspect service list method.
 type ListPayload struct {
 	// Optioanl entity for which to request aspects
@@ -178,12 +186,6 @@ type ListPayload struct {
 	Page *string
 	// JWT used for authentication
 	JWT string
-}
-
-type NavT struct {
-	Self  *string
-	First *string
-	Next  *string
 }
 
 // Method is not yet implemented.
@@ -400,234 +402,4 @@ func (e *UnsupportedContentType) ErrorName() string {
 // GoaErrorName returns "UnsupportedContentType".
 func (e *UnsupportedContentType) GoaErrorName() string {
 	return "unsupported-content-type"
-}
-
-// NewAspectRT initializes result type AspectRT from viewed result type
-// AspectRT.
-func NewAspectRT(vres *aspectviews.AspectRT) *AspectRT {
-	return newAspectRT(vres.Projected)
-}
-
-// NewViewedAspectRT initializes viewed result type AspectRT from result type
-// AspectRT using the given view.
-func NewViewedAspectRT(res *AspectRT, view string) *aspectviews.AspectRT {
-	p := newAspectRTView(res)
-	return &aspectviews.AspectRT{Projected: p, View: "default"}
-}
-
-// NewAspectListRT initializes result type AspectListRT from viewed result type
-// AspectListRT.
-func NewAspectListRT(vres *aspectviews.AspectListRT) *AspectListRT {
-	return newAspectListRT(vres.Projected)
-}
-
-// NewViewedAspectListRT initializes viewed result type AspectListRT from
-// result type AspectListRT using the given view.
-func NewViewedAspectListRT(res *AspectListRT, view string) *aspectviews.AspectListRT {
-	p := newAspectListRTView(res)
-	return &aspectviews.AspectListRT{Projected: p, View: "default"}
-}
-
-// NewAspectIDRT initializes result type AspectIDRT from viewed result type
-// AspectIDRT.
-func NewAspectIDRT(vres *aspectviews.AspectIDRT) *AspectIDRT {
-	return newAspectIDRT(vres.Projected)
-}
-
-// NewViewedAspectIDRT initializes viewed result type AspectIDRT from result
-// type AspectIDRT using the given view.
-func NewViewedAspectIDRT(res *AspectIDRT, view string) *aspectviews.AspectIDRT {
-	p := newAspectIDRTView(res)
-	return &aspectviews.AspectIDRT{Projected: p, View: "default"}
-}
-
-// newAspectRT converts projected type AspectRT to service type AspectRT.
-func newAspectRT(vres *aspectviews.AspectRTView) *AspectRT {
-	res := &AspectRT{
-		ID:          vres.ID,
-		Entity:      vres.Entity,
-		Schema:      vres.Schema,
-		Content:     vres.Content,
-		ContentType: vres.ContentType,
-		ValidFrom:   vres.ValidFrom,
-		ValidTo:     vres.ValidTo,
-		Asserter:    vres.Asserter,
-		Retracter:   vres.Retracter,
-	}
-	return res
-}
-
-// newAspectRTView projects result type AspectRT to projected type AspectRTView
-// using the "default" view.
-func newAspectRTView(res *AspectRT) *aspectviews.AspectRTView {
-	vres := &aspectviews.AspectRTView{
-		ID:          res.ID,
-		Entity:      res.Entity,
-		Schema:      res.Schema,
-		Content:     res.Content,
-		ContentType: res.ContentType,
-		ValidFrom:   res.ValidFrom,
-		ValidTo:     res.ValidTo,
-		Asserter:    res.Asserter,
-		Retracter:   res.Retracter,
-	}
-	return vres
-}
-
-// newAspectListRT converts projected type AspectListRT to service type
-// AspectListRT.
-func newAspectListRT(vres *aspectviews.AspectListRTView) *AspectListRT {
-	res := &AspectListRT{
-		Entity:     vres.Entity,
-		Schema:     vres.Schema,
-		AspectPath: vres.AspectPath,
-	}
-	if vres.AtTime != nil {
-		res.AtTime = *vres.AtTime
-	}
-	if vres.Items != nil {
-		res.Items = make([]*AspectListItemRT, len(vres.Items))
-		for i, val := range vres.Items {
-			res.Items[i] = transformAspectviewsAspectListItemRTViewToAspectListItemRT(val)
-		}
-	}
-	if vres.Links != nil {
-		res.Links = transformAspectviewsNavTViewToNavT(vres.Links)
-	}
-	return res
-}
-
-// newAspectListRTView projects result type AspectListRT to projected type
-// AspectListRTView using the "default" view.
-func newAspectListRTView(res *AspectListRT) *aspectviews.AspectListRTView {
-	vres := &aspectviews.AspectListRTView{
-		Entity:     res.Entity,
-		Schema:     res.Schema,
-		AspectPath: res.AspectPath,
-		AtTime:     &res.AtTime,
-	}
-	if res.Items != nil {
-		vres.Items = make([]*aspectviews.AspectListItemRTView, len(res.Items))
-		for i, val := range res.Items {
-			vres.Items[i] = transformAspectListItemRTToAspectviewsAspectListItemRTView(val)
-		}
-	} else {
-		vres.Items = []*aspectviews.AspectListItemRTView{}
-	}
-	if res.Links != nil {
-		vres.Links = transformNavTToAspectviewsNavTView(res.Links)
-	}
-	return vres
-}
-
-// newAspectListItemRT converts projected type AspectListItemRT to service type
-// AspectListItemRT.
-func newAspectListItemRT(vres *aspectviews.AspectListItemRTView) *AspectListItemRT {
-	res := &AspectListItemRT{
-		Content: vres.Content,
-	}
-	if vres.ID != nil {
-		res.ID = *vres.ID
-	}
-	if vres.Entity != nil {
-		res.Entity = *vres.Entity
-	}
-	if vres.Schema != nil {
-		res.Schema = *vres.Schema
-	}
-	if vres.ContentType != nil {
-		res.ContentType = *vres.ContentType
-	}
-	return res
-}
-
-// newAspectListItemRTView projects result type AspectListItemRT to projected
-// type AspectListItemRTView using the "default" view.
-func newAspectListItemRTView(res *AspectListItemRT) *aspectviews.AspectListItemRTView {
-	vres := &aspectviews.AspectListItemRTView{
-		ID:          &res.ID,
-		Entity:      &res.Entity,
-		Schema:      &res.Schema,
-		Content:     res.Content,
-		ContentType: &res.ContentType,
-	}
-	return vres
-}
-
-// newAspectIDRT converts projected type AspectIDRT to service type AspectIDRT.
-func newAspectIDRT(vres *aspectviews.AspectIDRTView) *AspectIDRT {
-	res := &AspectIDRT{}
-	if vres.ID != nil {
-		res.ID = *vres.ID
-	}
-	return res
-}
-
-// newAspectIDRTView projects result type AspectIDRT to projected type
-// AspectIDRTView using the "default" view.
-func newAspectIDRTView(res *AspectIDRT) *aspectviews.AspectIDRTView {
-	vres := &aspectviews.AspectIDRTView{
-		ID: &res.ID,
-	}
-	return vres
-}
-
-// transformAspectviewsAspectListItemRTViewToAspectListItemRT builds a value of
-// type *AspectListItemRT from a value of type
-// *aspectviews.AspectListItemRTView.
-func transformAspectviewsAspectListItemRTViewToAspectListItemRT(v *aspectviews.AspectListItemRTView) *AspectListItemRT {
-	if v == nil {
-		return nil
-	}
-	res := &AspectListItemRT{
-		ID:          *v.ID,
-		Entity:      *v.Entity,
-		Schema:      *v.Schema,
-		Content:     v.Content,
-		ContentType: *v.ContentType,
-	}
-
-	return res
-}
-
-// transformAspectviewsNavTViewToNavT builds a value of type *NavT from a value
-// of type *aspectviews.NavTView.
-func transformAspectviewsNavTViewToNavT(v *aspectviews.NavTView) *NavT {
-	if v == nil {
-		return nil
-	}
-	res := &NavT{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// transformAspectListItemRTToAspectviewsAspectListItemRTView builds a value of
-// type *aspectviews.AspectListItemRTView from a value of type
-// *AspectListItemRT.
-func transformAspectListItemRTToAspectviewsAspectListItemRTView(v *AspectListItemRT) *aspectviews.AspectListItemRTView {
-	res := &aspectviews.AspectListItemRTView{
-		ID:          &v.ID,
-		Entity:      &v.Entity,
-		Schema:      &v.Schema,
-		Content:     v.Content,
-		ContentType: &v.ContentType,
-	}
-
-	return res
-}
-
-// transformNavTToAspectviewsNavTView builds a value of type
-// *aspectviews.NavTView from a value of type *NavT.
-func transformNavTToAspectviewsNavTView(v *NavT) *aspectviews.NavTView {
-	res := &aspectviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
 }

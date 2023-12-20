@@ -4,7 +4,6 @@ package client
 
 import (
 	aspect "github.com/ivcap-works/ivcap-core-api/gen/aspect"
-	aspectviews "github.com/ivcap-works/ivcap-core-api/gen/aspect/views"
 
 	goa "goa.design/goa/v3/pkg"
 )
@@ -20,7 +19,7 @@ type ListRequestBody struct {
 // ReadResponseBody is the type of the "aspect" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
-	// Record URN
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Entity URN
 	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
@@ -30,14 +29,15 @@ type ReadResponseBody struct {
 	Content any `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
 	// Content-Type header, MUST be of application/json.
 	ContentType *string `json:"content-type,omitempty"`
-	// Time this aspect was asserted
+	// Time this record was asserted
 	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
-	// Time this aspect was retractd
+	// Time this record was retracted
 	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
-	// Entity asserting this aspect aspect at 'valid-from'
+	// Entity asserting this metadata record at 'valid-from'
 	Asserter *string `form:"asserter,omitempty" json:"asserter,omitempty" xml:"asserter,omitempty"`
-	// Entity retracting this aspect at 'valid-to'
-	Retracter *string `form:"retracter,omitempty" json:"retracter,omitempty" xml:"retracter,omitempty"`
+	// Entity retracting this record at 'valid-to'
+	Retracter *string              `form:"retracter,omitempty" json:"retracter,omitempty" xml:"retracter,omitempty"`
+	Links     []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ListResponseBody is the type of the "aspect" service "list" endpoint HTTP
@@ -52,22 +52,21 @@ type ListResponseBody struct {
 	// Optional json path to further filter on returned list
 	AspectPath *string `form:"aspect-path,omitempty" json:"aspect-path,omitempty" xml:"aspect-path,omitempty"`
 	// Time at which this list was valid
-	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-	// Navigation links
-	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // CreateResponseBody is the type of the "aspect" service "create" endpoint
 // HTTP response body.
 type CreateResponseBody struct {
-	// ID to specific aspect
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 }
 
 // UpdateResponseBody is the type of the "aspect" service "update" endpoint
 // HTTP response body.
 type UpdateResponseBody struct {
-	// ID to specific aspect
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 }
 
@@ -246,9 +245,19 @@ type RetractNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// LinkTResponseBody is used to define fields on response body types.
+type LinkTResponseBody struct {
+	// relation type
+	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
+	// mime type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	// web link
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+}
+
 // AspectListItemRTResponseBody is used to define fields on response body types.
 type AspectListItemRTResponseBody struct {
-	// Record URN
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Entity URN
 	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
@@ -258,13 +267,6 @@ type AspectListItemRTResponseBody struct {
 	Content any `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
 	// Content-Type header, MUST be of application/json.
 	ContentType *string `json:"content-type,omitempty"`
-}
-
-// NavTResponseBody is used to define fields on response body types.
-type NavTResponseBody struct {
-	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
 }
 
 // NewListRequestBody builds the HTTP request body from the payload of the
@@ -278,17 +280,21 @@ func NewListRequestBody(p *aspect.ListPayload) *ListRequestBody {
 
 // NewReadAspectRTOK builds a "aspect" service "read" endpoint result from a
 // HTTP "OK" response.
-func NewReadAspectRTOK(body *ReadResponseBody) *aspectviews.AspectRTView {
-	v := &aspectviews.AspectRTView{
-		ID:          body.ID,
-		Entity:      body.Entity,
-		Schema:      body.Schema,
+func NewReadAspectRTOK(body *ReadResponseBody) *aspect.AspectRT {
+	v := &aspect.AspectRT{
+		ID:          *body.ID,
+		Entity:      *body.Entity,
+		Schema:      *body.Schema,
 		Content:     body.Content,
-		ContentType: body.ContentType,
-		ValidFrom:   body.ValidFrom,
+		ContentType: *body.ContentType,
+		ValidFrom:   *body.ValidFrom,
 		ValidTo:     body.ValidTo,
-		Asserter:    body.Asserter,
+		Asserter:    *body.Asserter,
 		Retracter:   body.Retracter,
+	}
+	v.Links = make([]*aspect.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToAspectLinkT(val)
 	}
 
 	return v
@@ -352,18 +358,21 @@ func NewReadNotAuthorized() *aspect.UnauthorizedT {
 
 // NewListAspectListRTOK builds a "aspect" service "list" endpoint result from
 // a HTTP "OK" response.
-func NewListAspectListRTOK(body *ListResponseBody) *aspectviews.AspectListRTView {
-	v := &aspectviews.AspectListRTView{
+func NewListAspectListRTOK(body *ListResponseBody) *aspect.AspectListRT {
+	v := &aspect.AspectListRT{
 		Entity:     body.Entity,
 		Schema:     body.Schema,
 		AspectPath: body.AspectPath,
-		AtTime:     body.AtTime,
+		AtTime:     *body.AtTime,
 	}
-	v.Items = make([]*aspectviews.AspectListItemRTView, len(body.Items))
+	v.Items = make([]*aspect.AspectListItemRT, len(body.Items))
 	for i, val := range body.Items {
-		v.Items[i] = unmarshalAspectListItemRTResponseBodyToAspectviewsAspectListItemRTView(val)
+		v.Items[i] = unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(val)
 	}
-	v.Links = unmarshalNavTResponseBodyToAspectviewsNavTView(body.Links)
+	v.Links = make([]*aspect.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToAspectLinkT(val)
+	}
 
 	return v
 }
@@ -438,9 +447,9 @@ func NewListUnsupportedContentType(body *ListUnsupportedContentTypeResponseBody)
 
 // NewCreateAspectIDRTOK builds a "aspect" service "create" endpoint result
 // from a HTTP "OK" response.
-func NewCreateAspectIDRTOK(body *CreateResponseBody) *aspectviews.AspectIDRTView {
-	v := &aspectviews.AspectIDRTView{
-		ID: body.ID,
+func NewCreateAspectIDRTOK(body *CreateResponseBody) *aspect.AspectIDRT {
+	v := &aspect.AspectIDRT{
+		ID: *body.ID,
 	}
 
 	return v
@@ -507,9 +516,9 @@ func NewCreateNotAuthorized() *aspect.UnauthorizedT {
 
 // NewUpdateAspectIDRTOK builds a "aspect" service "update" endpoint result
 // from a HTTP "OK" response.
-func NewUpdateAspectIDRTOK(body *UpdateResponseBody) *aspectviews.AspectIDRTView {
-	v := &aspectviews.AspectIDRTView{
-		ID: body.ID,
+func NewUpdateAspectIDRTOK(body *UpdateResponseBody) *aspect.AspectIDRT {
+	v := &aspect.AspectIDRT{
+		ID: *body.ID,
 	}
 
 	return v
@@ -631,6 +640,122 @@ func NewRetractNotAuthorized() *aspect.UnauthorizedT {
 	v := &aspect.UnauthorizedT{}
 
 	return v
+}
+
+// ValidateReadResponseBody runs the validations defined on ReadResponseBody
+func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Entity == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("entity", "body"))
+	}
+	if body.Schema == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
+	}
+	if body.Content == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("content", "body"))
+	}
+	if body.ContentType == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
+	}
+	if body.ValidFrom == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("valid-from", "body"))
+	}
+	if body.Asserter == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("asserter", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Entity != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
+	}
+	if body.Schema != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
+	}
+	if body.ValidFrom != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.valid-from", *body.ValidFrom, goa.FormatDateTime))
+	}
+	if body.ValidTo != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.valid-to", *body.ValidTo, goa.FormatDateTime))
+	}
+	if body.Asserter != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.asserter", *body.Asserter, goa.FormatURI))
+	}
+	if body.Retracter != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.retracter", *body.Retracter, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateListResponseBody runs the validations defined on ListResponseBody
+func ValidateListResponseBody(body *ListResponseBody) (err error) {
+	if body.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	}
+	if body.AtTime == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("at-time", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	for _, e := range body.Items {
+		if e != nil {
+			if err2 := ValidateAspectListItemRTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if body.Entity != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
+	}
+	if body.Schema != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
+	}
+	if body.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.at-time", *body.AtTime, goa.FormatDateTime))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateCreateResponseBody runs the validations defined on CreateResponseBody
+func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateUpdateResponseBody runs the validations defined on UpdateResponseBody
+func ValidateUpdateResponseBody(body *UpdateResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
 }
 
 // ValidateReadBadRequestResponseBody runs the validations defined on
@@ -855,6 +980,20 @@ func ValidateRetractNotImplementedResponseBody(body *RetractNotImplementedRespon
 	return
 }
 
+// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
+func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
+	if body.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
+	}
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	return
+}
+
 // ValidateAspectListItemRTResponseBody runs the validations defined on
 // AspectListItemRTResponseBody
 func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (err error) {
@@ -874,27 +1013,13 @@ func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (e
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
-func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
-	if body.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
-	}
-	if body.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
-	}
-	if body.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
 	}
 	return
 }

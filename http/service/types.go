@@ -14,16 +14,14 @@ import (
 type CreateServiceRequestBody struct {
 	// More detailed description of the service
 	Description string `form:"description" json:"description" xml:"description"`
-	// Optional provider provided meta tags
-	Metadata []*ParameterTRequestBodyRequestBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceTRequestBodyRequestBody `form:"references,omitempty" json:"references,omitempty" xml:"references,omitempty"`
-	// Link to banner image oprionally used for this service
+	// Link to banner image optionally used for this service
 	Banner *string `form:"banner,omitempty" json:"banner,omitempty" xml:"banner,omitempty"`
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
-	// Reference to policy controlling access
-	PolicyID *string `json:"policy-id,omitempty"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -37,16 +35,14 @@ type CreateServiceRequestBody struct {
 type UpdateRequestBody struct {
 	// More detailed description of the service
 	Description string `form:"description" json:"description" xml:"description"`
-	// Optional provider provided meta tags
-	Metadata []*ParameterTRequestBodyRequestBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceTRequestBodyRequestBody `form:"references,omitempty" json:"references,omitempty" xml:"references,omitempty"`
-	// Link to banner image oprionally used for this service
+	// Link to banner image optionally used for this service
 	Banner *string `form:"banner,omitempty" json:"banner,omitempty" xml:"banner,omitempty"`
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
-	// Reference to policy controlling access
-	PolicyID *string `json:"policy-id,omitempty"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -59,27 +55,24 @@ type UpdateRequestBody struct {
 // response body.
 type ListResponseBody struct {
 	// Services
-	Services []*ServiceListItemResponseBody `form:"services,omitempty" json:"services,omitempty" xml:"services,omitempty"`
+	Items []*ServiceListItemResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
 	// Time at which this list was valid
-	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-	// Navigation links
-	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // CreateServiceResponseBody is the type of the "service" service
 // "create_service" endpoint HTTP response body.
 type CreateServiceResponseBody struct {
-	// Service ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// More detailed description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Optional provider provided meta tags
-	Metadata []*ParameterTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account *string              `json:"account"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -91,17 +84,15 @@ type CreateServiceResponseBody struct {
 // ReadResponseBody is the type of the "service" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
-	// Service ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// More detailed description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Optional provider provided meta tags
-	Metadata []*ParameterTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account *string              `json:"account"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -113,17 +104,15 @@ type ReadResponseBody struct {
 // UpdateResponseBody is the type of the "service" service "update" endpoint
 // HTTP response body.
 type UpdateResponseBody struct {
-	// Service ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// More detailed description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Optional provider provided meta tags
-	Metadata []*ParameterTResponseBody `form:"metadata,omitempty" json:"metadata,omitempty" xml:"metadata,omitempty"`
 	// Reference to billable account
-	Account *RefTResponseBody  `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account *string              `json:"account"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -319,39 +308,25 @@ type DeleteNotImplementedResponseBody struct {
 
 // ServiceListItemResponseBody is used to define fields on response body types.
 type ServiceListItemResponseBody struct {
-	// Service ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional description of the service
-	Description *string            `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
-	Links       *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+	// Reference to billable account
+	Account *string `json:"account"`
+	Href    *string `json:"href,omitempty"`
 }
 
-// SelfTResponseBody is used to define fields on response body types.
-type SelfTResponseBody struct {
-	Self        *string                   `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	DescribedBy *DescribedByTResponseBody `form:"describedBy,omitempty" json:"describedBy,omitempty" xml:"describedBy,omitempty"`
-}
-
-// DescribedByTResponseBody is used to define fields on response body types.
-type DescribedByTResponseBody struct {
-	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+// LinkTResponseBody is used to define fields on response body types.
+type LinkTResponseBody struct {
+	// relation type
+	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
+	// mime type
 	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
-}
-
-// NavTResponseBody is used to define fields on response body types.
-type NavTResponseBody struct {
-	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
-}
-
-// ParameterTRequestBodyRequestBody is used to define fields on request body
-// types.
-type ParameterTRequestBodyRequestBody struct {
-	Name  *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+	// web link
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
 }
 
 // ReferenceTRequestBodyRequestBody is used to define fields on request body
@@ -367,7 +342,7 @@ type ReferenceTRequestBodyRequestBody struct {
 // types.
 type WorkflowTRequestBodyRequestBody struct {
 	// Type of workflow
-	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	Type string `form:"type" json:"type" xml:"type"`
 	// Type of workflow
 	Basic *BasicWorkflowOptsTRequestBodyRequestBody `form:"basic,omitempty" json:"basic,omitempty" xml:"basic,omitempty"`
 	// Defines the workflow using argo's WF schema
@@ -425,18 +400,6 @@ type ParameterOptT struct {
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 }
 
-// ParameterTResponseBody is used to define fields on response body types.
-type ParameterTResponseBody struct {
-	Name  *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
-}
-
-// RefTResponseBody is used to define fields on response body types.
-type RefTResponseBody struct {
-	ID    *string            `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-}
-
 // ParameterDefTResponseBody is used to define fields on response body types.
 type ParameterDefTResponseBody struct {
 	Name        *string                      `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -463,14 +426,8 @@ func NewCreateServiceRequestBody(p *service.CreateServicePayload) *CreateService
 	body := &CreateServiceRequestBody{
 		Description: p.Services.Description,
 		Banner:      p.Services.Banner,
-		PolicyID:    p.Services.PolicyID,
+		Policy:      p.Services.Policy,
 		Name:        p.Services.Name,
-	}
-	if p.Services.Metadata != nil {
-		body.Metadata = make([]*ParameterTRequestBodyRequestBody, len(p.Services.Metadata))
-		for i, val := range p.Services.Metadata {
-			body.Metadata[i] = marshalServiceParameterTToParameterTRequestBodyRequestBody(val)
-		}
 	}
 	if p.Services.References != nil {
 		body.References = make([]*ReferenceTRequestBodyRequestBody, len(p.Services.References))
@@ -504,14 +461,8 @@ func NewUpdateRequestBody(p *service.UpdatePayload) *UpdateRequestBody {
 	body := &UpdateRequestBody{
 		Description: p.Services.Description,
 		Banner:      p.Services.Banner,
-		PolicyID:    p.Services.PolicyID,
+		Policy:      p.Services.Policy,
 		Name:        p.Services.Name,
-	}
-	if p.Services.Metadata != nil {
-		body.Metadata = make([]*ParameterTRequestBodyRequestBody, len(p.Services.Metadata))
-		for i, val := range p.Services.Metadata {
-			body.Metadata[i] = marshalServiceParameterTToParameterTRequestBodyRequestBody(val)
-		}
 	}
 	if p.Services.References != nil {
 		body.References = make([]*ReferenceTRequestBodyRequestBody, len(p.Services.References))
@@ -545,11 +496,14 @@ func NewListServiceListRTOK(body *ListResponseBody) *serviceviews.ServiceListRTV
 	v := &serviceviews.ServiceListRTView{
 		AtTime: body.AtTime,
 	}
-	v.Services = make([]*serviceviews.ServiceListItemView, len(body.Services))
-	for i, val := range body.Services {
-		v.Services[i] = unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(val)
+	v.Items = make([]*serviceviews.ServiceListItemView, len(body.Items))
+	for i, val := range body.Items {
+		v.Items[i] = unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(val)
 	}
-	v.Links = unmarshalNavTResponseBodyToServiceviewsNavTView(body.Links)
+	v.Links = make([]*serviceviews.LinkTView, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToServiceviewsLinkTView(val)
+	}
 
 	return v
 }
@@ -614,32 +568,27 @@ func NewListNotAuthorized() *service.UnauthorizedT {
 
 // NewCreateServiceServiceStatusRTCreated builds a "service" service
 // "create_service" endpoint result from a HTTP "Created" response.
-func NewCreateServiceServiceStatusRTCreated(body *CreateServiceResponseBody) *serviceviews.ServiceStatusRTView {
-	v := &serviceviews.ServiceStatusRTView{
-		ID:          body.ID,
+func NewCreateServiceServiceStatusRTCreated(body *CreateServiceResponseBody) *service.ServiceStatusRT {
+	v := &service.ServiceStatusRT{
+		ID:          *body.ID,
 		Description: body.Description,
-		Status:      body.Status,
+		Status:      *body.Status,
+		Account:     *body.Account,
 		Name:        body.Name,
 	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*serviceviews.ParameterTView, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = unmarshalParameterTResponseBodyToServiceviewsParameterTView(val)
-		}
+	v.Links = make([]*service.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToServiceLinkT(val)
 	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Account)
-	}
-	v.Links = unmarshalSelfTResponseBodyToServiceviewsSelfTView(body.Links)
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
 		for i, val := range body.Tags {
 			v.Tags[i] = val
 		}
 	}
-	v.Parameters = make([]*serviceviews.ParameterDefTView, len(body.Parameters))
+	v.Parameters = make([]*service.ParameterDefT, len(body.Parameters))
 	for i, val := range body.Parameters {
-		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView(val)
+		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServiceParameterDefT(val)
 	}
 
 	return v
@@ -728,32 +677,27 @@ func NewCreateServiceNotAuthorized() *service.UnauthorizedT {
 
 // NewReadServiceStatusRTOK builds a "service" service "read" endpoint result
 // from a HTTP "OK" response.
-func NewReadServiceStatusRTOK(body *ReadResponseBody) *serviceviews.ServiceStatusRTView {
-	v := &serviceviews.ServiceStatusRTView{
-		ID:          body.ID,
+func NewReadServiceStatusRTOK(body *ReadResponseBody) *service.ServiceStatusRT {
+	v := &service.ServiceStatusRT{
+		ID:          *body.ID,
 		Description: body.Description,
-		Status:      body.Status,
+		Status:      *body.Status,
+		Account:     *body.Account,
 		Name:        body.Name,
 	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*serviceviews.ParameterTView, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = unmarshalParameterTResponseBodyToServiceviewsParameterTView(val)
-		}
+	v.Links = make([]*service.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToServiceLinkT(val)
 	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Account)
-	}
-	v.Links = unmarshalSelfTResponseBodyToServiceviewsSelfTView(body.Links)
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
 		for i, val := range body.Tags {
 			v.Tags[i] = val
 		}
 	}
-	v.Parameters = make([]*serviceviews.ParameterDefTView, len(body.Parameters))
+	v.Parameters = make([]*service.ParameterDefT, len(body.Parameters))
 	for i, val := range body.Parameters {
-		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView(val)
+		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServiceParameterDefT(val)
 	}
 
 	return v
@@ -817,32 +761,27 @@ func NewReadNotAuthorized() *service.UnauthorizedT {
 
 // NewUpdateServiceStatusRTOK builds a "service" service "update" endpoint
 // result from a HTTP "OK" response.
-func NewUpdateServiceStatusRTOK(body *UpdateResponseBody) *serviceviews.ServiceStatusRTView {
-	v := &serviceviews.ServiceStatusRTView{
-		ID:          body.ID,
+func NewUpdateServiceStatusRTOK(body *UpdateResponseBody) *service.ServiceStatusRT {
+	v := &service.ServiceStatusRT{
+		ID:          *body.ID,
 		Description: body.Description,
-		Status:      body.Status,
+		Status:      *body.Status,
+		Account:     *body.Account,
 		Name:        body.Name,
 	}
-	if body.Metadata != nil {
-		v.Metadata = make([]*serviceviews.ParameterTView, len(body.Metadata))
-		for i, val := range body.Metadata {
-			v.Metadata[i] = unmarshalParameterTResponseBodyToServiceviewsParameterTView(val)
-		}
+	v.Links = make([]*service.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToServiceLinkT(val)
 	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToServiceviewsRefTView(body.Account)
-	}
-	v.Links = unmarshalSelfTResponseBodyToServiceviewsSelfTView(body.Links)
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
 		for i, val := range body.Tags {
 			v.Tags[i] = val
 		}
 	}
-	v.Parameters = make([]*serviceviews.ParameterDefTView, len(body.Parameters))
+	v.Parameters = make([]*service.ParameterDefT, len(body.Parameters))
 	for i, val := range body.Parameters {
-		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView(val)
+		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServiceParameterDefT(val)
 	}
 
 	return v
@@ -962,6 +901,121 @@ func NewDeleteNotAuthorized() *service.UnauthorizedT {
 	v := &service.UnauthorizedT{}
 
 	return v
+}
+
+// ValidateCreateServiceResponseBody runs the validations defined on
+// create_service_response_body
+func ValidateCreateServiceResponseBody(body *CreateServiceResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
+	if body.Parameters == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "active" || *body.Status == "inactive" || *body.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"active", "inactive", "error"}))
+		}
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateReadResponseBody runs the validations defined on ReadResponseBody
+func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
+	if body.Parameters == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "active" || *body.Status == "inactive" || *body.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"active", "inactive", "error"}))
+		}
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateUpdateResponseBody runs the validations defined on UpdateResponseBody
+func ValidateUpdateResponseBody(body *UpdateResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
+	if body.Parameters == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "active" || *body.Status == "inactive" || *body.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"active", "inactive", "error"}))
+		}
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
 }
 
 // ValidateListBadRequestResponseBody runs the validations defined on
@@ -1213,46 +1267,34 @@ func ValidateDeleteNotImplementedResponseBody(body *DeleteNotImplementedResponse
 // ValidateServiceListItemResponseBody runs the validations defined on
 // ServiceListItemResponseBody
 func ValidateServiceListItemResponseBody(body *ServiceListItemResponseBody) (err error) {
-	if body.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
 	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
 	}
-	return
-}
-
-// ValidateSelfTResponseBody runs the validations defined on SelfTResponseBody
-func ValidateSelfTResponseBody(body *SelfTResponseBody) (err error) {
-	if body.DescribedBy != nil {
-		if err2 := ValidateDescribedByTResponseBody(body.DescribedBy); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
 	}
 	return
 }
 
-// ValidateDescribedByTResponseBody runs the validations defined on
-// DescribedByTResponseBody
-func ValidateDescribedByTResponseBody(body *DescribedByTResponseBody) (err error) {
-	if body.Href != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.href", *body.Href, goa.FormatURI))
+// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
+func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
+	if body.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
 	}
-	return
-}
-
-// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
-func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
-	if body.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
 	}
-	if body.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
-	}
-	if body.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	return
 }
@@ -1282,19 +1324,6 @@ func ValidateWorkflowTRequestBodyRequestBody(body *WorkflowTRequestBodyRequestBo
 func ValidateBasicWorkflowOptsTRequestBodyRequestBody(body *BasicWorkflowOptsTRequestBodyRequestBody) (err error) {
 	if body.Command == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("command", "body"))
-	}
-	return
-}
-
-// ValidateRefTResponseBody runs the validations defined on RefTResponseBody
-func ValidateRefTResponseBody(body *RefTResponseBody) (err error) {
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
-	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
 	}
 	return
 }

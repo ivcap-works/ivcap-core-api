@@ -14,20 +14,11 @@ type Service interface {
 	// list services
 	List(context.Context, *ListPayload) (res *ServiceListRT, err error)
 	// Create a new services and return its status.
-	// The "view" return value must have one of the following views
-	//	- "default"
-	//	- "tiny"
-	CreateService(context.Context, *CreateServicePayload) (res *ServiceStatusRT, view string, err error)
+	CreateService(context.Context, *CreateServicePayload) (res *ServiceStatusRT, err error)
 	// Show services by ID
-	// The "view" return value must have one of the following views
-	//	- "default"
-	//	- "tiny"
-	Read(context.Context, *ReadPayload) (res *ServiceStatusRT, view string, err error)
+	Read(context.Context, *ReadPayload) (res *ServiceStatusRT, err error)
 	// Update an existing services and return its status.
-	// The "view" return value must have one of the following views
-	//	- "default"
-	//	- "tiny"
-	Update(context.Context, *UpdatePayload) (res *ServiceStatusRT, view string, err error)
+	Update(context.Context, *UpdatePayload) (res *ServiceStatusRT, err error)
 	// Delete an existing services.
 	Delete(context.Context, *DeletePayload) (err error)
 }
@@ -75,7 +66,7 @@ type BasicWorkflowOptsT struct {
 // create_service method.
 type CreateServicePayload struct {
 	// New services description
-	Services *ServiceDescriptionT
+	Services *ServiceDefinitionT
 	// JWT used for authentication
 	JWT string
 }
@@ -86,11 +77,6 @@ type DeletePayload struct {
 	ID string
 	// JWT used for authentication
 	JWT string
-}
-
-type DescribedByT struct {
-	Href *string
-	Type *string
 }
 
 // Provided credential is not valid.
@@ -116,6 +102,15 @@ type InvalidScopesT struct {
 	Message string
 }
 
+type LinkT struct {
+	// relation type
+	Rel string
+	// mime type
+	Type string
+	// web link
+	Href string
+}
+
 // ListPayload is the payload type of the service service list method.
 type ListPayload struct {
 	// The $limit system query option requests the number of items in the queried
@@ -135,7 +130,7 @@ type ListPayload struct {
 	// orders Trips on
 	// property EndsAt in descending order.
 	OrderBy *string
-	// When set order result in descending order. Ascending order is the default.
+	// When set order result in descending order. Ascending order is the lt.
 	OrderDesc bool
 	// Return the state of the respective resources at that time [now]
 	AtTime *string
@@ -144,12 +139,6 @@ type ListPayload struct {
 	Page *string
 	// JWT used for authentication
 	JWT string
-}
-
-type NavT struct {
-	Self  *string
-	First *string
-	Next  *string
 }
 
 // Method is not yet implemented.
@@ -176,22 +165,12 @@ type ParameterOptT struct {
 	Description *string
 }
 
-type ParameterT struct {
-	Name  *string
-	Value *string
-}
-
 // ReadPayload is the payload type of the service service read method.
 type ReadPayload struct {
 	// ID of services to show
 	ID string
 	// JWT used for authentication
 	JWT string
-}
-
-type RefT struct {
-	ID    *string
-	Links *SelfT
 }
 
 type ReferenceT struct {
@@ -229,24 +208,17 @@ type ResourceNotFoundT struct {
 	Message string
 }
 
-type SelfT struct {
-	Self        *string
-	DescribedBy *DescribedByT
-}
-
-type ServiceDescriptionT struct {
+type ServiceDefinitionT struct {
 	// More detailed description of the service
 	Description string
-	// Optional provider provided meta tags
-	Metadata []*ParameterT
 	// Reference to account revenues for this service should be credited to
 	References []*ReferenceT
-	// Link to banner image oprionally used for this service
+	// Link to banner image optionally used for this service
 	Banner *string
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowT
-	// Reference to policy controlling access
-	PolicyID *string `json:"policy-id,omitempty"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Optional provider provided name
 	Name *string
 	// Optional provider provided tags
@@ -256,39 +228,38 @@ type ServiceDescriptionT struct {
 }
 
 type ServiceListItem struct {
-	// Service ID
-	ID *string
+	// ID
+	ID string
 	// Optional customer provided name
 	Name *string
 	// Optional description of the service
 	Description *string
-	Links       *SelfT
+	// Reference to billable account
+	Account string `json:"account"`
+	Href    string `json:"href,omitempty"`
 }
 
 // ServiceListRT is the result type of the service service list method.
 type ServiceListRT struct {
 	// Services
-	Services []*ServiceListItem
+	Items []*ServiceListItem
 	// Time at which this list was valid
 	AtTime string
-	// Navigation links
-	Links *NavT
+	Links  []*LinkT
 }
 
 // ServiceStatusRT is the result type of the service service create_service
 // method.
 type ServiceStatusRT struct {
-	// Service ID
+	// ID
 	ID string
 	// More detailed description of the service
 	Description *string
 	// Service status
-	Status *string
-	// Optional provider provided meta tags
-	Metadata []*ParameterT
+	Status string
 	// Reference to billable account
-	Account *RefT
-	Links   *SelfT
+	Account string `json:"account"`
+	Links   []*LinkT
 	// Optional provider provided name
 	Name *string
 	// Optional provider provided tags
@@ -308,7 +279,7 @@ type UpdatePayload struct {
 	// Create if not already exist
 	ForceCreate *bool
 	// Updated services description
-	Services *ServiceDescriptionT
+	Services *ServiceDefinitionT
 	// JWT used for authentication
 	JWT string
 }
@@ -320,7 +291,7 @@ type UpdatePayload struct {
 // 'opts' is expected to contain the same schema as 'basic'
 type WorkflowT struct {
 	// Type of workflow
-	Type *string
+	Type string
 	// Type of workflow
 	Basic *BasicWorkflowOptsT
 	// Defines the workflow using argo's WF schema
@@ -479,34 +450,6 @@ func NewViewedServiceListRT(res *ServiceListRT, view string) *serviceviews.Servi
 	return &serviceviews.ServiceListRT{Projected: p, View: "default"}
 }
 
-// NewServiceStatusRT initializes result type ServiceStatusRT from viewed
-// result type ServiceStatusRT.
-func NewServiceStatusRT(vres *serviceviews.ServiceStatusRT) *ServiceStatusRT {
-	var res *ServiceStatusRT
-	switch vres.View {
-	case "default", "":
-		res = newServiceStatusRT(vres.Projected)
-	case "tiny":
-		res = newServiceStatusRTTiny(vres.Projected)
-	}
-	return res
-}
-
-// NewViewedServiceStatusRT initializes viewed result type ServiceStatusRT from
-// result type ServiceStatusRT using the given view.
-func NewViewedServiceStatusRT(res *ServiceStatusRT, view string) *serviceviews.ServiceStatusRT {
-	var vres *serviceviews.ServiceStatusRT
-	switch view {
-	case "default", "":
-		p := newServiceStatusRTView(res)
-		vres = &serviceviews.ServiceStatusRT{Projected: p, View: "default"}
-	case "tiny":
-		p := newServiceStatusRTViewTiny(res)
-		vres = &serviceviews.ServiceStatusRT{Projected: p, View: "tiny"}
-	}
-	return vres
-}
-
 // newServiceListRT converts projected type ServiceListRT to service type
 // ServiceListRT.
 func newServiceListRT(vres *serviceviews.ServiceListRTView) *ServiceListRT {
@@ -514,14 +457,17 @@ func newServiceListRT(vres *serviceviews.ServiceListRTView) *ServiceListRT {
 	if vres.AtTime != nil {
 		res.AtTime = *vres.AtTime
 	}
-	if vres.Services != nil {
-		res.Services = make([]*ServiceListItem, len(vres.Services))
-		for i, val := range vres.Services {
-			res.Services[i] = transformServiceviewsServiceListItemViewToServiceListItem(val)
+	if vres.Items != nil {
+		res.Items = make([]*ServiceListItem, len(vres.Items))
+		for i, val := range vres.Items {
+			res.Items[i] = transformServiceviewsServiceListItemViewToServiceListItem(val)
 		}
 	}
 	if vres.Links != nil {
-		res.Links = transformServiceviewsNavTViewToNavT(vres.Links)
+		res.Links = make([]*LinkT, len(vres.Links))
+		for i, val := range vres.Links {
+			res.Links[i] = transformServiceviewsLinkTViewToLinkT(val)
+		}
 	}
 	return res
 }
@@ -532,114 +478,21 @@ func newServiceListRTView(res *ServiceListRT) *serviceviews.ServiceListRTView {
 	vres := &serviceviews.ServiceListRTView{
 		AtTime: &res.AtTime,
 	}
-	if res.Services != nil {
-		vres.Services = make([]*serviceviews.ServiceListItemView, len(res.Services))
-		for i, val := range res.Services {
-			vres.Services[i] = transformServiceListItemToServiceviewsServiceListItemView(val)
+	if res.Items != nil {
+		vres.Items = make([]*serviceviews.ServiceListItemView, len(res.Items))
+		for i, val := range res.Items {
+			vres.Items[i] = transformServiceListItemToServiceviewsServiceListItemView(val)
 		}
 	} else {
-		vres.Services = []*serviceviews.ServiceListItemView{}
+		vres.Items = []*serviceviews.ServiceListItemView{}
 	}
 	if res.Links != nil {
-		vres.Links = transformNavTToServiceviewsNavTView(res.Links)
-	}
-	return vres
-}
-
-// newServiceStatusRT converts projected type ServiceStatusRT to service type
-// ServiceStatusRT.
-func newServiceStatusRT(vres *serviceviews.ServiceStatusRTView) *ServiceStatusRT {
-	res := &ServiceStatusRT{
-		Name:        vres.Name,
-		Description: vres.Description,
-	}
-	if vres.ID != nil {
-		res.ID = *vres.ID
-	}
-	if vres.Tags != nil {
-		res.Tags = make([]string, len(vres.Tags))
-		for i, val := range vres.Tags {
-			res.Tags[i] = val
-		}
-	}
-	if vres.Metadata != nil {
-		res.Metadata = make([]*ParameterT, len(vres.Metadata))
-		for i, val := range vres.Metadata {
-			res.Metadata[i] = transformServiceviewsParameterTViewToParameterT(val)
-		}
-	}
-	if vres.Parameters != nil {
-		res.Parameters = make([]*ParameterDefT, len(vres.Parameters))
-		for i, val := range vres.Parameters {
-			res.Parameters[i] = transformServiceviewsParameterDefTViewToParameterDefT(val)
-		}
-	}
-	if vres.Account != nil {
-		res.Account = transformServiceviewsRefTViewToRefT(vres.Account)
-	}
-	if vres.Links != nil {
-		res.Links = transformServiceviewsSelfTViewToSelfT(vres.Links)
-	}
-	return res
-}
-
-// newServiceStatusRTTiny converts projected type ServiceStatusRT to service
-// type ServiceStatusRT.
-func newServiceStatusRTTiny(vres *serviceviews.ServiceStatusRTView) *ServiceStatusRT {
-	res := &ServiceStatusRT{
-		Name: vres.Name,
-	}
-	if vres.Links != nil {
-		res.Links = transformServiceviewsSelfTViewToSelfT(vres.Links)
-	}
-	return res
-}
-
-// newServiceStatusRTView projects result type ServiceStatusRT to projected
-// type ServiceStatusRTView using the "default" view.
-func newServiceStatusRTView(res *ServiceStatusRT) *serviceviews.ServiceStatusRTView {
-	vres := &serviceviews.ServiceStatusRTView{
-		ID:          &res.ID,
-		Description: res.Description,
-		Name:        res.Name,
-	}
-	if res.Metadata != nil {
-		vres.Metadata = make([]*serviceviews.ParameterTView, len(res.Metadata))
-		for i, val := range res.Metadata {
-			vres.Metadata[i] = transformParameterTToServiceviewsParameterTView(val)
-		}
-	}
-	if res.Account != nil {
-		vres.Account = transformRefTToServiceviewsRefTView(res.Account)
-	}
-	if res.Links != nil {
-		vres.Links = transformSelfTToServiceviewsSelfTView(res.Links)
-	}
-	if res.Tags != nil {
-		vres.Tags = make([]string, len(res.Tags))
-		for i, val := range res.Tags {
-			vres.Tags[i] = val
-		}
-	}
-	if res.Parameters != nil {
-		vres.Parameters = make([]*serviceviews.ParameterDefTView, len(res.Parameters))
-		for i, val := range res.Parameters {
-			vres.Parameters[i] = transformParameterDefTToServiceviewsParameterDefTView(val)
+		vres.Links = make([]*serviceviews.LinkTView, len(res.Links))
+		for i, val := range res.Links {
+			vres.Links[i] = transformLinkTToServiceviewsLinkTView(val)
 		}
 	} else {
-		vres.Parameters = []*serviceviews.ParameterDefTView{}
-	}
-	return vres
-}
-
-// newServiceStatusRTViewTiny projects result type ServiceStatusRT to projected
-// type ServiceStatusRTView using the "tiny" view.
-func newServiceStatusRTViewTiny(res *ServiceStatusRT) *serviceviews.ServiceStatusRTView {
-	vres := &serviceviews.ServiceStatusRTView{
-		Name: res.Name,
-	}
-	if res.Links != nil {
-		vres.Links = transformSelfTToServiceviewsSelfTView(res.Links)
+		vres.Links = []*serviceviews.LinkTView{}
 	}
 	return vres
 }
@@ -651,54 +504,26 @@ func transformServiceviewsServiceListItemViewToServiceListItem(v *serviceviews.S
 		return nil
 	}
 	res := &ServiceListItem{
-		ID:          v.ID,
+		ID:          *v.ID,
 		Name:        v.Name,
 		Description: v.Description,
-	}
-	if v.Links != nil {
-		res.Links = transformServiceviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformServiceviewsSelfTViewToSelfT builds a value of type *SelfT from a
-// value of type *serviceviews.SelfTView.
-func transformServiceviewsSelfTViewToSelfT(v *serviceviews.SelfTView) *SelfT {
-	res := &SelfT{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = transformServiceviewsDescribedByTViewToDescribedByT(v.DescribedBy)
+		Account:     *v.Account,
+		Href:        *v.Href,
 	}
 
 	return res
 }
 
-// transformServiceviewsDescribedByTViewToDescribedByT builds a value of type
-// *DescribedByT from a value of type *serviceviews.DescribedByTView.
-func transformServiceviewsDescribedByTViewToDescribedByT(v *serviceviews.DescribedByTView) *DescribedByT {
+// transformServiceviewsLinkTViewToLinkT builds a value of type *LinkT from a
+// value of type *serviceviews.LinkTView.
+func transformServiceviewsLinkTViewToLinkT(v *serviceviews.LinkTView) *LinkT {
 	if v == nil {
 		return nil
 	}
-	res := &DescribedByT{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// transformServiceviewsNavTViewToNavT builds a value of type *NavT from a
-// value of type *serviceviews.NavTView.
-func transformServiceviewsNavTViewToNavT(v *serviceviews.NavTView) *NavT {
-	if v == nil {
-		return nil
-	}
-	res := &NavT{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
+	res := &LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res
@@ -708,190 +533,23 @@ func transformServiceviewsNavTViewToNavT(v *serviceviews.NavTView) *NavT {
 // type *serviceviews.ServiceListItemView from a value of type *ServiceListItem.
 func transformServiceListItemToServiceviewsServiceListItemView(v *ServiceListItem) *serviceviews.ServiceListItemView {
 	res := &serviceviews.ServiceListItemView{
-		ID:          v.ID,
+		ID:          &v.ID,
 		Name:        v.Name,
 		Description: v.Description,
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToServiceviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// transformSelfTToServiceviewsSelfTView builds a value of type
-// *serviceviews.SelfTView from a value of type *SelfT.
-func transformSelfTToServiceviewsSelfTView(v *SelfT) *serviceviews.SelfTView {
-	res := &serviceviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = transformDescribedByTToServiceviewsDescribedByTView(v.DescribedBy)
+		Account:     &v.Account,
+		Href:        &v.Href,
 	}
 
 	return res
 }
 
-// transformDescribedByTToServiceviewsDescribedByTView builds a value of type
-// *serviceviews.DescribedByTView from a value of type *DescribedByT.
-func transformDescribedByTToServiceviewsDescribedByTView(v *DescribedByT) *serviceviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// transformNavTToServiceviewsNavTView builds a value of type
-// *serviceviews.NavTView from a value of type *NavT.
-func transformNavTToServiceviewsNavTView(v *NavT) *serviceviews.NavTView {
-	res := &serviceviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// transformServiceviewsParameterTViewToParameterT builds a value of type
-// *ParameterT from a value of type *serviceviews.ParameterTView.
-func transformServiceviewsParameterTViewToParameterT(v *serviceviews.ParameterTView) *ParameterT {
-	if v == nil {
-		return nil
-	}
-	res := &ParameterT{
-		Name:  v.Name,
-		Value: v.Value,
-	}
-
-	return res
-}
-
-// transformServiceviewsParameterDefTViewToParameterDefT builds a value of type
-// *ParameterDefT from a value of type *serviceviews.ParameterDefTView.
-func transformServiceviewsParameterDefTViewToParameterDefT(v *serviceviews.ParameterDefTView) *ParameterDefT {
-	if v == nil {
-		return nil
-	}
-	res := &ParameterDefT{
-		Name:        v.Name,
-		Label:       v.Label,
-		Type:        v.Type,
-		Description: v.Description,
-		Unit:        v.Unit,
-		Constant:    v.Constant,
-		Optional:    v.Optional,
-		Default:     v.Default,
-		Unary:       v.Unary,
-	}
-	if v.Options != nil {
-		res.Options = make([]*ParameterOptT, len(v.Options))
-		for i, val := range v.Options {
-			res.Options[i] = transformServiceviewsParameterOptTViewToParameterOptT(val)
-		}
-	}
-
-	return res
-}
-
-// transformServiceviewsParameterOptTViewToParameterOptT builds a value of type
-// *ParameterOptT from a value of type *serviceviews.ParameterOptTView.
-func transformServiceviewsParameterOptTViewToParameterOptT(v *serviceviews.ParameterOptTView) *ParameterOptT {
-	if v == nil {
-		return nil
-	}
-	res := &ParameterOptT{
-		Value:       v.Value,
-		Description: v.Description,
-	}
-
-	return res
-}
-
-// transformServiceviewsRefTViewToRefT builds a value of type *RefT from a
-// value of type *serviceviews.RefTView.
-func transformServiceviewsRefTViewToRefT(v *serviceviews.RefTView) *RefT {
-	if v == nil {
-		return nil
-	}
-	res := &RefT{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = transformServiceviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformParameterTToServiceviewsParameterTView builds a value of type
-// *serviceviews.ParameterTView from a value of type *ParameterT.
-func transformParameterTToServiceviewsParameterTView(v *ParameterT) *serviceviews.ParameterTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.ParameterTView{
-		Name:  v.Name,
-		Value: v.Value,
-	}
-
-	return res
-}
-
-// transformRefTToServiceviewsRefTView builds a value of type
-// *serviceviews.RefTView from a value of type *RefT.
-func transformRefTToServiceviewsRefTView(v *RefT) *serviceviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToServiceviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// transformParameterDefTToServiceviewsParameterDefTView builds a value of type
-// *serviceviews.ParameterDefTView from a value of type *ParameterDefT.
-func transformParameterDefTToServiceviewsParameterDefTView(v *ParameterDefT) *serviceviews.ParameterDefTView {
-	res := &serviceviews.ParameterDefTView{
-		Name:        v.Name,
-		Label:       v.Label,
-		Type:        v.Type,
-		Description: v.Description,
-		Unit:        v.Unit,
-		Constant:    v.Constant,
-		Optional:    v.Optional,
-		Default:     v.Default,
-		Unary:       v.Unary,
-	}
-	if v.Options != nil {
-		res.Options = make([]*serviceviews.ParameterOptTView, len(v.Options))
-		for i, val := range v.Options {
-			res.Options[i] = transformParameterOptTToServiceviewsParameterOptTView(val)
-		}
-	}
-
-	return res
-}
-
-// transformParameterOptTToServiceviewsParameterOptTView builds a value of type
-// *serviceviews.ParameterOptTView from a value of type *ParameterOptT.
-func transformParameterOptTToServiceviewsParameterOptTView(v *ParameterOptT) *serviceviews.ParameterOptTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.ParameterOptTView{
-		Value:       v.Value,
-		Description: v.Description,
+// transformLinkTToServiceviewsLinkTView builds a value of type
+// *serviceviews.LinkTView from a value of type *LinkT.
+func transformLinkTToServiceviewsLinkTView(v *LinkT) *serviceviews.LinkTView {
+	res := &serviceviews.LinkTView{
+		Rel:  &v.Rel,
+		Type: &v.Type,
+		Href: &v.Href,
 	}
 
 	return res

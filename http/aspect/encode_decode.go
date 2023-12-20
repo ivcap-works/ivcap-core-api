@@ -5,7 +5,6 @@ package client
 import (
 	"bytes"
 	aspect "github.com/ivcap-works/ivcap-core-api/gen/aspect"
-	aspectviews "github.com/ivcap-works/ivcap-core-api/gen/aspect/views"
 	"context"
 	"fmt"
 	"io"
@@ -96,13 +95,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("aspect", "read", err)
 			}
-			p := NewReadAspectRTOK(&body)
-			view := "default"
-			vres := &aspectviews.AspectRT{Projected: p, View: view}
-			if err = aspectviews.ValidateAspectRT(vres); err != nil {
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("aspect", "read", err)
 			}
-			res := aspect.NewAspectRT(vres)
+			res := NewReadAspectRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -273,13 +270,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("aspect", "list", err)
 			}
-			p := NewListAspectListRTOK(&body)
-			view := "default"
-			vres := &aspectviews.AspectListRT{Projected: p, View: view}
-			if err = aspectviews.ValidateAspectListRT(vres); err != nil {
+			err = ValidateListResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("aspect", "list", err)
 			}
-			res := aspect.NewAspectListRT(vres)
+			res := NewListAspectListRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -454,13 +449,11 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("aspect", "create", err)
 			}
-			p := NewCreateAspectIDRTOK(&body)
-			view := "default"
-			vres := &aspectviews.AspectIDRT{Projected: p, View: view}
-			if err = aspectviews.ValidateAspectIDRT(vres); err != nil {
+			err = ValidateCreateResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("aspect", "create", err)
 			}
-			res := aspect.NewAspectIDRT(vres)
+			res := NewCreateAspectIDRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -628,13 +621,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("aspect", "update", err)
 			}
-			p := NewUpdateAspectIDRTOK(&body)
-			view := "default"
-			vres := &aspectviews.AspectIDRT{Projected: p, View: view}
-			if err = aspectviews.ValidateAspectIDRT(vres); err != nil {
+			err = ValidateUpdateResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("aspect", "update", err)
 			}
-			res := aspect.NewAspectIDRT(vres)
+			res := NewUpdateAspectIDRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -857,28 +848,28 @@ func DecodeRetractResponse(decoder func(*http.Response) goahttp.Decoder, restore
 	}
 }
 
-// unmarshalAspectListItemRTResponseBodyToAspectviewsAspectListItemRTView
-// builds a value of type *aspectviews.AspectListItemRTView from a value of
-// type *AspectListItemRTResponseBody.
-func unmarshalAspectListItemRTResponseBodyToAspectviewsAspectListItemRTView(v *AspectListItemRTResponseBody) *aspectviews.AspectListItemRTView {
-	res := &aspectviews.AspectListItemRTView{
-		ID:          v.ID,
-		Entity:      v.Entity,
-		Schema:      v.Schema,
-		Content:     v.Content,
-		ContentType: v.ContentType,
+// unmarshalLinkTResponseBodyToAspectLinkT builds a value of type *aspect.LinkT
+// from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToAspectLinkT(v *LinkTResponseBody) *aspect.LinkT {
+	res := &aspect.LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res
 }
 
-// unmarshalNavTResponseBodyToAspectviewsNavTView builds a value of type
-// *aspectviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToAspectviewsNavTView(v *NavTResponseBody) *aspectviews.NavTView {
-	res := &aspectviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
+// unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT builds a value
+// of type *aspect.AspectListItemRT from a value of type
+// *AspectListItemRTResponseBody.
+func unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(v *AspectListItemRTResponseBody) *aspect.AspectListItemRT {
+	res := &aspect.AspectListItemRT{
+		ID:          *v.ID,
+		Entity:      *v.Entity,
+		Schema:      *v.Schema,
+		Content:     v.Content,
+		ContentType: *v.ContentType,
 	}
 
 	return res

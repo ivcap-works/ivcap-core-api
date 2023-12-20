@@ -96,13 +96,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("order", "read", err)
 			}
-			p := NewReadOrderStatusRTOK(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &orderviews.OrderStatusRT{Projected: p, View: view}
-			if err = orderviews.ValidateOrderStatusRT(vres); err != nil {
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("order", "read", err)
 			}
-			res := order.NewOrderStatusRT(vres)
+			res := NewReadOrderStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -422,13 +420,11 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("order", "create", err)
 			}
-			p := NewCreateOrderStatusRTOK(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &orderviews.OrderStatusRT{Projected: p, View: view}
-			if err = orderviews.ValidateOrderStatusRT(vres); err != nil {
+			err = ValidateCreateResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("order", "create", err)
 			}
-			res := order.NewOrderStatusRT(vres)
+			res := NewCreateOrderStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -845,111 +841,59 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 	}
 }
 
-// unmarshalProductTResponseBodyToOrderviewsProductTView builds a value of type
-// *orderviews.ProductTView from a value of type *ProductTResponseBody.
-func unmarshalProductTResponseBodyToOrderviewsProductTView(v *ProductTResponseBody) *orderviews.ProductTView {
+// unmarshalPartialProductListTResponseBodyToOrderPartialProductListT builds a
+// value of type *order.PartialProductListT from a value of type
+// *PartialProductListTResponseBody.
+func unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(v *PartialProductListTResponseBody) *order.PartialProductListT {
 	if v == nil {
 		return nil
 	}
-	res := &orderviews.ProductTView{
-		ID:       v.ID,
+	res := &order.PartialProductListT{}
+	res.Items = make([]*order.ProductListItemT, len(v.Items))
+	for i, val := range v.Items {
+		res.Items[i] = unmarshalProductListItemTResponseBodyToOrderProductListItemT(val)
+	}
+	res.Links = make([]*order.LinkT, len(v.Links))
+	for i, val := range v.Links {
+		res.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
+	}
+
+	return res
+}
+
+// unmarshalProductListItemTResponseBodyToOrderProductListItemT builds a value
+// of type *order.ProductListItemT from a value of type
+// *ProductListItemTResponseBody.
+func unmarshalProductListItemTResponseBodyToOrderProductListItemT(v *ProductListItemTResponseBody) *order.ProductListItemT {
+	res := &order.ProductListItemT{
+		ID:       *v.ID,
 		Name:     v.Name,
-		Status:   v.Status,
+		Status:   *v.Status,
 		MimeType: v.MimeType,
 		Size:     v.Size,
-		Etag:     v.Etag,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfWithDataTResponseBodyToOrderviewsSelfWithDataTView(v.Links)
+		Href:     *v.Href,
+		DataHref: v.DataHref,
 	}
 
 	return res
 }
 
-// unmarshalSelfWithDataTResponseBodyToOrderviewsSelfWithDataTView builds a
-// value of type *orderviews.SelfWithDataTView from a value of type
-// *SelfWithDataTResponseBody.
-func unmarshalSelfWithDataTResponseBodyToOrderviewsSelfWithDataTView(v *SelfWithDataTResponseBody) *orderviews.SelfWithDataTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.SelfWithDataTView{
-		Self: v.Self,
-		Data: v.Data,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView(v.DescribedBy)
+// unmarshalLinkTResponseBodyToOrderLinkT builds a value of type *order.LinkT
+// from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToOrderLinkT(v *LinkTResponseBody) *order.LinkT {
+	res := &order.LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res
 }
 
-// unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView builds a value
-// of type *orderviews.DescribedByTView from a value of type
-// *DescribedByTResponseBody.
-func unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView(v *DescribedByTResponseBody) *orderviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// unmarshalRefTResponseBodyToOrderviewsRefTView builds a value of type
-// *orderviews.RefTView from a value of type *RefTResponseBody.
-func unmarshalRefTResponseBodyToOrderviewsRefTView(v *RefTResponseBody) *orderviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// unmarshalSelfTResponseBodyToOrderviewsSelfTView builds a value of type
-// *orderviews.SelfTView from a value of type *SelfTResponseBody.
-func unmarshalSelfTResponseBodyToOrderviewsSelfTView(v *SelfTResponseBody) *orderviews.SelfTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView(v.DescribedBy)
-	}
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToOrderviewsNavTView builds a value of type
-// *orderviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToOrderviewsNavTView(v *NavTResponseBody) *orderviews.NavTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// unmarshalParameterTResponseBodyToOrderviewsParameterTView builds a value of
-// type *orderviews.ParameterTView from a value of type *ParameterTResponseBody.
-func unmarshalParameterTResponseBodyToOrderviewsParameterTView(v *ParameterTResponseBody) *orderviews.ParameterTView {
-	res := &orderviews.ParameterTView{
+// unmarshalParameterTResponseBodyToOrderParameterT builds a value of type
+// *order.ParameterT from a value of type *ParameterTResponseBody.
+func unmarshalParameterTResponseBodyToOrderParameterT(v *ParameterTResponseBody) *order.ParameterT {
+	res := &order.ParameterT{
 		Name:  v.Name,
 		Value: v.Value,
 	}
@@ -968,10 +912,22 @@ func unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(v *OrderLis
 		OrderedAt:  v.OrderedAt,
 		StartedAt:  v.StartedAt,
 		FinishedAt: v.FinishedAt,
-		ServiceID:  v.ServiceID,
-		AccountID:  v.AccountID,
+		Service:    v.Service,
+		Account:    v.Account,
+		Href:       v.Href,
 	}
-	res.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(v.Links)
+
+	return res
+}
+
+// unmarshalLinkTResponseBodyToOrderviewsLinkTView builds a value of type
+// *orderviews.LinkTView from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToOrderviewsLinkTView(v *LinkTResponseBody) *orderviews.LinkTView {
+	res := &orderviews.LinkTView{
+		Rel:  v.Rel,
+		Type: v.Type,
+		Href: v.Href,
+	}
 
 	return res
 }

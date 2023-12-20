@@ -59,12 +59,7 @@ func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.List(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedArtifactListRT(res, "default")
-		return vres, nil
+		return s.List(ctx, p)
 	}
 }
 
@@ -83,12 +78,7 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Read(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedArtifactStatusRT(res, "default")
-		return vres, nil
+		return s.Read(ctx, p)
 	}
 }
 
@@ -107,11 +97,6 @@ func NewUploadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Upload(ctx, ep.Payload, ep.Body)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedArtifactStatusRT(res, "default")
-		return vres, nil
+		return s.Upload(ctx, ep.Payload, ep.Body)
 	}
 }

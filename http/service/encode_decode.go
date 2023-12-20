@@ -260,13 +260,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
-			p := NewCreateServiceServiceStatusRTCreated(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &serviceviews.ServiceStatusRT{Projected: p, View: view}
-			if err = serviceviews.ValidateServiceStatusRT(vres); err != nil {
+			err = ValidateCreateServiceResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
-			res := service.NewServiceStatusRT(vres)
+			res := NewCreateServiceServiceStatusRTCreated(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -450,13 +448,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("service", "read", err)
 			}
-			p := NewReadServiceStatusRTOK(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &serviceviews.ServiceStatusRT{Projected: p, View: view}
-			if err = serviceviews.ValidateServiceStatusRT(vres); err != nil {
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("service", "read", err)
 			}
-			res := service.NewServiceStatusRT(vres)
+			res := NewReadServiceStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -624,13 +620,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("service", "update", err)
 			}
-			p := NewUpdateServiceStatusRTOK(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &serviceviews.ServiceStatusRT{Projected: p, View: view}
-			if err = serviceviews.ValidateServiceStatusRT(vres); err != nil {
+			err = ValidateUpdateResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("service", "update", err)
 			}
-			res := service.NewServiceStatusRT(vres)
+			res := NewUpdateServiceStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -860,62 +854,20 @@ func unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(v *Se
 		ID:          v.ID,
 		Name:        v.Name,
 		Description: v.Description,
-	}
-	res.Links = unmarshalSelfTResponseBodyToServiceviewsSelfTView(v.Links)
-
-	return res
-}
-
-// unmarshalSelfTResponseBodyToServiceviewsSelfTView builds a value of type
-// *serviceviews.SelfTView from a value of type *SelfTResponseBody.
-func unmarshalSelfTResponseBodyToServiceviewsSelfTView(v *SelfTResponseBody) *serviceviews.SelfTView {
-	res := &serviceviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToServiceviewsDescribedByTView(v.DescribedBy)
+		Account:     v.Account,
+		Href:        v.Href,
 	}
 
 	return res
 }
 
-// unmarshalDescribedByTResponseBodyToServiceviewsDescribedByTView builds a
-// value of type *serviceviews.DescribedByTView from a value of type
-// *DescribedByTResponseBody.
-func unmarshalDescribedByTResponseBodyToServiceviewsDescribedByTView(v *DescribedByTResponseBody) *serviceviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.DescribedByTView{
-		Href: v.Href,
+// unmarshalLinkTResponseBodyToServiceviewsLinkTView builds a value of type
+// *serviceviews.LinkTView from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToServiceviewsLinkTView(v *LinkTResponseBody) *serviceviews.LinkTView {
+	res := &serviceviews.LinkTView{
+		Rel:  v.Rel,
 		Type: v.Type,
-	}
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToServiceviewsNavTView builds a value of type
-// *serviceviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToServiceviewsNavTView(v *NavTResponseBody) *serviceviews.NavTView {
-	res := &serviceviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// marshalServiceParameterTToParameterTRequestBodyRequestBody builds a value of
-// type *ParameterTRequestBodyRequestBody from a value of type
-// *service.ParameterT.
-func marshalServiceParameterTToParameterTRequestBodyRequestBody(v *service.ParameterT) *ParameterTRequestBodyRequestBody {
-	if v == nil {
-		return nil
-	}
-	res := &ParameterTRequestBodyRequestBody{
-		Name:  v.Name,
-		Value: v.Value,
+		Href: v.Href,
 	}
 
 	return res
@@ -1036,21 +988,6 @@ func marshalServiceParameterOptTToParameterOptT(v *service.ParameterOptT) *Param
 	return res
 }
 
-// marshalParameterTRequestBodyRequestBodyToServiceParameterT builds a value of
-// type *service.ParameterT from a value of type
-// *ParameterTRequestBodyRequestBody.
-func marshalParameterTRequestBodyRequestBodyToServiceParameterT(v *ParameterTRequestBodyRequestBody) *service.ParameterT {
-	if v == nil {
-		return nil
-	}
-	res := &service.ParameterT{
-		Name:  v.Name,
-		Value: v.Value,
-	}
-
-	return res
-}
-
 // marshalReferenceTRequestBodyRequestBodyToServiceReferenceT builds a value of
 // type *service.ReferenceT from a value of type
 // *ReferenceTRequestBodyRequestBody.
@@ -1166,42 +1103,22 @@ func marshalParameterOptTToServiceParameterOptT(v *ParameterOptT) *service.Param
 	return res
 }
 
-// unmarshalParameterTResponseBodyToServiceviewsParameterTView builds a value
-// of type *serviceviews.ParameterTView from a value of type
-// *ParameterTResponseBody.
-func unmarshalParameterTResponseBodyToServiceviewsParameterTView(v *ParameterTResponseBody) *serviceviews.ParameterTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.ParameterTView{
-		Name:  v.Name,
-		Value: v.Value,
+// unmarshalLinkTResponseBodyToServiceLinkT builds a value of type
+// *service.LinkT from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToServiceLinkT(v *LinkTResponseBody) *service.LinkT {
+	res := &service.LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res
 }
 
-// unmarshalRefTResponseBodyToServiceviewsRefTView builds a value of type
-// *serviceviews.RefTView from a value of type *RefTResponseBody.
-func unmarshalRefTResponseBodyToServiceviewsRefTView(v *RefTResponseBody) *serviceviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &serviceviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfTResponseBodyToServiceviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView builds a
-// value of type *serviceviews.ParameterDefTView from a value of type
-// *ParameterDefTResponseBody.
-func unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView(v *ParameterDefTResponseBody) *serviceviews.ParameterDefTView {
-	res := &serviceviews.ParameterDefTView{
+// unmarshalParameterDefTResponseBodyToServiceParameterDefT builds a value of
+// type *service.ParameterDefT from a value of type *ParameterDefTResponseBody.
+func unmarshalParameterDefTResponseBodyToServiceParameterDefT(v *ParameterDefTResponseBody) *service.ParameterDefT {
+	res := &service.ParameterDefT{
 		Name:        v.Name,
 		Label:       v.Label,
 		Type:        v.Type,
@@ -1213,23 +1130,22 @@ func unmarshalParameterDefTResponseBodyToServiceviewsParameterDefTView(v *Parame
 		Unary:       v.Unary,
 	}
 	if v.Options != nil {
-		res.Options = make([]*serviceviews.ParameterOptTView, len(v.Options))
+		res.Options = make([]*service.ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
-			res.Options[i] = unmarshalParameterOptTResponseBodyToServiceviewsParameterOptTView(val)
+			res.Options[i] = unmarshalParameterOptTResponseBodyToServiceParameterOptT(val)
 		}
 	}
 
 	return res
 }
 
-// unmarshalParameterOptTResponseBodyToServiceviewsParameterOptTView builds a
-// value of type *serviceviews.ParameterOptTView from a value of type
-// *ParameterOptTResponseBody.
-func unmarshalParameterOptTResponseBodyToServiceviewsParameterOptTView(v *ParameterOptTResponseBody) *serviceviews.ParameterOptTView {
+// unmarshalParameterOptTResponseBodyToServiceParameterOptT builds a value of
+// type *service.ParameterOptT from a value of type *ParameterOptTResponseBody.
+func unmarshalParameterOptTResponseBodyToServiceParameterOptT(v *ParameterOptTResponseBody) *service.ParameterOptT {
 	if v == nil {
 		return nil
 	}
-	res := &serviceviews.ParameterOptTView{
+	res := &service.ParameterOptT{
 		Value:       v.Value,
 		Description: v.Description,
 	}

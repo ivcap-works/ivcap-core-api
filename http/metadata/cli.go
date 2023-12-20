@@ -191,66 +191,6 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 	return res, nil
 }
 
-// BuildUpdateOnePayload builds the payload for the metadata update_one
-// endpoint from CLI flags.
-func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntityID string, metadataUpdateOneSchema string, metadataUpdateOnePolicyID string, metadataUpdateOneJWT string, metadataUpdateOneContentType string) (*metadata.UpdateOnePayload, error) {
-	var err error
-	var body any
-	{
-		err = json.Unmarshal([]byte(metadataUpdateOneBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
-		}
-	}
-	var entityID string
-	{
-		entityID = metadataUpdateOneEntityID
-		err = goa.MergeErrors(err, goa.ValidateFormat("entity-id", entityID, goa.FormatURI))
-		if err != nil {
-			return nil, err
-		}
-	}
-	var schema string
-	{
-		schema = metadataUpdateOneSchema
-		err = goa.MergeErrors(err, goa.ValidateFormat("schema", schema, goa.FormatURI))
-		if err != nil {
-			return nil, err
-		}
-	}
-	var policyID *string
-	{
-		if metadataUpdateOnePolicyID != "" {
-			policyID = &metadataUpdateOnePolicyID
-			err = goa.MergeErrors(err, goa.ValidateFormat("policy-id", *policyID, goa.FormatURI))
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var jwt string
-	{
-		jwt = metadataUpdateOneJWT
-	}
-	var contentType *string
-	{
-		if metadataUpdateOneContentType != "" {
-			contentType = &metadataUpdateOneContentType
-		}
-	}
-	v := body
-	res := &metadata.UpdateOnePayload{
-		Aspect: &v,
-	}
-	res.EntityID = entityID
-	res.Schema = schema
-	res.PolicyID = policyID
-	res.JWT = jwt
-	res.ContentType = contentType
-
-	return res, nil
-}
-
 // BuildUpdateRecordPayload builds the payload for the metadata update_record
 // endpoint from CLI flags.
 func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRecordID string, metadataUpdateRecordEntityID string, metadataUpdateRecordSchema string, metadataUpdateRecordPolicyID string, metadataUpdateRecordJWT string, metadataUpdateRecordContentType string) (*metadata.UpdateRecordPayload, error) {

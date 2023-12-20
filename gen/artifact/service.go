@@ -3,7 +3,6 @@
 package artifact
 
 import (
-	artifactviews "github.com/ivcap-works/ivcap-core-api/gen/artifact/views"
 	"context"
 	"io"
 
@@ -17,7 +16,7 @@ type Service interface {
 	// Show artifacts by ID
 	Read(context.Context, *ReadPayload) (res *ArtifactStatusRT, err error)
 	// Upload content and create a artifacts.
-	Upload(context.Context, *UploadPayload, io.ReadCloser) (res *ArtifactStatusRT, err error)
+	Upload(context.Context, *UploadPayload, io.ReadCloser) (res *ArtifactUploadRT, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -37,27 +36,26 @@ const ServiceName = "artifact"
 var MethodNames = [3]string{"list", "read", "upload"}
 
 type ArtifactListItem struct {
-	// Artifact ID
-	ID *string
+	// ID
+	ID string
 	// Optional name
 	Name *string
 	// Artifact status
-	Status *string
+	Status string
 	// Size of artifact in bytes
 	Size *int64
 	// Mime (content) type of artifact
 	MimeType *string
-	Links    *SelfT
+	Href     string `json:"href,omitempty"`
 }
 
 // ArtifactListRT is the result type of the artifact service list method.
 type ArtifactListRT struct {
 	// Artifacts
-	Artifacts []*ArtifactListItem
+	Items []*ArtifactListItem
 	// Time at which this list was valid
 	AtTime *string
-	// Navigation links
-	Links *NavT
+	Links  []*LinkT
 }
 
 // ArtifactStatusRT is the result type of the artifact service read method.
@@ -80,30 +78,52 @@ type ArtifactStatusRT struct {
 	CreatedAt *string
 	// DateTime artifact was last modified
 	LastModifiedAt *string
-	// Reference to policy controlling access
-	Policy *RefT
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Reference to billable account
-	Account *RefT
-	// Link to retrieve the artifact data
-	Data  *SelfT
-	Links *SelfT
+	Account  *string `json:"account"`
+	DataHref *string `json:"dataRef,omitempty"`
+	Links    []*LinkT
+}
+
+// ArtifactUploadRT is the result type of the artifact service upload method.
+type ArtifactUploadRT struct {
 	// link back to record
-	Location *string
+	Location string
 	// indicate version of TUS supported
 	TusResumable *string
 	// TUS offset for partially uploaded content
 	TusOffset *int64
+	// Artifact ID
+	ID string
+	// Optional name
+	Name *string
+	// Artifact status
+	Status string
+	// Mime-type of data
+	MimeType *string
+	// Size of data
+	Size *int64
+	// URL of object this artifact is caching
+	CacheOf *string
+	// ETAG of artifact
+	Etag *string `json:"etag,omitempty"`
+	// DateTime artifact was created
+	CreatedAt *string
+	// DateTime artifact was last modified
+	LastModifiedAt *string
+	// Reference to policy used
+	Policy *string `json:"policy"`
+	// Reference to billable account
+	Account  *string `json:"account"`
+	DataHref *string `json:"dataRef,omitempty"`
+	Links    []*LinkT
 }
 
 // Bad arguments supplied.
 type BadRequestT struct {
 	// Information message
 	Message string
-}
-
-type DescribedByT struct {
-	Href *string
-	Type *string
 }
 
 // Provided credential is not valid.
@@ -129,6 +149,15 @@ type InvalidScopesT struct {
 	Message string
 }
 
+type LinkT struct {
+	// relation type
+	Rel string
+	// mime type
+	Type string
+	// web link
+	Href string
+}
+
 // ListPayload is the payload type of the artifact service list method.
 type ListPayload struct {
 	// The $limit system query option requests the number of items in the queried
@@ -148,7 +177,7 @@ type ListPayload struct {
 	// orders Trips on
 	// property EndsAt in descending order.
 	OrderBy *string
-	// When set order result in descending order. Ascending order is the default.
+	// When set order result in descending order. Ascending order is the lt.
 	OrderDesc bool
 	// Return the state of the respective resources at that time [now]
 	AtTime *string
@@ -157,12 +186,6 @@ type ListPayload struct {
 	Page *string
 	// JWT used for authentication
 	JWT string
-}
-
-type NavT struct {
-	Self  *string
-	First *string
-	Next  *string
 }
 
 // Method is not yet implemented.
@@ -179,11 +202,6 @@ type ReadPayload struct {
 	JWT string
 }
 
-type RefT struct {
-	ID    *string
-	Links *SelfT
-}
-
 // NotFound is the type returned when attempting to manage a resource that does
 // not exist.
 type ResourceNotFoundT struct {
@@ -191,11 +209,6 @@ type ResourceNotFoundT struct {
 	ID string
 	// Message of error
 	Message string
-}
-
-type SelfT struct {
-	Self        *string
-	DescribedBy *DescribedByT
 }
 
 // Unauthorized access to resource
@@ -349,288 +362,4 @@ func (e *UnauthorizedT) ErrorName() string {
 // GoaErrorName returns "UnauthorizedT".
 func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
-}
-
-// NewArtifactListRT initializes result type ArtifactListRT from viewed result
-// type ArtifactListRT.
-func NewArtifactListRT(vres *artifactviews.ArtifactListRT) *ArtifactListRT {
-	return newArtifactListRT(vres.Projected)
-}
-
-// NewViewedArtifactListRT initializes viewed result type ArtifactListRT from
-// result type ArtifactListRT using the given view.
-func NewViewedArtifactListRT(res *ArtifactListRT, view string) *artifactviews.ArtifactListRT {
-	p := newArtifactListRTView(res)
-	return &artifactviews.ArtifactListRT{Projected: p, View: "default"}
-}
-
-// NewArtifactStatusRT initializes result type ArtifactStatusRT from viewed
-// result type ArtifactStatusRT.
-func NewArtifactStatusRT(vres *artifactviews.ArtifactStatusRT) *ArtifactStatusRT {
-	return newArtifactStatusRT(vres.Projected)
-}
-
-// NewViewedArtifactStatusRT initializes viewed result type ArtifactStatusRT
-// from result type ArtifactStatusRT using the given view.
-func NewViewedArtifactStatusRT(res *ArtifactStatusRT, view string) *artifactviews.ArtifactStatusRT {
-	p := newArtifactStatusRTView(res)
-	return &artifactviews.ArtifactStatusRT{Projected: p, View: "default"}
-}
-
-// newArtifactListRT converts projected type ArtifactListRT to service type
-// ArtifactListRT.
-func newArtifactListRT(vres *artifactviews.ArtifactListRTView) *ArtifactListRT {
-	res := &ArtifactListRT{
-		AtTime: vres.AtTime,
-	}
-	if vres.Artifacts != nil {
-		res.Artifacts = make([]*ArtifactListItem, len(vres.Artifacts))
-		for i, val := range vres.Artifacts {
-			res.Artifacts[i] = transformArtifactviewsArtifactListItemViewToArtifactListItem(val)
-		}
-	}
-	if vres.Links != nil {
-		res.Links = transformArtifactviewsNavTViewToNavT(vres.Links)
-	}
-	return res
-}
-
-// newArtifactListRTView projects result type ArtifactListRT to projected type
-// ArtifactListRTView using the "default" view.
-func newArtifactListRTView(res *ArtifactListRT) *artifactviews.ArtifactListRTView {
-	vres := &artifactviews.ArtifactListRTView{
-		AtTime: res.AtTime,
-	}
-	if res.Artifacts != nil {
-		vres.Artifacts = make([]*artifactviews.ArtifactListItemView, len(res.Artifacts))
-		for i, val := range res.Artifacts {
-			vres.Artifacts[i] = transformArtifactListItemToArtifactviewsArtifactListItemView(val)
-		}
-	} else {
-		vres.Artifacts = []*artifactviews.ArtifactListItemView{}
-	}
-	if res.Links != nil {
-		vres.Links = transformNavTToArtifactviewsNavTView(res.Links)
-	}
-	return vres
-}
-
-// newArtifactStatusRT converts projected type ArtifactStatusRT to service type
-// ArtifactStatusRT.
-func newArtifactStatusRT(vres *artifactviews.ArtifactStatusRTView) *ArtifactStatusRT {
-	res := &ArtifactStatusRT{
-		Name:           vres.Name,
-		MimeType:       vres.MimeType,
-		Size:           vres.Size,
-		CacheOf:        vres.CacheOf,
-		Etag:           vres.Etag,
-		CreatedAt:      vres.CreatedAt,
-		LastModifiedAt: vres.LastModifiedAt,
-		Location:       vres.Location,
-		TusResumable:   vres.TusResumable,
-		TusOffset:      vres.TusOffset,
-	}
-	if vres.ID != nil {
-		res.ID = *vres.ID
-	}
-	if vres.Status != nil {
-		res.Status = *vres.Status
-	}
-	if vres.Policy != nil {
-		res.Policy = transformArtifactviewsRefTViewToRefT(vres.Policy)
-	}
-	if vres.Account != nil {
-		res.Account = transformArtifactviewsRefTViewToRefT(vres.Account)
-	}
-	if vres.Data != nil {
-		res.Data = transformArtifactviewsSelfTViewToSelfT(vres.Data)
-	}
-	if vres.Links != nil {
-		res.Links = transformArtifactviewsSelfTViewToSelfT(vres.Links)
-	}
-	return res
-}
-
-// newArtifactStatusRTView projects result type ArtifactStatusRT to projected
-// type ArtifactStatusRTView using the "default" view.
-func newArtifactStatusRTView(res *ArtifactStatusRT) *artifactviews.ArtifactStatusRTView {
-	vres := &artifactviews.ArtifactStatusRTView{
-		ID:             &res.ID,
-		Name:           res.Name,
-		Status:         &res.Status,
-		MimeType:       res.MimeType,
-		Size:           res.Size,
-		CacheOf:        res.CacheOf,
-		Etag:           res.Etag,
-		CreatedAt:      res.CreatedAt,
-		LastModifiedAt: res.LastModifiedAt,
-		Location:       res.Location,
-		TusResumable:   res.TusResumable,
-		TusOffset:      res.TusOffset,
-	}
-	if res.Policy != nil {
-		vres.Policy = transformRefTToArtifactviewsRefTView(res.Policy)
-	}
-	if res.Account != nil {
-		vres.Account = transformRefTToArtifactviewsRefTView(res.Account)
-	}
-	if res.Data != nil {
-		vres.Data = transformSelfTToArtifactviewsSelfTView(res.Data)
-	}
-	if res.Links != nil {
-		vres.Links = transformSelfTToArtifactviewsSelfTView(res.Links)
-	}
-	return vres
-}
-
-// transformArtifactviewsArtifactListItemViewToArtifactListItem builds a value
-// of type *ArtifactListItem from a value of type
-// *artifactviews.ArtifactListItemView.
-func transformArtifactviewsArtifactListItemViewToArtifactListItem(v *artifactviews.ArtifactListItemView) *ArtifactListItem {
-	if v == nil {
-		return nil
-	}
-	res := &ArtifactListItem{
-		ID:       v.ID,
-		Name:     v.Name,
-		Status:   v.Status,
-		Size:     v.Size,
-		MimeType: v.MimeType,
-	}
-	if v.Links != nil {
-		res.Links = transformArtifactviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformArtifactviewsSelfTViewToSelfT builds a value of type *SelfT from a
-// value of type *artifactviews.SelfTView.
-func transformArtifactviewsSelfTViewToSelfT(v *artifactviews.SelfTView) *SelfT {
-	res := &SelfT{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = transformArtifactviewsDescribedByTViewToDescribedByT(v.DescribedBy)
-	}
-
-	return res
-}
-
-// transformArtifactviewsDescribedByTViewToDescribedByT builds a value of type
-// *DescribedByT from a value of type *artifactviews.DescribedByTView.
-func transformArtifactviewsDescribedByTViewToDescribedByT(v *artifactviews.DescribedByTView) *DescribedByT {
-	if v == nil {
-		return nil
-	}
-	res := &DescribedByT{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// transformArtifactviewsNavTViewToNavT builds a value of type *NavT from a
-// value of type *artifactviews.NavTView.
-func transformArtifactviewsNavTViewToNavT(v *artifactviews.NavTView) *NavT {
-	if v == nil {
-		return nil
-	}
-	res := &NavT{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// transformArtifactListItemToArtifactviewsArtifactListItemView builds a value
-// of type *artifactviews.ArtifactListItemView from a value of type
-// *ArtifactListItem.
-func transformArtifactListItemToArtifactviewsArtifactListItemView(v *ArtifactListItem) *artifactviews.ArtifactListItemView {
-	res := &artifactviews.ArtifactListItemView{
-		ID:       v.ID,
-		Name:     v.Name,
-		Status:   v.Status,
-		Size:     v.Size,
-		MimeType: v.MimeType,
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToArtifactviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// transformSelfTToArtifactviewsSelfTView builds a value of type
-// *artifactviews.SelfTView from a value of type *SelfT.
-func transformSelfTToArtifactviewsSelfTView(v *SelfT) *artifactviews.SelfTView {
-	res := &artifactviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = transformDescribedByTToArtifactviewsDescribedByTView(v.DescribedBy)
-	}
-
-	return res
-}
-
-// transformDescribedByTToArtifactviewsDescribedByTView builds a value of type
-// *artifactviews.DescribedByTView from a value of type *DescribedByT.
-func transformDescribedByTToArtifactviewsDescribedByTView(v *DescribedByT) *artifactviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// transformNavTToArtifactviewsNavTView builds a value of type
-// *artifactviews.NavTView from a value of type *NavT.
-func transformNavTToArtifactviewsNavTView(v *NavT) *artifactviews.NavTView {
-	res := &artifactviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// transformArtifactviewsRefTViewToRefT builds a value of type *RefT from a
-// value of type *artifactviews.RefTView.
-func transformArtifactviewsRefTViewToRefT(v *artifactviews.RefTView) *RefT {
-	if v == nil {
-		return nil
-	}
-	res := &RefT{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = transformArtifactviewsSelfTViewToSelfT(v.Links)
-	}
-
-	return res
-}
-
-// transformRefTToArtifactviewsRefTView builds a value of type
-// *artifactviews.RefTView from a value of type *RefT.
-func transformRefTToArtifactviewsRefTView(v *RefT) *artifactviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = transformSelfTToArtifactviewsSelfTView(v.Links)
-	}
-
-	return res
 }

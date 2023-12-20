@@ -55,12 +55,7 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Read(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAspectRT(res, "default")
-		return vres, nil
+		return s.Read(ctx, p)
 	}
 }
 
@@ -79,12 +74,7 @@ func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.List(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAspectListRT(res, "default")
-		return vres, nil
+		return s.List(ctx, p)
 	}
 }
 
@@ -103,12 +93,7 @@ func NewCreateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Create(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAspectIDRT(res, "default")
-		return vres, nil
+		return s.Create(ctx, p)
 	}
 }
 
@@ -127,12 +112,7 @@ func NewUpdateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Update(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAspectIDRT(res, "default")
-		return vres, nil
+		return s.Update(ctx, p)
 	}
 }
 

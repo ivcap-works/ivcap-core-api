@@ -4,7 +4,6 @@ package client
 
 import (
 	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
-	metadataviews "github.com/ivcap-works/ivcap-core-api/gen/metadata/views"
 
 	goa "goa.design/goa/v3/pkg"
 )
@@ -12,8 +11,8 @@ import (
 // ReadResponseBody is the type of the "metadata" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
-	// Record ID
-	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
+	// ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Entity ID
 	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
 	// Schema ID
@@ -22,41 +21,34 @@ type ReadResponseBody struct {
 	Aspect any `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
 	// Time this record was asserted
 	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
-	// Time this record was revoked
+	// Time this record was retracted
 	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
 	// Entity asserting this metadata record at 'valid-from'
 	Asserter *string `form:"asserter,omitempty" json:"asserter,omitempty" xml:"asserter,omitempty"`
 	// Entity revoking this record at 'valid-to'
-	Revoker *string `form:"revoker,omitempty" json:"revoker,omitempty" xml:"revoker,omitempty"`
+	Revoker *string              `form:"revoker,omitempty" json:"revoker,omitempty" xml:"revoker,omitempty"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ListResponseBody is the type of the "metadata" service "list" endpoint HTTP
 // response body.
 type ListResponseBody struct {
 	// List of metadata records
-	Records []*MetadataListItemRTResponseBody `form:"records,omitempty" json:"records,omitempty" xml:"records,omitempty"`
+	Items []*MetadataListItemRTResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
 	// Entity for which to request metadata
-	EntityID *string `form:"entity-id,omitempty" json:"entity-id,omitempty" xml:"entity-id,omitempty"`
+	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
 	// Optional schema to filter on
 	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
 	// Optional json path to further filter on returned list
 	AspectPath *string `form:"aspect-path,omitempty" json:"aspect-path,omitempty" xml:"aspect-path,omitempty"`
 	// Time at which this list was valid
-	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-	// Navigation links
-	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // AddResponseBody is the type of the "metadata" service "add" endpoint HTTP
 // response body.
 type AddResponseBody struct {
-	// Reference to record created
-	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
-}
-
-// UpdateOneResponseBody is the type of the "metadata" service "update_one"
-// endpoint HTTP response body.
-type UpdateOneResponseBody struct {
 	// Reference to record created
 	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
 }
@@ -168,40 +160,6 @@ type AddNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// UpdateOneBadRequestResponseBody is the type of the "metadata" service
-// "update_one" endpoint HTTP response body for the "bad-request" error.
-type UpdateOneBadRequestResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// UpdateOneInvalidParameterResponseBody is the type of the "metadata" service
-// "update_one" endpoint HTTP response body for the "invalid-parameter" error.
-type UpdateOneInvalidParameterResponseBody struct {
-	// message describing expected type or pattern.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-	// name of parameter.
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// provided parameter value.
-	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
-}
-
-// UpdateOneInvalidScopesResponseBody is the type of the "metadata" service
-// "update_one" endpoint HTTP response body for the "invalid-scopes" error.
-type UpdateOneInvalidScopesResponseBody struct {
-	// ID of involved resource
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Message of error
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
-// UpdateOneNotImplementedResponseBody is the type of the "metadata" service
-// "update_one" endpoint HTTP response body for the "not-implemented" error.
-type UpdateOneNotImplementedResponseBody struct {
-	// Information message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
 // UpdateRecordBadRequestResponseBody is the type of the "metadata" service
 // "update_record" endpoint HTTP response body for the "bad-request" error.
 type UpdateRecordBadRequestResponseBody struct {
@@ -271,11 +229,21 @@ type RevokeNotImplementedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// LinkTResponseBody is used to define fields on response body types.
+type LinkTResponseBody struct {
+	// relation type
+	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
+	// mime type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	// web link
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+}
+
 // MetadataListItemRTResponseBody is used to define fields on response body
 // types.
 type MetadataListItemRTResponseBody struct {
-	// Record ID
-	RecordID *string `form:"record-id,omitempty" json:"record-id,omitempty" xml:"record-id,omitempty"`
+	// ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Entity ID
 	Entity *string `form:"entity,omitempty" json:"entity,omitempty" xml:"entity,omitempty"`
 	// Schema ID
@@ -283,28 +251,25 @@ type MetadataListItemRTResponseBody struct {
 	// Attached metadata aspect
 	Aspect any `form:"aspect,omitempty" json:"aspect,omitempty" xml:"aspect,omitempty"`
 	// If aspectPath was defined, this is what matched the query
-	AspectContext *string `form:"aspectContext,omitempty" json:"aspectContext,omitempty" xml:"aspectContext,omitempty"`
-}
-
-// NavTResponseBody is used to define fields on response body types.
-type NavTResponseBody struct {
-	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
+	AspectContext *string `form:"aspect-context,omitempty" json:"aspect-context,omitempty" xml:"aspect-context,omitempty"`
 }
 
 // NewReadMetadataRecordRTOK builds a "metadata" service "read" endpoint result
 // from a HTTP "OK" response.
-func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadataviews.MetadataRecordRTView {
-	v := &metadataviews.MetadataRecordRTView{
-		RecordID:  body.RecordID,
-		Entity:    body.Entity,
-		Schema:    body.Schema,
+func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadata.MetadataRecordRT {
+	v := &metadata.MetadataRecordRT{
+		ID:        *body.ID,
+		Entity:    *body.Entity,
+		Schema:    *body.Schema,
 		Aspect:    body.Aspect,
-		ValidFrom: body.ValidFrom,
+		ValidFrom: *body.ValidFrom,
 		ValidTo:   body.ValidTo,
-		Asserter:  body.Asserter,
+		Asserter:  *body.Asserter,
 		Revoker:   body.Revoker,
+	}
+	v.Links = make([]*metadata.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToMetadataLinkT(val)
 	}
 
 	return v
@@ -366,20 +331,23 @@ func NewReadNotAuthorized() *metadata.UnauthorizedT {
 	return v
 }
 
-// NewListMetaRTViewOK builds a "metadata" service "list" endpoint result from
-// a HTTP "OK" response.
-func NewListMetaRTViewOK(body *ListResponseBody) *metadataviews.ListMetaRTView {
-	v := &metadataviews.ListMetaRTView{
-		EntityID:   body.EntityID,
+// NewListMetaRTOK builds a "metadata" service "list" endpoint result from a
+// HTTP "OK" response.
+func NewListMetaRTOK(body *ListResponseBody) *metadata.ListMetaRT {
+	v := &metadata.ListMetaRT{
+		Entity:     body.Entity,
 		Schema:     body.Schema,
 		AspectPath: body.AspectPath,
 		AtTime:     body.AtTime,
 	}
-	v.Records = make([]*metadataviews.MetadataListItemRTView, len(body.Records))
-	for i, val := range body.Records {
-		v.Records[i] = unmarshalMetadataListItemRTResponseBodyToMetadataviewsMetadataListItemRTView(val)
+	v.Items = make([]*metadata.MetadataListItemRT, len(body.Items))
+	for i, val := range body.Items {
+		v.Items[i] = unmarshalMetadataListItemRTResponseBodyToMetadataMetadataListItemRT(val)
 	}
-	v.Links = unmarshalNavTResponseBodyToMetadataviewsNavTView(body.Links)
+	v.Links = make([]*metadata.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToMetadataLinkT(val)
+	}
 
 	return v
 }
@@ -442,11 +410,11 @@ func NewListNotAuthorized() *metadata.UnauthorizedT {
 	return v
 }
 
-// NewAddMetaRTViewOK builds a "metadata" service "add" endpoint result from a
-// HTTP "OK" response.
-func NewAddMetaRTViewOK(body *AddResponseBody) *metadataviews.AddMetaRTView {
-	v := &metadataviews.AddMetaRTView{
-		RecordID: body.RecordID,
+// NewAddMetaRTOK builds a "metadata" service "add" endpoint result from a HTTP
+// "OK" response.
+func NewAddMetaRTOK(body *AddResponseBody) *metadata.AddMetaRT {
+	v := &metadata.AddMetaRT{
+		RecordID: *body.RecordID,
 	}
 
 	return v
@@ -510,80 +478,11 @@ func NewAddNotAuthorized() *metadata.UnauthorizedT {
 	return v
 }
 
-// NewUpdateOneAddMetaRTOK builds a "metadata" service "update_one" endpoint
-// result from a HTTP "OK" response.
-func NewUpdateOneAddMetaRTOK(body *UpdateOneResponseBody) *metadataviews.AddMetaRTView {
-	v := &metadataviews.AddMetaRTView{
-		RecordID: body.RecordID,
-	}
-
-	return v
-}
-
-// NewUpdateOneBadRequest builds a metadata service update_one endpoint
-// bad-request error.
-func NewUpdateOneBadRequest(body *UpdateOneBadRequestResponseBody) *metadata.BadRequestT {
-	v := &metadata.BadRequestT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewUpdateOneInvalidCredential builds a metadata service update_one endpoint
-// invalid-credential error.
-func NewUpdateOneInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
-// NewUpdateOneInvalidParameter builds a metadata service update_one endpoint
-// invalid-parameter error.
-func NewUpdateOneInvalidParameter(body *UpdateOneInvalidParameterResponseBody) *metadata.InvalidParameterValue {
-	v := &metadata.InvalidParameterValue{
-		Message: *body.Message,
-		Name:    *body.Name,
-		Value:   body.Value,
-	}
-
-	return v
-}
-
-// NewUpdateOneInvalidScopes builds a metadata service update_one endpoint
-// invalid-scopes error.
-func NewUpdateOneInvalidScopes(body *UpdateOneInvalidScopesResponseBody) *metadata.InvalidScopesT {
-	v := &metadata.InvalidScopesT{
-		ID:      body.ID,
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewUpdateOneNotImplemented builds a metadata service update_one endpoint
-// not-implemented error.
-func NewUpdateOneNotImplemented(body *UpdateOneNotImplementedResponseBody) *metadata.NotImplementedT {
-	v := &metadata.NotImplementedT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
-// NewUpdateOneNotAuthorized builds a metadata service update_one endpoint
-// not-authorized error.
-func NewUpdateOneNotAuthorized() *metadata.UnauthorizedT {
-	v := &metadata.UnauthorizedT{}
-
-	return v
-}
-
 // NewUpdateRecordAddMetaRTOK builds a "metadata" service "update_record"
 // endpoint result from a HTTP "OK" response.
-func NewUpdateRecordAddMetaRTOK(body *UpdateRecordResponseBody) *metadataviews.AddMetaRTView {
-	v := &metadataviews.AddMetaRTView{
-		RecordID: body.RecordID,
+func NewUpdateRecordAddMetaRTOK(body *UpdateRecordResponseBody) *metadata.AddMetaRT {
+	v := &metadata.AddMetaRT{
+		RecordID: *body.RecordID,
 	}
 
 	return v
@@ -705,6 +604,117 @@ func NewRevokeNotAuthorized() *metadata.UnauthorizedT {
 	v := &metadata.UnauthorizedT{}
 
 	return v
+}
+
+// ValidateReadResponseBody runs the validations defined on ReadResponseBody
+func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Entity == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("entity", "body"))
+	}
+	if body.Schema == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
+	}
+	if body.Aspect == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("aspect", "body"))
+	}
+	if body.ValidFrom == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("valid-from", "body"))
+	}
+	if body.Asserter == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("asserter", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.Entity != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
+	}
+	if body.Schema != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
+	}
+	if body.ValidFrom != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.valid-from", *body.ValidFrom, goa.FormatDateTime))
+	}
+	if body.ValidTo != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.valid-to", *body.ValidTo, goa.FormatDateTime))
+	}
+	if body.Asserter != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.asserter", *body.Asserter, goa.FormatURI))
+	}
+	if body.Revoker != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.revoker", *body.Revoker, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateListResponseBody runs the validations defined on ListResponseBody
+func ValidateListResponseBody(body *ListResponseBody) (err error) {
+	if body.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	for _, e := range body.Items {
+		if e != nil {
+			if err2 := ValidateMetadataListItemRTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if body.Entity != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
+	}
+	if body.Schema != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
+	}
+	if body.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.at-time", *body.AtTime, goa.FormatDateTime))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateAddResponseBody runs the validations defined on AddResponseBody
+func ValidateAddResponseBody(body *AddResponseBody) (err error) {
+	if body.RecordID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("record-id", "body"))
+	}
+	if body.RecordID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.record-id", *body.RecordID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateUpdateRecordResponseBody runs the validations defined on
+// update_record_response_body
+func ValidateUpdateRecordResponseBody(body *UpdateRecordResponseBody) (err error) {
+	if body.RecordID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("record-id", "body"))
+	}
+	if body.RecordID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.record-id", *body.RecordID, goa.FormatURI))
+	}
+	return
 }
 
 // ValidateReadBadRequestResponseBody runs the validations defined on
@@ -836,48 +846,6 @@ func ValidateAddNotImplementedResponseBody(body *AddNotImplementedResponseBody) 
 	return
 }
 
-// ValidateUpdateOneBadRequestResponseBody runs the validations defined on
-// update_one_bad-request_response_body
-func ValidateUpdateOneBadRequestResponseBody(body *UpdateOneBadRequestResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateUpdateOneInvalidParameterResponseBody runs the validations defined
-// on update_one_invalid-parameter_response_body
-func ValidateUpdateOneInvalidParameterResponseBody(body *UpdateOneInvalidParameterResponseBody) (err error) {
-	if body.Name == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
-	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
-// ValidateUpdateOneInvalidScopesResponseBody runs the validations defined on
-// update_one_invalid-scopes_response_body
-func ValidateUpdateOneInvalidScopesResponseBody(body *UpdateOneInvalidScopesResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
-	}
-	return
-}
-
-// ValidateUpdateOneNotImplementedResponseBody runs the validations defined on
-// update_one_not-implemented_response_body
-func ValidateUpdateOneNotImplementedResponseBody(body *UpdateOneNotImplementedResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
 // ValidateUpdateRecordBadRequestResponseBody runs the validations defined on
 // update_record_bad-request_response_body
 func ValidateUpdateRecordBadRequestResponseBody(body *UpdateRecordBadRequestResponseBody) (err error) {
@@ -962,31 +930,40 @@ func ValidateRevokeNotImplementedResponseBody(body *RevokeNotImplementedResponse
 	return
 }
 
+// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
+func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
+	if body.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
+	}
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	return
+}
+
 // ValidateMetadataListItemRTResponseBody runs the validations defined on
 // MetadataListItemRTResponseBody
 func ValidateMetadataListItemRTResponseBody(body *MetadataListItemRTResponseBody) (err error) {
-	if body.RecordID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.record-id", *body.RecordID, goa.FormatURI))
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Entity == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("entity", "body"))
+	}
+	if body.Schema == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
-func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
-	if body.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
-	}
-	if body.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
-	}
-	if body.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
 	}
 	return
 }

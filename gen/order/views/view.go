@@ -6,14 +6,6 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// OrderStatusRT is the viewed result type that is projected based on a view.
-type OrderStatusRT struct {
-	// Type to project
-	Projected *OrderStatusRTView
-	// View to render
-	View string
-}
-
 // OrderListRT is the viewed result type that is projected based on a view.
 type OrderListRT struct {
 	// Type to project
@@ -31,10 +23,21 @@ type OrderTopResultItemCollection struct {
 	View string
 }
 
-// OrderStatusRTView is a type that runs validations on a projected type.
-type OrderStatusRTView struct {
-	// Order ID
+// OrderListRTView is a type that runs validations on a projected type.
+type OrderListRTView struct {
+	// Orders
+	Items []*OrderListItemView
+	// Time at which this list was valid
+	AtTime *string
+	Links  []*LinkTView
+}
+
+// OrderListItemView is a type that runs validations on a projected type.
+type OrderListItemView struct {
+	// ID
 	ID *string
+	// Optional customer provided name
+	Name *string
 	// Order status
 	Status *string
 	// DateTime order was placed
@@ -43,101 +46,21 @@ type OrderStatusRTView struct {
 	StartedAt *string
 	// DateTime order processing finished
 	FinishedAt *string
-	// Products delivered for this order
-	Products []*ProductTView
 	// Reference to service requested
-	Service *RefTView
+	Service *string `json:"service"`
 	// Reference to billable account
-	Account *RefTView
-	Links   *SelfTView
-	// Product metadata links
-	ProductLinks *NavTView
-	// Optional customer provided name
-	Name *string
-	// Optional customer provided tags
-	Tags []string
-	// Service parameters
-	Parameters []*ParameterTView
+	Account *string `json:"account"`
+	Href    *string `json:"href,omitempty"`
 }
 
-// ProductTView is a type that runs validations on a projected type.
-type ProductTView struct {
-	ID       *string
-	Name     *string
-	Status   *string
-	MimeType *string `json:"mime-type,omitempty"`
-	Size     *int64
-	Links    *SelfWithDataTView
-	Etag     *string `json:"etag,omitempty"`
-}
-
-// SelfWithDataTView is a type that runs validations on a projected type.
-type SelfWithDataTView struct {
-	Self        *string
-	DescribedBy *DescribedByTView
-	Data        *string
-}
-
-// DescribedByTView is a type that runs validations on a projected type.
-type DescribedByTView struct {
-	Href *string
+// LinkTView is a type that runs validations on a projected type.
+type LinkTView struct {
+	// relation type
+	Rel *string
+	// mime type
 	Type *string
-}
-
-// RefTView is a type that runs validations on a projected type.
-type RefTView struct {
-	ID    *string
-	Links *SelfTView
-}
-
-// SelfTView is a type that runs validations on a projected type.
-type SelfTView struct {
-	Self        *string
-	DescribedBy *DescribedByTView
-}
-
-// NavTView is a type that runs validations on a projected type.
-type NavTView struct {
-	Self  *string
-	First *string
-	Next  *string
-}
-
-// ParameterTView is a type that runs validations on a projected type.
-type ParameterTView struct {
-	Name  *string
-	Value *string
-}
-
-// OrderListRTView is a type that runs validations on a projected type.
-type OrderListRTView struct {
-	// Orders
-	Orders []*OrderListItemView
-	// Time at which this list was valid
-	AtTime *string
-	// Navigation links
-	Links *NavTView
-}
-
-// OrderListItemView is a type that runs validations on a projected type.
-type OrderListItemView struct {
-	// Order ID
-	ID *string
-	// Optional customer provided name
-	Name *string
-	// Order status
-	Status *string
-	// DateTime order was placed
-	OrderedAt *string
-	// DateTime processing of order started
-	StartedAt *string
-	// DateTime order was finished
-	FinishedAt *string
-	// ID of ordered service
-	ServiceID *string
-	// ID of ordered service
-	AccountID *string
-	Links     *SelfTView
+	// web link
+	Href *string
 }
 
 // OrderTopResultItemCollectionView is a type that runs validations on a
@@ -159,34 +82,11 @@ type OrderTopResultItemView struct {
 }
 
 var (
-	// OrderStatusRTMap is a map indexing the attribute names of OrderStatusRT by
-	// view name.
-	OrderStatusRTMap = map[string][]string{
-		"default": {
-			"id",
-			"name",
-			"status",
-			"ordered-at",
-			"started-at",
-			"finished-at",
-			"parameters",
-			"products",
-			"service",
-			"account",
-			"links",
-			"product-links",
-		},
-		"tiny": {
-			"name",
-			"status",
-			"links",
-		},
-	}
 	// OrderListRTMap is a map indexing the attribute names of OrderListRT by view
 	// name.
 	OrderListRTMap = map[string][]string{
 		"default": {
-			"orders",
+			"items",
 			"at-time",
 			"links",
 		},
@@ -215,20 +115,6 @@ var (
 	}
 )
 
-// ValidateOrderStatusRT runs the validations defined on the viewed result type
-// OrderStatusRT.
-func ValidateOrderStatusRT(result *OrderStatusRT) (err error) {
-	switch result.View {
-	case "default", "":
-		err = ValidateOrderStatusRTView(result.Projected)
-	case "tiny":
-		err = ValidateOrderStatusRTViewTiny(result.Projected)
-	default:
-		err = goa.InvalidEnumValueError("view", result.View, []any{"default", "tiny"})
-	}
-	return
-}
-
 // ValidateOrderListRT runs the validations defined on the viewed result type
 // OrderListRT.
 func ValidateOrderListRT(result *OrderListRT) (err error) {
@@ -253,145 +139,11 @@ func ValidateOrderTopResultItemCollection(result OrderTopResultItemCollection) (
 	return
 }
 
-// ValidateOrderStatusRTView runs the validations defined on OrderStatusRTView
-// using the "default" view.
-func ValidateOrderStatusRTView(result *OrderStatusRTView) (err error) {
-	if result.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
-	}
-	if result.Parameters == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "result"))
-	}
-	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
-	}
-	if result.Status != nil {
-		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
-		}
-	}
-	for _, e := range result.Products {
-		if e != nil {
-			if err2 := ValidateProductTView(e); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
-	if result.Service != nil {
-		if err2 := ValidateRefTView(result.Service); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	if result.Account != nil {
-		if err2 := ValidateRefTView(result.Account); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	if result.Links != nil {
-		if err2 := ValidateSelfTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	if result.ProductLinks != nil {
-		if err2 := ValidateNavTView(result.ProductLinks); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateOrderStatusRTViewTiny runs the validations defined on
-// OrderStatusRTView using the "tiny" view.
-func ValidateOrderStatusRTViewTiny(result *OrderStatusRTView) (err error) {
-	if result.Status != nil {
-		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
-		}
-	}
-	if result.Links != nil {
-		if err2 := ValidateSelfTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateProductTView runs the validations defined on ProductTView.
-func ValidateProductTView(result *ProductTView) (err error) {
-	if result.Links != nil {
-		if err2 := ValidateSelfWithDataTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateSelfWithDataTView runs the validations defined on SelfWithDataTView.
-func ValidateSelfWithDataTView(result *SelfWithDataTView) (err error) {
-	if result.DescribedBy != nil {
-		if err2 := ValidateDescribedByTView(result.DescribedBy); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateDescribedByTView runs the validations defined on DescribedByTView.
-func ValidateDescribedByTView(result *DescribedByTView) (err error) {
-	if result.Href != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.href", *result.Href, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateRefTView runs the validations defined on RefTView.
-func ValidateRefTView(result *RefTView) (err error) {
-	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
-	}
-	if result.Links != nil {
-		if err2 := ValidateSelfTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateSelfTView runs the validations defined on SelfTView.
-func ValidateSelfTView(result *SelfTView) (err error) {
-	if result.DescribedBy != nil {
-		if err2 := ValidateDescribedByTView(result.DescribedBy); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
-	}
-	return
-}
-
-// ValidateNavTView runs the validations defined on NavTView.
-func ValidateNavTView(result *NavTView) (err error) {
-	if result.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.self", *result.Self, goa.FormatURI))
-	}
-	if result.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.first", *result.First, goa.FormatURI))
-	}
-	if result.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.next", *result.Next, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateParameterTView runs the validations defined on ParameterTView.
-func ValidateParameterTView(result *ParameterTView) (err error) {
-
-	return
-}
-
 // ValidateOrderListRTView runs the validations defined on OrderListRTView
 // using the "default" view.
 func ValidateOrderListRTView(result *OrderListRTView) (err error) {
-	if result.Orders == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("orders", "result"))
+	if result.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "result"))
 	}
 	if result.AtTime == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("at-time", "result"))
@@ -399,7 +151,7 @@ func ValidateOrderListRTView(result *OrderListRTView) (err error) {
 	if result.Links == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
 	}
-	for _, e := range result.Orders {
+	for _, e := range result.Items {
 		if e != nil {
 			if err2 := ValidateOrderListItemView(e); err2 != nil {
 				err = goa.MergeErrors(err, err2)
@@ -409,9 +161,11 @@ func ValidateOrderListRTView(result *OrderListRTView) (err error) {
 	if result.AtTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
 	}
-	if result.Links != nil {
-		if err2 := ValidateNavTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
+	for _, e := range result.Links {
+		if e != nil {
+			if err2 := ValidateLinkTView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
 		}
 	}
 	return
@@ -419,18 +173,57 @@ func ValidateOrderListRTView(result *OrderListRTView) (err error) {
 
 // ValidateOrderListItemView runs the validations defined on OrderListItemView.
 func ValidateOrderListItemView(result *OrderListItemView) (err error) {
-	if result.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
+	if result.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
+	if result.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "result"))
+	}
+	if result.Service == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("service", "result"))
+	}
+	if result.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "result"))
+	}
+	if result.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
+	}
+	if result.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
 	}
 	if result.Status != nil {
 		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
 			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
 		}
 	}
-	if result.Links != nil {
-		if err2 := ValidateSelfTView(result.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+	if result.OrderedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.ordered-at", *result.OrderedAt, goa.FormatDateTime))
+	}
+	if result.StartedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.started-at", *result.StartedAt, goa.FormatDateTime))
+	}
+	if result.FinishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.finished-at", *result.FinishedAt, goa.FormatDateTime))
+	}
+	if result.Service != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.service", *result.Service, goa.FormatURI))
+	}
+	if result.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.account", *result.Account, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateLinkTView runs the validations defined on LinkTView.
+func ValidateLinkTView(result *LinkTView) (err error) {
+	if result.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "result"))
+	}
+	if result.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "result"))
+	}
+	if result.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
 	}
 	return
 }

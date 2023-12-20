@@ -114,14 +114,14 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	{
 		err = json.Unmarshal([]byte(orderCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": \"10\"\n         }\n      ],\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"service-id\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\",\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ]\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": \"10\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"service\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\",\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ]\n   }'")
 		}
 		if body.Parameters == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.service-id", body.ServiceID, goa.FormatURI))
-		if body.PolicyID != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.service", body.Service, goa.FormatURI))
+		if body.Policy != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
 		}
 		if err != nil {
 			return nil, err
@@ -132,9 +132,9 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 		jwt = orderCreateJWT
 	}
 	v := &order.OrderRequestT{
-		ServiceID: body.ServiceID,
-		PolicyID:  body.PolicyID,
-		Name:      body.Name,
+		Service: body.Service,
+		Policy:  body.Policy,
+		Name:    body.Name,
 	}
 	if body.Tags != nil {
 		v.Tags = make([]string, len(body.Tags))
@@ -166,12 +166,9 @@ func BuildLogsPayload(orderLogsBody string, orderLogsJWT string) (*order.LogsPay
 	{
 		err = json.Unmarshal([]byte(orderLogsBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"container-name\": \"main\",\n      \"from\": 1257894000,\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order-id\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"to\": 1257894000\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"container-name\": \"main\",\n      \"from\": 1257894000,\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"to\": 1257894000\n   }'")
 		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.order-id", body.OrderID, goa.FormatURI))
-		if body.PolicyID != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
-		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.order", body.Order, goa.FormatURI))
 		if err != nil {
 			return nil, err
 		}
@@ -185,8 +182,7 @@ func BuildLogsPayload(orderLogsBody string, orderLogsJWT string) (*order.LogsPay
 		To:            body.To,
 		NamespaceName: body.NamespaceName,
 		ContainerName: body.ContainerName,
-		OrderID:       body.OrderID,
-		PolicyID:      body.PolicyID,
+		Order:         body.Order,
 	}
 	res := &order.LogsPayload{
 		DownloadLogRequest: v,
@@ -203,12 +199,9 @@ func BuildTopPayload(orderTopBody string, orderTopJWT string) (*order.TopPayload
 	{
 		err = json.Unmarshal([]byte(orderTopBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order-id\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"policy-id\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
 		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.order-id", body.OrderID, goa.FormatURI))
-		if body.PolicyID != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.policy-id", *body.PolicyID, goa.FormatURI))
-		}
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.order", body.Order, goa.FormatURI))
 		if err != nil {
 			return nil, err
 		}
@@ -218,9 +211,8 @@ func BuildTopPayload(orderTopBody string, orderTopJWT string) (*order.TopPayload
 		jwt = orderTopJWT
 	}
 	v := &order.OrderTopRequestT{
-		OrderID:       body.OrderID,
+		Order:         body.Order,
 		NamespaceName: body.NamespaceName,
-		PolicyID:      body.PolicyID,
 	}
 	res := &order.TopPayload{
 		OrderTopRequest: v,

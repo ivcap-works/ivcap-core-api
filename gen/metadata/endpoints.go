@@ -14,7 +14,6 @@ type Endpoints struct {
 	Read         goa.Endpoint
 	List         goa.Endpoint
 	Add          goa.Endpoint
-	UpdateOne    goa.Endpoint
 	UpdateRecord goa.Endpoint
 	Revoke       goa.Endpoint
 }
@@ -27,7 +26,6 @@ func NewEndpoints(s Service) *Endpoints {
 		Read:         NewReadEndpoint(s, a.JWTAuth),
 		List:         NewListEndpoint(s, a.JWTAuth),
 		Add:          NewAddEndpoint(s, a.JWTAuth),
-		UpdateOne:    NewUpdateOneEndpoint(s, a.JWTAuth),
 		UpdateRecord: NewUpdateRecordEndpoint(s, a.JWTAuth),
 		Revoke:       NewRevokeEndpoint(s, a.JWTAuth),
 	}
@@ -38,7 +36,6 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Read = m(e.Read)
 	e.List = m(e.List)
 	e.Add = m(e.Add)
-	e.UpdateOne = m(e.UpdateOne)
 	e.UpdateRecord = m(e.UpdateRecord)
 	e.Revoke = m(e.Revoke)
 }
@@ -58,12 +55,7 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Read(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedMetadataRecordRT(res, "default")
-		return vres, nil
+		return s.Read(ctx, p)
 	}
 }
 
@@ -82,12 +74,7 @@ func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.List(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedListMetaRT(res, "default")
-		return vres, nil
+		return s.List(ctx, p)
 	}
 }
 
@@ -106,36 +93,7 @@ func NewAddEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Add(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAddMetaRT(res, "default")
-		return vres, nil
-	}
-}
-
-// NewUpdateOneEndpoint returns an endpoint function that calls the method
-// "update_one" of service "metadata".
-func NewUpdateOneEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*UpdateOnePayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:write"},
-		}
-		ctx, err = authJWTFn(ctx, p.JWT, &sc)
-		if err != nil {
-			return nil, err
-		}
-		res, err := s.UpdateOne(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAddMetaRT(res, "default")
-		return vres, nil
+		return s.Add(ctx, p)
 	}
 }
 
@@ -154,12 +112,7 @@ func NewUpdateRecordEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endp
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.UpdateRecord(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAddMetaRT(res, "default")
-		return vres, nil
+		return s.UpdateRecord(ctx, p)
 	}
 }
 

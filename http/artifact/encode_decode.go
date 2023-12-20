@@ -5,7 +5,6 @@ package client
 import (
 	"bytes"
 	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
-	artifactviews "github.com/ivcap-works/ivcap-core-api/gen/artifact/views"
 	"context"
 	"fmt"
 	"io"
@@ -105,13 +104,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("artifact", "list", err)
 			}
-			p := NewListArtifactListRTOK(&body)
-			view := "default"
-			vres := &artifactviews.ArtifactListRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactListRT(vres); err != nil {
+			err = ValidateListResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("artifact", "list", err)
 			}
-			res := artifact.NewArtifactListRT(vres)
+			res := NewListArtifactListRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -267,13 +264,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("artifact", "read", err)
 			}
-			p := NewReadArtifactStatusRTOK(&body)
-			view := "default"
-			vres := &artifactviews.ArtifactStatusRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactStatusRT(vres); err != nil {
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("artifact", "read", err)
 			}
-			res := artifact.NewArtifactStatusRT(vres)
+			res := NewReadArtifactStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -470,15 +465,20 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("artifact", "upload", err)
 			}
+			err = ValidateUploadResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "upload", err)
+			}
 			var (
-				location     *string
+				location     string
 				tusResumable *string
 				tusOffset    *int64
 			)
 			locationRaw := resp.Header.Get("Location")
-			if locationRaw != "" {
-				location = &locationRaw
+			if locationRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("location", "header"))
 			}
+			location = locationRaw
 			tusResumableRaw := resp.Header.Get("Tus-Resumable")
 			if tusResumableRaw != "" {
 				tusResumable = &tusResumableRaw
@@ -496,13 +496,7 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrValidationError("artifact", "upload", err)
 			}
-			p := NewUploadArtifactStatusRTCreated(&body, location, tusResumable, tusOffset)
-			view := "default"
-			vres := &artifactviews.ArtifactStatusRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactStatusRT(vres); err != nil {
-				return nil, goahttp.ErrValidationError("artifact", "upload", err)
-			}
-			res := artifact.NewArtifactStatusRT(vres)
+			res := NewUploadArtifactUploadRTCreated(&body, location, tusResumable, tusOffset)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -577,73 +571,29 @@ func BuildUploadStreamPayload(payload any, fpath string) (*artifact.UploadReques
 	}, nil
 }
 
-// unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView
-// builds a value of type *artifactviews.ArtifactListItemView from a value of
-// type *ArtifactListItemResponseBody.
-func unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView(v *ArtifactListItemResponseBody) *artifactviews.ArtifactListItemView {
-	res := &artifactviews.ArtifactListItemView{
-		ID:       v.ID,
+// unmarshalArtifactListItemResponseBodyToArtifactArtifactListItem builds a
+// value of type *artifact.ArtifactListItem from a value of type
+// *ArtifactListItemResponseBody.
+func unmarshalArtifactListItemResponseBodyToArtifactArtifactListItem(v *ArtifactListItemResponseBody) *artifact.ArtifactListItem {
+	res := &artifact.ArtifactListItem{
+		ID:       *v.ID,
 		Name:     v.Name,
-		Status:   v.Status,
+		Status:   *v.Status,
 		Size:     v.Size,
 		MimeType: v.MimeType,
-	}
-	res.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v.Links)
-
-	return res
-}
-
-// unmarshalSelfTResponseBodyToArtifactviewsSelfTView builds a value of type
-// *artifactviews.SelfTView from a value of type *SelfTResponseBody.
-func unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v *SelfTResponseBody) *artifactviews.SelfTView {
-	res := &artifactviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToArtifactviewsDescribedByTView(v.DescribedBy)
+		Href:     *v.Href,
 	}
 
 	return res
 }
 
-// unmarshalDescribedByTResponseBodyToArtifactviewsDescribedByTView builds a
-// value of type *artifactviews.DescribedByTView from a value of type
-// *DescribedByTResponseBody.
-func unmarshalDescribedByTResponseBodyToArtifactviewsDescribedByTView(v *DescribedByTResponseBody) *artifactviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToArtifactviewsNavTView builds a value of type
-// *artifactviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToArtifactviewsNavTView(v *NavTResponseBody) *artifactviews.NavTView {
-	res := &artifactviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// unmarshalRefTResponseBodyToArtifactviewsRefTView builds a value of type
-// *artifactviews.RefTView from a value of type *RefTResponseBody.
-func unmarshalRefTResponseBodyToArtifactviewsRefTView(v *RefTResponseBody) *artifactviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v.Links)
+// unmarshalLinkTResponseBodyToArtifactLinkT builds a value of type
+// *artifact.LinkT from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToArtifactLinkT(v *LinkTResponseBody) *artifact.LinkT {
+	res := &artifact.LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res
