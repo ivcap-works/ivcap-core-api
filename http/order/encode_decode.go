@@ -845,9 +845,6 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 // value of type *order.PartialProductListT from a value of type
 // *PartialProductListTResponseBody.
 func unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(v *PartialProductListTResponseBody) *order.PartialProductListT {
-	if v == nil {
-		return nil
-	}
 	res := &order.PartialProductListT{}
 	res.Items = make([]*order.ProductListItemT, len(v.Items))
 	for i, val := range v.Items {

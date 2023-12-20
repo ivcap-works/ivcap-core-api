@@ -449,9 +449,7 @@ func NewReadOrderStatusRTOK(body *ReadResponseBody) *order.OrderStatusRT {
 		Account:    *body.Account,
 		Name:       body.Name,
 	}
-	if body.Products != nil {
-		v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
-	}
+	v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
 	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
@@ -615,9 +613,7 @@ func NewCreateOrderStatusRTOK(body *CreateResponseBody) *order.OrderStatusRT {
 		Account:    *body.Account,
 		Name:       body.Name,
 	}
-	if body.Products != nil {
-		v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
-	}
+	v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
 	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
@@ -868,6 +864,9 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 	if body.Status == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
 	}
+	if body.Products == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("products", "body"))
+	}
 	if body.Service == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("service", "body"))
 	}
@@ -925,6 +924,9 @@ func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 	}
 	if body.Status == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Products == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("products", "body"))
 	}
 	if body.Service == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("service", "body"))
