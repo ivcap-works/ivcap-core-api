@@ -65,20 +65,21 @@ func BuildListPayload(aspectListEntity string, aspectListSchema string, aspectLi
 			}
 		}
 	}
-	var limit int
+	var limit *int
 	{
 		if aspectListLimit != "" {
 			var v int64
 			v, err = strconv.ParseInt(aspectListLimit, 10, strconv.IntSize)
-			limit = int(v)
+			val := int(v)
+			limit = &val
 			if err != nil {
 				return nil, fmt.Errorf("invalid value for limit, must be INT")
 			}
-			if limit < 1 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+			if *limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 1, true))
 			}
-			if limit > 50 {
-				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
+			if *limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", *limit, 50, false))
 			}
 			if err != nil {
 				return nil, err

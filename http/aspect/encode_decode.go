@@ -219,7 +219,9 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		if p.AtTime != nil {
 			values.Add("at-time", *p.AtTime)
 		}
-		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		if p.Limit != nil {
+			values.Add("limit", fmt.Sprintf("%v", *p.Limit))
+		}
 		values.Add("filter", p.Filter)
 		values.Add("order-by", p.OrderBy)
 		if p.OrderDesc != nil {

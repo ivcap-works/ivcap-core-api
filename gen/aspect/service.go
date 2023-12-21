@@ -8,9 +8,9 @@ import (
 	"goa.design/goa/v3/security"
 )
 
-// Manages the life cycle of aspect(s) attached to an entity.
+// Manages the life cycle of aspect(s) attached to some entity.
 type Service interface {
-	// Show aspect by ID
+	// Show aspects by ID
 	Read(context.Context, *ReadPayload) (res *AspectRT, err error)
 	// Return a list of aspect aspects.
 	List(context.Context, *ListPayload) (res *AspectListRT, err error)
@@ -163,7 +163,7 @@ type ListPayload struct {
 	AtTime *string `json:"at-time,omitempty"`
 	// The 'limit' system query option requests the number of items in the queried
 	// collection to be included in the result.
-	Limit int
+	Limit *int
 	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
 	// 'filter'
@@ -196,7 +196,7 @@ type NotImplementedT struct {
 
 // ReadPayload is the payload type of the aspect service read method.
 type ReadPayload struct {
-	// ID of aspect to show
+	// ID of aspects to show
 	ID string
 	// JWT used for authentication
 	JWT string
