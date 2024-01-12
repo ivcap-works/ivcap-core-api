@@ -20,27 +20,27 @@ import (
 	"fmt"
 )
 
-// ReadOrderPath returns the URL path to the order service read HTTP endpoint.
-func ReadOrderPath(id string) string {
-	return fmt.Sprintf("/1/orders/%v", id)
+// ReadAspectPath returns the URL path to the aspect service read HTTP endpoint.
+func ReadAspectPath(id string) string {
+	return fmt.Sprintf("/1/aspects/%v", id)
 }
 
-// ListOrderPath returns the URL path to the order service list HTTP endpoint.
-func ListOrderPath() string {
-	return "/1/orders"
+// ListAspectPath returns the URL path to the aspect service list HTTP endpoint.
+func ListAspectPath() string {
+	return "/1/aspects"
 }
 
-// CreateOrderPath returns the URL path to the order service create HTTP endpoint.
-func CreateOrderPath() string {
-	return "/1/orders"
+// CreateAspectPath returns the URL path to the aspect service create HTTP endpoint.
+func CreateAspectPath() string {
+	return "/1/aspects"
 }
 
-// LogsOrderPath returns the URL path to the order service logs HTTP endpoint.
-func LogsOrderPath(orderID string) string {
-	return fmt.Sprintf("/1/orders/%v/logs", orderID)
+// UpdateAspectPath returns the URL path to the aspect service update HTTP endpoint.
+func UpdateAspectPath(id string) string {
+	return fmt.Sprintf("/1/aspects/%v", id)
 }
 
-// TopOrderPath returns the URL path to the order service top HTTP endpoint.
-func TopOrderPath(orderID string) string {
-	return fmt.Sprintf("/1/orders/%v/top", orderID)
+// RetractAspectPath returns the URL path to the aspect service retract HTTP endpoint.
+func RetractAspectPath(id string) string {
+	return fmt.Sprintf("/1/aspects/%v", id)
 }

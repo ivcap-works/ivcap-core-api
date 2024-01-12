@@ -1,10 +1,10 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
-	metadata "github.com/reinventingscience/ivcap-core-api/gen/metadata"
+	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -51,7 +51,7 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	{
 		if metadataListEntityID != "" {
 			entityID = &metadataListEntityID
-			err = goa.MergeErrors(err, goa.ValidateFormat("entityID", *entityID, goa.FormatURI))
+			err = goa.MergeErrors(err, goa.ValidateFormat("entity-id", *entityID, goa.FormatURI))
 			if err != nil {
 				return nil, err
 			}
@@ -73,7 +73,7 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	{
 		if metadataListAtTime != "" {
 			atTime = &metadataListAtTime
-			err = goa.MergeErrors(err, goa.ValidateFormat("atTime", *atTime, goa.FormatDateTime))
+			err = goa.MergeErrors(err, goa.ValidateFormat("at-time", *atTime, goa.FormatDateTime))
 			if err != nil {
 				return nil, err
 			}
@@ -151,7 +151,7 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 // flags.
 func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadataAddSchema string, metadataAddPolicyID string, metadataAddJWT string, metadataAddContentType string) (*metadata.AddPayload, error) {
 	var err error
-	var body interface{}
+	var body any
 	{
 		err = json.Unmarshal([]byte(metadataAddBody), &body)
 		if err != nil {
@@ -161,7 +161,7 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 	var entityID string
 	{
 		entityID = metadataAddEntityID
-		err = goa.MergeErrors(err, goa.ValidateFormat("entityID", entityID, goa.FormatURI))
+		err = goa.MergeErrors(err, goa.ValidateFormat("entity-id", entityID, goa.FormatURI))
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +178,7 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 	{
 		if metadataAddPolicyID != "" {
 			policyID = &metadataAddPolicyID
-			err = goa.MergeErrors(err, goa.ValidateFormat("policyID", *policyID, goa.FormatURI))
+			err = goa.MergeErrors(err, goa.ValidateFormat("policy-id", *policyID, goa.FormatURI))
 			if err != nil {
 				return nil, err
 			}
@@ -205,71 +205,11 @@ func BuildAddPayload(metadataAddBody string, metadataAddEntityID string, metadat
 	return res, nil
 }
 
-// BuildUpdateOnePayload builds the payload for the metadata update_one
-// endpoint from CLI flags.
-func BuildUpdateOnePayload(metadataUpdateOneBody string, metadataUpdateOneEntityID string, metadataUpdateOneSchema string, metadataUpdateOnePolicyID string, metadataUpdateOneJWT string, metadataUpdateOneContentType string) (*metadata.UpdateOnePayload, error) {
-	var err error
-	var body interface{}
-	{
-		err = json.Unmarshal([]byte(metadataUpdateOneBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
-		}
-	}
-	var entityID string
-	{
-		entityID = metadataUpdateOneEntityID
-		err = goa.MergeErrors(err, goa.ValidateFormat("entityID", entityID, goa.FormatURI))
-		if err != nil {
-			return nil, err
-		}
-	}
-	var schema string
-	{
-		schema = metadataUpdateOneSchema
-		err = goa.MergeErrors(err, goa.ValidateFormat("schema", schema, goa.FormatURI))
-		if err != nil {
-			return nil, err
-		}
-	}
-	var policyID *string
-	{
-		if metadataUpdateOnePolicyID != "" {
-			policyID = &metadataUpdateOnePolicyID
-			err = goa.MergeErrors(err, goa.ValidateFormat("policyID", *policyID, goa.FormatURI))
-			if err != nil {
-				return nil, err
-			}
-		}
-	}
-	var jwt string
-	{
-		jwt = metadataUpdateOneJWT
-	}
-	var contentType *string
-	{
-		if metadataUpdateOneContentType != "" {
-			contentType = &metadataUpdateOneContentType
-		}
-	}
-	v := body
-	res := &metadata.UpdateOnePayload{
-		Aspect: &v,
-	}
-	res.EntityID = entityID
-	res.Schema = schema
-	res.PolicyID = policyID
-	res.JWT = jwt
-	res.ContentType = contentType
-
-	return res, nil
-}
-
 // BuildUpdateRecordPayload builds the payload for the metadata update_record
 // endpoint from CLI flags.
 func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRecordID string, metadataUpdateRecordEntityID string, metadataUpdateRecordSchema string, metadataUpdateRecordPolicyID string, metadataUpdateRecordJWT string, metadataUpdateRecordContentType string) (*metadata.UpdateRecordPayload, error) {
 	var err error
-	var body interface{}
+	var body any
 	{
 		err = json.Unmarshal([]byte(metadataUpdateRecordBody), &body)
 		if err != nil {
@@ -288,7 +228,7 @@ func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRec
 	{
 		if metadataUpdateRecordEntityID != "" {
 			entityID = &metadataUpdateRecordEntityID
-			err = goa.MergeErrors(err, goa.ValidateFormat("entityID", *entityID, goa.FormatURI))
+			err = goa.MergeErrors(err, goa.ValidateFormat("entity-id", *entityID, goa.FormatURI))
 			if err != nil {
 				return nil, err
 			}
@@ -308,7 +248,7 @@ func BuildUpdateRecordPayload(metadataUpdateRecordBody string, metadataUpdateRec
 	{
 		if metadataUpdateRecordPolicyID != "" {
 			policyID = &metadataUpdateRecordPolicyID
-			err = goa.MergeErrors(err, goa.ValidateFormat("policyID", *policyID, goa.FormatURI))
+			err = goa.MergeErrors(err, goa.ValidateFormat("policy-id", *policyID, goa.FormatURI))
 			if err != nil {
 				return nil, err
 			}

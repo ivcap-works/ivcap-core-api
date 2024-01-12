@@ -24,7 +24,7 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// Client lists the metadata service endpoint HTTP clients.
+// Client lists the aspect service endpoint HTTP clients.
 type Client struct {
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
@@ -32,15 +32,15 @@ type Client struct {
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
-	// Add Doer is the HTTP client used to make requests to the add endpoint.
-	AddDoer goahttp.Doer
+	// Create Doer is the HTTP client used to make requests to the create endpoint.
+	CreateDoer goahttp.Doer
 
-	// UpdateRecord Doer is the HTTP client used to make requests to the
-	// update_record endpoint.
-	UpdateRecordDoer goahttp.Doer
+	// Update Doer is the HTTP client used to make requests to the update endpoint.
+	UpdateDoer goahttp.Doer
 
-	// Revoke Doer is the HTTP client used to make requests to the revoke endpoint.
-	RevokeDoer goahttp.Doer
+	// Retract Doer is the HTTP client used to make requests to the retract
+	// endpoint.
+	RetractDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -55,7 +55,7 @@ type Client struct {
 	decoder func(*http.Response) goahttp.Decoder
 }
 
-// NewClient instantiates HTTP clients for all the metadata service servers.
+// NewClient instantiates HTTP clients for all the aspect service servers.
 func NewClient(
 	scheme string,
 	host string,
@@ -67,9 +67,9 @@ func NewClient(
 	return &Client{
 		ReadDoer:            doer,
 		ListDoer:            doer,
-		AddDoer:             doer,
-		UpdateRecordDoer:    doer,
-		RevokeDoer:          doer,
+		CreateDoer:          doer,
+		UpdateDoer:          doer,
+		RetractDoer:         doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -79,8 +79,8 @@ func NewClient(
 	}
 }
 
-// Read returns an endpoint that makes HTTP requests to the metadata service
-// read server.
+// Read returns an endpoint that makes HTTP requests to the aspect service read
+// server.
 func (c *Client) Read() goa.Endpoint {
 	var (
 		encodeRequest  = EncodeReadRequest(c.encoder)
@@ -97,14 +97,14 @@ func (c *Client) Read() goa.Endpoint {
 		}
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "read", err)
+			return nil, goahttp.ErrRequestError("aspect", "read", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the metadata service
-// list server.
+// List returns an endpoint that makes HTTP requests to the aspect service list
+// server.
 func (c *Client) List() goa.Endpoint {
 	var (
 		encodeRequest  = EncodeListRequest(c.encoder)
@@ -121,21 +121,21 @@ func (c *Client) List() goa.Endpoint {
 		}
 		resp, err := c.ListDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "list", err)
+			return nil, goahttp.ErrRequestError("aspect", "list", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Add returns an endpoint that makes HTTP requests to the metadata service add
-// server.
-func (c *Client) Add() goa.Endpoint {
+// Create returns an endpoint that makes HTTP requests to the aspect service
+// create server.
+func (c *Client) Create() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeAddRequest(c.encoder)
-		decodeResponse = DecodeAddResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeCreateRequest(c.encoder)
+		decodeResponse = DecodeCreateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildAddRequest(ctx, v)
+		req, err := c.BuildCreateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -143,23 +143,23 @@ func (c *Client) Add() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.AddDoer.Do(req)
+		resp, err := c.CreateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "add", err)
+			return nil, goahttp.ErrRequestError("aspect", "create", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// UpdateRecord returns an endpoint that makes HTTP requests to the metadata
-// service update_record server.
-func (c *Client) UpdateRecord() goa.Endpoint {
+// Update returns an endpoint that makes HTTP requests to the aspect service
+// update server.
+func (c *Client) Update() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeUpdateRecordRequest(c.encoder)
-		decodeResponse = DecodeUpdateRecordResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeUpdateRequest(c.encoder)
+		decodeResponse = DecodeUpdateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildUpdateRecordRequest(ctx, v)
+		req, err := c.BuildUpdateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -167,23 +167,23 @@ func (c *Client) UpdateRecord() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.UpdateRecordDoer.Do(req)
+		resp, err := c.UpdateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "update_record", err)
+			return nil, goahttp.ErrRequestError("aspect", "update", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Revoke returns an endpoint that makes HTTP requests to the metadata service
-// revoke server.
-func (c *Client) Revoke() goa.Endpoint {
+// Retract returns an endpoint that makes HTTP requests to the aspect service
+// retract server.
+func (c *Client) Retract() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeRevokeRequest(c.encoder)
-		decodeResponse = DecodeRevokeResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeRetractRequest(c.encoder)
+		decodeResponse = DecodeRetractResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildRevokeRequest(ctx, v)
+		req, err := c.BuildRetractRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -191,9 +191,9 @@ func (c *Client) Revoke() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.RevokeDoer.Do(req)
+		resp, err := c.RetractDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "revoke", err)
+			return nil, goahttp.ErrRequestError("aspect", "retract", err)
 		}
 		return decodeResponse(resp)
 	}

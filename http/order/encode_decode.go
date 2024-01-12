@@ -1,10 +1,10 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,14 +12,14 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	order "github.com/reinventingscience/ivcap-core-api/gen/order"
-	orderviews "github.com/reinventingscience/ivcap-core-api/gen/order/views"
+	order "github.com/ivcap-works/ivcap-core-api/gen/order"
+	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 	"context"
 	"fmt"
 	"io"
@@ -32,7 +32,7 @@ import (
 
 // BuildReadRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "read" endpoint
-func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
@@ -57,8 +57,8 @@ func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeReadRequest returns an encoder for requests sent to the order read
 // server.
-func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.ReadPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "read", "*order.ReadPayload", v)
@@ -86,8 +86,8 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -110,13 +110,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("order", "read", err)
 			}
-			p := NewReadOrderStatusRTOK(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &orderviews.OrderStatusRT{Projected: p, View: view}
-			if err = orderviews.ValidateOrderStatusRT(vres); err != nil {
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("order", "read", err)
 			}
-			res := order.NewOrderStatusRT(vres)
+			res := NewReadOrderStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -194,7 +192,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildListRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "list" endpoint
-func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListOrderPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -209,8 +207,8 @@ func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeListRequest returns an encoder for requests sent to the order list
 // server.
-func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.ListPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "list", "*order.ListPayload", v)
@@ -254,8 +252,8 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -362,7 +360,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildCreateRequest instantiates a HTTP request object with method and path
 // set to call the "order" service "create" endpoint
-func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildCreateRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateOrderPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
@@ -377,8 +375,8 @@ func (c *Client) BuildCreateRequest(ctx context.Context, v interface{}) (*http.R
 
 // EncodeCreateRequest returns an encoder for requests sent to the order create
 // server.
-func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.CreatePayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "create", "*order.CreatePayload", v)
@@ -412,8 +410,8 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 //   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -436,13 +434,11 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("order", "create", err)
 			}
-			p := NewCreateOrderStatusRTOK(&body)
-			view := resp.Header.Get("goa-view")
-			vres := &orderviews.OrderStatusRT{Projected: p, View: view}
-			if err = orderviews.ValidateOrderStatusRT(vres); err != nil {
+			err = ValidateCreateResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("order", "create", err)
 			}
-			res := order.NewOrderStatusRT(vres)
+			res := NewCreateOrderStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -536,9 +532,19 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 
 // BuildLogsRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "logs" endpoint
-func (c *Client) BuildLogsRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: LogsOrderPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+func (c *Client) BuildLogsRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		orderID string
+	)
+	{
+		p, ok := v.(*order.LogsPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("order", "logs", "*order.LogsPayload", v)
+		}
+		orderID = p.OrderID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: LogsOrderPath(orderID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("order", "logs", u.String(), err)
 	}
@@ -551,8 +557,8 @@ func (c *Client) BuildLogsRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeLogsRequest returns an encoder for requests sent to the order logs
 // server.
-func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.LogsPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "logs", "*order.LogsPayload", v)
@@ -565,10 +571,14 @@ func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 				req.Header.Set("Authorization", head)
 			}
 		}
-		body := NewLogsRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("order", "logs", err)
+		values := req.URL.Query()
+		if p.From != nil {
+			values.Add("from", fmt.Sprintf("%v", *p.From))
 		}
+		if p.To != nil {
+			values.Add("to", fmt.Sprintf("%v", *p.To))
+		}
+		req.URL.RawQuery = values.Encode()
 		return nil
 	}
 }
@@ -585,8 +595,8 @@ func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -690,9 +700,19 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildTopRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "top" endpoint
-func (c *Client) BuildTopRequest(ctx context.Context, v interface{}) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: TopOrderPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+func (c *Client) BuildTopRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		orderID string
+	)
+	{
+		p, ok := v.(*order.TopPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("order", "top", "*order.TopPayload", v)
+		}
+		orderID = p.OrderID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: TopOrderPath(orderID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("order", "top", u.String(), err)
 	}
@@ -705,8 +725,8 @@ func (c *Client) BuildTopRequest(ctx context.Context, v interface{}) (*http.Requ
 
 // EncodeTopRequest returns an encoder for requests sent to the order top
 // server.
-func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*order.TopPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("order", "top", "*order.TopPayload", v)
@@ -718,10 +738,6 @@ func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 			} else {
 				req.Header.Set("Authorization", head)
 			}
-		}
-		body := NewTopRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("order", "top", err)
 		}
 		return nil
 	}
@@ -739,8 +755,8 @@ func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -859,111 +875,56 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 	}
 }
 
-// unmarshalProductTResponseBodyToOrderviewsProductTView builds a value of type
-// *orderviews.ProductTView from a value of type *ProductTResponseBody.
-func unmarshalProductTResponseBodyToOrderviewsProductTView(v *ProductTResponseBody) *orderviews.ProductTView {
-	if v == nil {
-		return nil
+// unmarshalPartialProductListTResponseBodyToOrderPartialProductListT builds a
+// value of type *order.PartialProductListT from a value of type
+// *PartialProductListTResponseBody.
+func unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(v *PartialProductListTResponseBody) *order.PartialProductListT {
+	res := &order.PartialProductListT{}
+	res.Items = make([]*order.ProductListItemT, len(v.Items))
+	for i, val := range v.Items {
+		res.Items[i] = unmarshalProductListItemTResponseBodyToOrderProductListItemT(val)
 	}
-	res := &orderviews.ProductTView{
-		ID:       v.ID,
+	res.Links = make([]*order.LinkT, len(v.Links))
+	for i, val := range v.Links {
+		res.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
+	}
+
+	return res
+}
+
+// unmarshalProductListItemTResponseBodyToOrderProductListItemT builds a value
+// of type *order.ProductListItemT from a value of type
+// *ProductListItemTResponseBody.
+func unmarshalProductListItemTResponseBodyToOrderProductListItemT(v *ProductListItemTResponseBody) *order.ProductListItemT {
+	res := &order.ProductListItemT{
+		ID:       *v.ID,
 		Name:     v.Name,
-		Status:   v.Status,
+		Status:   *v.Status,
 		MimeType: v.MimeType,
 		Size:     v.Size,
-		Etag:     v.Etag,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfWithDataTResponseBodyToOrderviewsSelfWithDataTView(v.Links)
+		Href:     *v.Href,
+		DataHref: v.DataHref,
 	}
 
 	return res
 }
 
-// unmarshalSelfWithDataTResponseBodyToOrderviewsSelfWithDataTView builds a
-// value of type *orderviews.SelfWithDataTView from a value of type
-// *SelfWithDataTResponseBody.
-func unmarshalSelfWithDataTResponseBodyToOrderviewsSelfWithDataTView(v *SelfWithDataTResponseBody) *orderviews.SelfWithDataTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.SelfWithDataTView{
-		Self: v.Self,
-		Data: v.Data,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView(v.DescribedBy)
+// unmarshalLinkTResponseBodyToOrderLinkT builds a value of type *order.LinkT
+// from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToOrderLinkT(v *LinkTResponseBody) *order.LinkT {
+	res := &order.LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res
 }
 
-// unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView builds a value
-// of type *orderviews.DescribedByTView from a value of type
-// *DescribedByTResponseBody.
-func unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView(v *DescribedByTResponseBody) *orderviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// unmarshalRefTResponseBodyToOrderviewsRefTView builds a value of type
-// *orderviews.RefTView from a value of type *RefTResponseBody.
-func unmarshalRefTResponseBodyToOrderviewsRefTView(v *RefTResponseBody) *orderviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(v.Links)
-	}
-
-	return res
-}
-
-// unmarshalSelfTResponseBodyToOrderviewsSelfTView builds a value of type
-// *orderviews.SelfTView from a value of type *SelfTResponseBody.
-func unmarshalSelfTResponseBodyToOrderviewsSelfTView(v *SelfTResponseBody) *orderviews.SelfTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToOrderviewsDescribedByTView(v.DescribedBy)
-	}
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToOrderviewsNavTView builds a value of type
-// *orderviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToOrderviewsNavTView(v *NavTResponseBody) *orderviews.NavTView {
-	if v == nil {
-		return nil
-	}
-	res := &orderviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// unmarshalParameterTResponseBodyToOrderviewsParameterTView builds a value of
-// type *orderviews.ParameterTView from a value of type *ParameterTResponseBody.
-func unmarshalParameterTResponseBodyToOrderviewsParameterTView(v *ParameterTResponseBody) *orderviews.ParameterTView {
-	res := &orderviews.ParameterTView{
+// unmarshalParameterTResponseBodyToOrderParameterT builds a value of type
+// *order.ParameterT from a value of type *ParameterTResponseBody.
+func unmarshalParameterTResponseBodyToOrderParameterT(v *ParameterTResponseBody) *order.ParameterT {
+	res := &order.ParameterT{
 		Name:  v.Name,
 		Value: v.Value,
 	}
@@ -982,10 +943,22 @@ func unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(v *OrderLis
 		OrderedAt:  v.OrderedAt,
 		StartedAt:  v.StartedAt,
 		FinishedAt: v.FinishedAt,
-		ServiceID:  v.ServiceID,
-		AccountID:  v.AccountID,
+		Service:    v.Service,
+		Account:    v.Account,
+		Href:       v.Href,
 	}
-	res.Links = unmarshalSelfTResponseBodyToOrderviewsSelfTView(v.Links)
+
+	return res
+}
+
+// unmarshalLinkTResponseBodyToOrderviewsLinkTView builds a value of type
+// *orderviews.LinkTView from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToOrderviewsLinkTView(v *LinkTResponseBody) *orderviews.LinkTView {
+	res := &orderviews.LinkTView{
+		Rel:  v.Rel,
+		Type: v.Type,
+		Href: v.Href,
+	}
 
 	return res
 }

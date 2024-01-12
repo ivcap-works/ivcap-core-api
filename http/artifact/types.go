@@ -1,10 +1,10 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,13 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
-	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
-	artifactviews "github.com/reinventingscience/ivcap-core-api/gen/artifact/views"
+	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 
 	goa "goa.design/goa/v3/pkg"
 )
@@ -27,11 +26,10 @@ import (
 // response body.
 type ListResponseBody struct {
 	// Artifacts
-	Artifacts []*ArtifactListItemResponseBody `form:"artifacts,omitempty" json:"artifacts,omitempty" xml:"artifacts,omitempty"`
+	Items []*ArtifactListItemResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
 	// Time at which this list was valid
-	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-	// Navigation links
-	Links *NavTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ReadResponseBody is the type of the "artifact" service "read" endpoint HTTP
@@ -55,19 +53,12 @@ type ReadResponseBody struct {
 	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
 	// DateTime artifact was last modified
 	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
-	// Reference to policy controlling access
-	Policy *RefTResponseBody `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Reference to billable account
-	Account *RefTResponseBody `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	// Link to retrieve the artifact data
-	Data  *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
-	// link back to record
-	Location *string `form:"location,omitempty" json:"location,omitempty" xml:"location,omitempty"`
-	// indicate version of TUS supported
-	TusResumable *string `form:"tus-resumable,omitempty" json:"tus-resumable,omitempty" xml:"tus-resumable,omitempty"`
-	// TUS offset for partially uploaded content
-	TusOffset *int64 `form:"tus-offset,omitempty" json:"tus-offset,omitempty" xml:"tus-offset,omitempty"`
+	Account  *string              `json:"account"`
+	DataHref *string              `json:"dataRef,omitempty"`
+	Links    []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // UploadResponseBody is the type of the "artifact" service "upload" endpoint
@@ -91,13 +82,12 @@ type UploadResponseBody struct {
 	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
 	// DateTime artifact was last modified
 	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
-	// Reference to policy controlling access
-	Policy *RefTResponseBody `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Reference to billable account
-	Account *RefTResponseBody `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	// Link to retrieve the artifact data
-	Data  *SelfTResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account  *string              `json:"account"`
+	DataHref *string              `json:"dataRef,omitempty"`
+	Links    []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ListBadRequestResponseBody is the type of the "artifact" service "list"
@@ -191,55 +181,43 @@ type UploadNotImplementedResponseBody struct {
 
 // ArtifactListItemResponseBody is used to define fields on response body types.
 type ArtifactListItemResponseBody struct {
-	// Artifact ID
+	// ID
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Optional name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Artifact status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Size of aritfact in bytes
+	// Size of artifact in bytes
 	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
 	// Mime (content) type of artifact
-	MimeType *string            `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
-	Links    *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	MimeType *string `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
+	Href     *string `json:"href,omitempty"`
 }
 
-// SelfTResponseBody is used to define fields on response body types.
-type SelfTResponseBody struct {
-	Self        *string                   `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	DescribedBy *DescribedByTResponseBody `form:"describedBy,omitempty" json:"describedBy,omitempty" xml:"describedBy,omitempty"`
-}
-
-// DescribedByTResponseBody is used to define fields on response body types.
-type DescribedByTResponseBody struct {
-	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+// LinkTResponseBody is used to define fields on response body types.
+type LinkTResponseBody struct {
+	// relation type
+	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
+	// mime type
 	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
-}
-
-// NavTResponseBody is used to define fields on response body types.
-type NavTResponseBody struct {
-	Self  *string `form:"self,omitempty" json:"self,omitempty" xml:"self,omitempty"`
-	First *string `form:"first,omitempty" json:"first,omitempty" xml:"first,omitempty"`
-	Next  *string `form:"next,omitempty" json:"next,omitempty" xml:"next,omitempty"`
-}
-
-// RefTResponseBody is used to define fields on response body types.
-type RefTResponseBody struct {
-	ID    *string            `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	Links *SelfTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	// web link
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
 }
 
 // NewListArtifactListRTOK builds a "artifact" service "list" endpoint result
 // from a HTTP "OK" response.
-func NewListArtifactListRTOK(body *ListResponseBody) *artifactviews.ArtifactListRTView {
-	v := &artifactviews.ArtifactListRTView{
+func NewListArtifactListRTOK(body *ListResponseBody) *artifact.ArtifactListRT {
+	v := &artifact.ArtifactListRT{
 		AtTime: body.AtTime,
 	}
-	v.Artifacts = make([]*artifactviews.ArtifactListItemView, len(body.Artifacts))
-	for i, val := range body.Artifacts {
-		v.Artifacts[i] = unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView(val)
+	v.Items = make([]*artifact.ArtifactListItem, len(body.Items))
+	for i, val := range body.Items {
+		v.Items[i] = unmarshalArtifactListItemResponseBodyToArtifactArtifactListItem(val)
 	}
-	v.Links = unmarshalNavTResponseBodyToArtifactviewsNavTView(body.Links)
+	v.Links = make([]*artifact.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToArtifactLinkT(val)
+	}
 
 	return v
 }
@@ -304,31 +282,25 @@ func NewListNotAuthorized() *artifact.UnauthorizedT {
 
 // NewReadArtifactStatusRTOK builds a "artifact" service "read" endpoint result
 // from a HTTP "OK" response.
-func NewReadArtifactStatusRTOK(body *ReadResponseBody) *artifactviews.ArtifactStatusRTView {
-	v := &artifactviews.ArtifactStatusRTView{
-		ID:             body.ID,
+func NewReadArtifactStatusRTOK(body *ReadResponseBody) *artifact.ArtifactStatusRT {
+	v := &artifact.ArtifactStatusRT{
+		ID:             *body.ID,
 		Name:           body.Name,
-		Status:         body.Status,
+		Status:         *body.Status,
 		MimeType:       body.MimeType,
 		Size:           body.Size,
 		CacheOf:        body.CacheOf,
 		Etag:           body.Etag,
 		CreatedAt:      body.CreatedAt,
 		LastModifiedAt: body.LastModifiedAt,
-		Location:       body.Location,
-		TusResumable:   body.TusResumable,
-		TusOffset:      body.TusOffset,
+		Policy:         body.Policy,
+		Account:        body.Account,
+		DataHref:       body.DataHref,
 	}
-	if body.Policy != nil {
-		v.Policy = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Policy)
+	v.Links = make([]*artifact.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToArtifactLinkT(val)
 	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Account)
-	}
-	if body.Data != nil {
-		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
-	}
-	v.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Links)
 
 	return v
 }
@@ -389,30 +361,27 @@ func NewReadNotAuthorized() *artifact.UnauthorizedT {
 	return v
 }
 
-// NewUploadArtifactStatusRTCreated builds a "artifact" service "upload"
+// NewUploadArtifactUploadRTCreated builds a "artifact" service "upload"
 // endpoint result from a HTTP "Created" response.
-func NewUploadArtifactStatusRTCreated(body *UploadResponseBody, location *string, tusResumable *string, tusOffset *int64) *artifactviews.ArtifactStatusRTView {
-	v := &artifactviews.ArtifactStatusRTView{
-		ID:             body.ID,
+func NewUploadArtifactUploadRTCreated(body *UploadResponseBody, location string, tusResumable *string, tusOffset *int64) *artifact.ArtifactUploadRT {
+	v := &artifact.ArtifactUploadRT{
+		ID:             *body.ID,
 		Name:           body.Name,
-		Status:         body.Status,
+		Status:         *body.Status,
 		MimeType:       body.MimeType,
 		Size:           body.Size,
 		CacheOf:        body.CacheOf,
 		Etag:           body.Etag,
 		CreatedAt:      body.CreatedAt,
 		LastModifiedAt: body.LastModifiedAt,
+		Policy:         body.Policy,
+		Account:        body.Account,
+		DataHref:       body.DataHref,
 	}
-	if body.Policy != nil {
-		v.Policy = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Policy)
+	v.Links = make([]*artifact.LinkT, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToArtifactLinkT(val)
 	}
-	if body.Account != nil {
-		v.Account = unmarshalRefTResponseBodyToArtifactviewsRefTView(body.Account)
-	}
-	if body.Data != nil {
-		v.Data = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Data)
-	}
-	v.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(body.Links)
 	v.Location = location
 	v.TusResumable = tusResumable
 	v.TusOffset = tusOffset
@@ -465,6 +434,116 @@ func NewUploadNotAuthorized() *artifact.UnauthorizedT {
 	v := &artifact.UnauthorizedT{}
 
 	return v
+}
+
+// ValidateListResponseBody runs the validations defined on ListResponseBody
+func ValidateListResponseBody(body *ListResponseBody) (err error) {
+	if body.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	for _, e := range body.Items {
+		if e != nil {
+			if err2 := ValidateArtifactListItemResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if body.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.at-time", *body.AtTime, goa.FormatDateTime))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateReadResponseBody runs the validations defined on ReadResponseBody
+func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
+		}
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.created-at", *body.CreatedAt, goa.FormatDateTime))
+	}
+	if body.LastModifiedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.last-modified-at", *body.LastModifiedAt, goa.FormatDateTime))
+	}
+	if body.Policy != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateUploadResponseBody runs the validations defined on UploadResponseBody
+func ValidateUploadResponseBody(body *UploadResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
+		}
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.created-at", *body.CreatedAt, goa.FormatDateTime))
+	}
+	if body.LastModifiedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.last-modified-at", *body.LastModifiedAt, goa.FormatDateTime))
+	}
+	if body.Policy != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
 }
 
 // ValidateListBadRequestResponseBody runs the validations defined on
@@ -587,64 +666,36 @@ func ValidateUploadNotImplementedResponseBody(body *UploadNotImplementedResponse
 // ValidateArtifactListItemResponseBody runs the validations defined on
 // ArtifactListItemResponseBody
 func ValidateArtifactListItemResponseBody(body *ArtifactListItemResponseBody) (err error) {
-	if body.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []interface{}{"pending", "partial", "ready", "error", "unknown"}))
-		}
-	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
 		}
 	}
 	return
 }
 
-// ValidateSelfTResponseBody runs the validations defined on SelfTResponseBody
-func ValidateSelfTResponseBody(body *SelfTResponseBody) (err error) {
-	if body.DescribedBy != nil {
-		if err2 := ValidateDescribedByTResponseBody(body.DescribedBy); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
+func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
+	if body.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
 	}
-	return
-}
-
-// ValidateDescribedByTResponseBody runs the validations defined on
-// DescribedByTResponseBody
-func ValidateDescribedByTResponseBody(body *DescribedByTResponseBody) (err error) {
-	if body.Href != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.href", *body.Href, goa.FormatURI))
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
 	}
-	return
-}
-
-// ValidateNavTResponseBody runs the validations defined on NavTResponseBody
-func ValidateNavTResponseBody(body *NavTResponseBody) (err error) {
-	if body.Self != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.self", *body.Self, goa.FormatURI))
-	}
-	if body.First != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.first", *body.First, goa.FormatURI))
-	}
-	if body.Next != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.next", *body.Next, goa.FormatURI))
-	}
-	return
-}
-
-// ValidateRefTResponseBody runs the validations defined on RefTResponseBody
-func ValidateRefTResponseBody(body *RefTResponseBody) (err error) {
-	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
-	}
-	if body.Links != nil {
-		if err2 := ValidateSelfTResponseBody(body.Links); err2 != nil {
-			err = goa.MergeErrors(err, err2)
-		}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	return
 }

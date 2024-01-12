@@ -1,10 +1,10 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,14 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
 import (
 	"bytes"
-	artifact "github.com/reinventingscience/ivcap-core-api/gen/artifact"
-	artifactviews "github.com/reinventingscience/ivcap-core-api/gen/artifact/views"
+	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 	"context"
 	"fmt"
 	"io"
@@ -35,7 +34,7 @@ import (
 
 // BuildListRequest instantiates a HTTP request object with method and path set
 // to call the "artifact" service "list" endpoint
-func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
 	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListArtifactPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
@@ -50,8 +49,8 @@ func (c *Client) BuildListRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeListRequest returns an encoder for requests sent to the artifact list
 // server.
-func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*artifact.ListPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("artifact", "list", "*artifact.ListPayload", v)
@@ -95,8 +94,8 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -119,13 +118,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("artifact", "list", err)
 			}
-			p := NewListArtifactListRTOK(&body)
-			view := "default"
-			vres := &artifactviews.ArtifactListRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactListRT(vres); err != nil {
+			err = ValidateListResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("artifact", "list", err)
 			}
-			res := artifact.NewArtifactListRT(vres)
+			res := NewListArtifactListRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -203,7 +200,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildReadRequest instantiates a HTTP request object with method and path set
 // to call the "artifact" service "read" endpoint
-func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
@@ -228,8 +225,8 @@ func (c *Client) BuildReadRequest(ctx context.Context, v interface{}) (*http.Req
 
 // EncodeReadRequest returns an encoder for requests sent to the artifact read
 // server.
-func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		p, ok := v.(*artifact.ReadPayload)
 		if !ok {
 			return goahttp.ErrInvalidType("artifact", "read", "*artifact.ReadPayload", v)
@@ -257,8 +254,8 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 //   - "not-found" (type *artifact.ResourceNotFoundT): http.StatusNotFound
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -281,13 +278,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("artifact", "read", err)
 			}
-			p := NewReadArtifactStatusRTOK(&body)
-			view := "default"
-			vres := &artifactviews.ArtifactStatusRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactStatusRT(vres); err != nil {
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
 				return nil, goahttp.ErrValidationError("artifact", "read", err)
 			}
-			res := artifact.NewArtifactStatusRT(vres)
+			res := NewReadArtifactStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -365,7 +360,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 
 // BuildUploadRequest instantiates a HTTP request object with method and path
 // set to call the "artifact" service "upload" endpoint
-func (c *Client) BuildUploadRequest(ctx context.Context, v interface{}) (*http.Request, error) {
+func (c *Client) BuildUploadRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		body io.Reader
 	)
@@ -388,8 +383,8 @@ func (c *Client) BuildUploadRequest(ctx context.Context, v interface{}) (*http.R
 
 // EncodeUploadRequest returns an encoder for requests sent to the artifact
 // upload server.
-func EncodeUploadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, interface{}) error {
-	return func(req *http.Request, v interface{}) error {
+func EncodeUploadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
 		data, ok := v.(*artifact.UploadRequestData)
 		if !ok {
 			return goahttp.ErrInvalidType("artifact", "upload", "*artifact.UploadRequestData", v)
@@ -460,8 +455,8 @@ func EncodeUploadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (interface{}, error) {
-	return func(resp *http.Response) (interface{}, error) {
+func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
 			if err != nil {
@@ -484,15 +479,20 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("artifact", "upload", err)
 			}
+			err = ValidateUploadResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "upload", err)
+			}
 			var (
-				location     *string
+				location     string
 				tusResumable *string
 				tusOffset    *int64
 			)
 			locationRaw := resp.Header.Get("Location")
-			if locationRaw != "" {
-				location = &locationRaw
+			if locationRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("location", "header"))
 			}
+			location = locationRaw
 			tusResumableRaw := resp.Header.Get("Tus-Resumable")
 			if tusResumableRaw != "" {
 				tusResumable = &tusResumableRaw
@@ -502,7 +502,7 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				if tusOffsetRaw != "" {
 					v, err2 := strconv.ParseInt(tusOffsetRaw, 10, 64)
 					if err2 != nil {
-						err = goa.MergeErrors(err, goa.InvalidFieldTypeError("tusOffset", tusOffsetRaw, "integer"))
+						err = goa.MergeErrors(err, goa.InvalidFieldTypeError("tus-offset", tusOffsetRaw, "integer"))
 					}
 					tusOffset = &v
 				}
@@ -510,13 +510,7 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			if err != nil {
 				return nil, goahttp.ErrValidationError("artifact", "upload", err)
 			}
-			p := NewUploadArtifactStatusRTCreated(&body, location, tusResumable, tusOffset)
-			view := "default"
-			vres := &artifactviews.ArtifactStatusRT{Projected: p, View: view}
-			if err = artifactviews.ValidateArtifactStatusRT(vres); err != nil {
-				return nil, goahttp.ErrValidationError("artifact", "upload", err)
-			}
-			res := artifact.NewArtifactStatusRT(vres)
+			res := NewUploadArtifactUploadRTCreated(&body, location, tusResumable, tusOffset)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -580,7 +574,7 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 
 // // BuildUploadStreamPayload creates a streaming endpoint request payload from
 // the method payload and the path to the file to be streamed
-func BuildUploadStreamPayload(payload interface{}, fpath string) (*artifact.UploadRequestData, error) {
+func BuildUploadStreamPayload(payload any, fpath string) (*artifact.UploadRequestData, error) {
 	f, err := os.Open(fpath)
 	if err != nil {
 		return nil, err
@@ -591,73 +585,29 @@ func BuildUploadStreamPayload(payload interface{}, fpath string) (*artifact.Uplo
 	}, nil
 }
 
-// unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView
-// builds a value of type *artifactviews.ArtifactListItemView from a value of
-// type *ArtifactListItemResponseBody.
-func unmarshalArtifactListItemResponseBodyToArtifactviewsArtifactListItemView(v *ArtifactListItemResponseBody) *artifactviews.ArtifactListItemView {
-	res := &artifactviews.ArtifactListItemView{
-		ID:       v.ID,
+// unmarshalArtifactListItemResponseBodyToArtifactArtifactListItem builds a
+// value of type *artifact.ArtifactListItem from a value of type
+// *ArtifactListItemResponseBody.
+func unmarshalArtifactListItemResponseBodyToArtifactArtifactListItem(v *ArtifactListItemResponseBody) *artifact.ArtifactListItem {
+	res := &artifact.ArtifactListItem{
+		ID:       *v.ID,
 		Name:     v.Name,
-		Status:   v.Status,
+		Status:   *v.Status,
 		Size:     v.Size,
 		MimeType: v.MimeType,
-	}
-	res.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v.Links)
-
-	return res
-}
-
-// unmarshalSelfTResponseBodyToArtifactviewsSelfTView builds a value of type
-// *artifactviews.SelfTView from a value of type *SelfTResponseBody.
-func unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v *SelfTResponseBody) *artifactviews.SelfTView {
-	res := &artifactviews.SelfTView{
-		Self: v.Self,
-	}
-	if v.DescribedBy != nil {
-		res.DescribedBy = unmarshalDescribedByTResponseBodyToArtifactviewsDescribedByTView(v.DescribedBy)
+		Href:     *v.Href,
 	}
 
 	return res
 }
 
-// unmarshalDescribedByTResponseBodyToArtifactviewsDescribedByTView builds a
-// value of type *artifactviews.DescribedByTView from a value of type
-// *DescribedByTResponseBody.
-func unmarshalDescribedByTResponseBodyToArtifactviewsDescribedByTView(v *DescribedByTResponseBody) *artifactviews.DescribedByTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.DescribedByTView{
-		Href: v.Href,
-		Type: v.Type,
-	}
-
-	return res
-}
-
-// unmarshalNavTResponseBodyToArtifactviewsNavTView builds a value of type
-// *artifactviews.NavTView from a value of type *NavTResponseBody.
-func unmarshalNavTResponseBodyToArtifactviewsNavTView(v *NavTResponseBody) *artifactviews.NavTView {
-	res := &artifactviews.NavTView{
-		Self:  v.Self,
-		First: v.First,
-		Next:  v.Next,
-	}
-
-	return res
-}
-
-// unmarshalRefTResponseBodyToArtifactviewsRefTView builds a value of type
-// *artifactviews.RefTView from a value of type *RefTResponseBody.
-func unmarshalRefTResponseBodyToArtifactviewsRefTView(v *RefTResponseBody) *artifactviews.RefTView {
-	if v == nil {
-		return nil
-	}
-	res := &artifactviews.RefTView{
-		ID: v.ID,
-	}
-	if v.Links != nil {
-		res.Links = unmarshalSelfTResponseBodyToArtifactviewsSelfTView(v.Links)
+// unmarshalLinkTResponseBodyToArtifactLinkT builds a value of type
+// *artifact.LinkT from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToArtifactLinkT(v *LinkTResponseBody) *artifact.LinkT {
+	res := &artifact.LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
 	}
 
 	return res

@@ -1,10 +1,10 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package metadata
 
@@ -28,7 +28,6 @@ type Endpoints struct {
 	Read         goa.Endpoint
 	List         goa.Endpoint
 	Add          goa.Endpoint
-	UpdateOne    goa.Endpoint
 	UpdateRecord goa.Endpoint
 	Revoke       goa.Endpoint
 }
@@ -41,7 +40,6 @@ func NewEndpoints(s Service) *Endpoints {
 		Read:         NewReadEndpoint(s, a.JWTAuth),
 		List:         NewListEndpoint(s, a.JWTAuth),
 		Add:          NewAddEndpoint(s, a.JWTAuth),
-		UpdateOne:    NewUpdateOneEndpoint(s, a.JWTAuth),
 		UpdateRecord: NewUpdateRecordEndpoint(s, a.JWTAuth),
 		Revoke:       NewRevokeEndpoint(s, a.JWTAuth),
 	}
@@ -52,7 +50,6 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.Read = m(e.Read)
 	e.List = m(e.List)
 	e.Add = m(e.Add)
-	e.UpdateOne = m(e.UpdateOne)
 	e.UpdateRecord = m(e.UpdateRecord)
 	e.Revoke = m(e.Revoke)
 }
@@ -60,7 +57,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 // NewReadEndpoint returns an endpoint function that calls the method "read" of
 // service "metadata".
 func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
+	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ReadPayload)
 		var err error
 		sc := security.JWTScheme{
@@ -72,19 +69,14 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Read(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedMetadataRecordRT(res, "default")
-		return vres, nil
+		return s.Read(ctx, p)
 	}
 }
 
 // NewListEndpoint returns an endpoint function that calls the method "list" of
 // service "metadata".
 func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
+	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ListPayload)
 		var err error
 		sc := security.JWTScheme{
@@ -96,19 +88,14 @@ func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.List(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedListMetaRT(res, "default")
-		return vres, nil
+		return s.List(ctx, p)
 	}
 }
 
 // NewAddEndpoint returns an endpoint function that calls the method "add" of
 // service "metadata".
 func NewAddEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
+	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*AddPayload)
 		var err error
 		sc := security.JWTScheme{
@@ -120,43 +107,14 @@ func NewAddEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.Add(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAddMetaRT(res, "default")
-		return vres, nil
-	}
-}
-
-// NewUpdateOneEndpoint returns an endpoint function that calls the method
-// "update_one" of service "metadata".
-func NewUpdateOneEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
-		p := req.(*UpdateOnePayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:write"},
-		}
-		ctx, err = authJWTFn(ctx, p.JWT, &sc)
-		if err != nil {
-			return nil, err
-		}
-		res, err := s.UpdateOne(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAddMetaRT(res, "default")
-		return vres, nil
+		return s.Add(ctx, p)
 	}
 }
 
 // NewUpdateRecordEndpoint returns an endpoint function that calls the method
 // "update_record" of service "metadata".
 func NewUpdateRecordEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
+	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*UpdateRecordPayload)
 		var err error
 		sc := security.JWTScheme{
@@ -168,19 +126,14 @@ func NewUpdateRecordEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endp
 		if err != nil {
 			return nil, err
 		}
-		res, err := s.UpdateRecord(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedAddMetaRT(res, "default")
-		return vres, nil
+		return s.UpdateRecord(ctx, p)
 	}
 }
 
 // NewRevokeEndpoint returns an endpoint function that calls the method
 // "revoke" of service "metadata".
 func NewRevokeEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req interface{}) (interface{}, error) {
+	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*RevokePayload)
 		var err error
 		sc := security.JWTScheme{

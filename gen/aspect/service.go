@@ -14,23 +14,27 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package artifact
+package aspect
 
 import (
 	"context"
-	"io"
 
 	"goa.design/goa/v3/security"
 )
 
-// Manage the life cycle of an artifact stored by this deployment.
+// Manages the life cycle of aspect(s) attached to some entity.
 type Service interface {
-	// list artifacts
-	List(context.Context, *ListPayload) (res *ArtifactListRT, err error)
-	// Show artifacts by ID
-	Read(context.Context, *ReadPayload) (res *ArtifactStatusRT, err error)
-	// Upload content and create a artifacts.
-	Upload(context.Context, *UploadPayload, io.ReadCloser) (res *ArtifactUploadRT, err error)
+	// Show aspects by ID
+	Read(context.Context, *ReadPayload) (res *AspectRT, err error)
+	// Return a list of aspect aspects.
+	List(context.Context, *ListPayload) (res *AspectListRT, err error)
+	// Attach new aspect to an entity.
+	Create(context.Context, *CreatePayload) (res *AspectIDRT, err error)
+	// Retract this aspect and create a new one with the information provided.
+	// For any field not provided, the value from the current aspect is used.
+	Update(context.Context, *UpdatePayload) (res *AspectIDRT, err error)
+	// Retract a previously created statement.
+	Retract(context.Context, *RetractPayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -42,102 +46,90 @@ type Auther interface {
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
-const ServiceName = "artifact"
+const ServiceName = "aspect"
 
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [3]string{"list", "read", "upload"}
+var MethodNames = [5]string{"read", "list", "create", "update", "retract"}
 
-type ArtifactListItem struct {
+// AspectIDRT is the result type of the aspect service create method.
+type AspectIDRT struct {
 	// ID
 	ID string
-	// Optional name
-	Name *string
-	// Artifact status
-	Status string
-	// Size of artifact in bytes
-	Size *int64
-	// Mime (content) type of artifact
-	MimeType *string
-	Href     string `json:"href,omitempty"`
 }
 
-// ArtifactListRT is the result type of the artifact service list method.
-type ArtifactListRT struct {
-	// Artifacts
-	Items []*ArtifactListItem
+type AspectListItemRT struct {
+	// ID
+	ID string
+	// Entity URN
+	Entity string
+	// Schema URN
+	Schema string
+	// Attached aspect aspect
+	Content any
+	// Content-Type header, MUST be of application/json.
+	ContentType string `json:"content-type,omitempty"`
+}
+
+// AspectListRT is the result type of the aspect service list method.
+type AspectListRT struct {
+	// List of aspect descriptions
+	Items []*AspectListItemRT
+	// Entity for which to request aspect
+	Entity *string
+	// Optional schema to filter on
+	Schema *string
+	// Optional json path to further filter on returned list
+	AspectPath *string
 	// Time at which this list was valid
-	AtTime *string
+	AtTime string
 	Links  []*LinkT
 }
 
-// ArtifactStatusRT is the result type of the artifact service read method.
-type ArtifactStatusRT struct {
-	// Artifact ID
+// AspectRT is the result type of the aspect service read method.
+type AspectRT struct {
+	// ID
 	ID string
-	// Optional name
-	Name *string
-	// Artifact status
-	Status string
-	// Mime-type of data
-	MimeType *string
-	// Size of data
-	Size *int64
-	// URL of object this artifact is caching
-	CacheOf *string
-	// ETAG of artifact
-	Etag *string `json:"etag,omitempty"`
-	// DateTime artifact was created
-	CreatedAt *string
-	// DateTime artifact was last modified
-	LastModifiedAt *string
-	// Reference to policy used
-	Policy *string `json:"policy"`
-	// Reference to billable account
-	Account  *string `json:"account"`
-	DataHref *string `json:"dataRef,omitempty"`
-	Links    []*LinkT
-}
-
-// ArtifactUploadRT is the result type of the artifact service upload method.
-type ArtifactUploadRT struct {
-	// link back to record
-	Location string
-	// indicate version of TUS supported
-	TusResumable *string
-	// TUS offset for partially uploaded content
-	TusOffset *int64
-	// Artifact ID
-	ID string
-	// Optional name
-	Name *string
-	// Artifact status
-	Status string
-	// Mime-type of data
-	MimeType *string
-	// Size of data
-	Size *int64
-	// URL of object this artifact is caching
-	CacheOf *string
-	// ETAG of artifact
-	Etag *string `json:"etag,omitempty"`
-	// DateTime artifact was created
-	CreatedAt *string
-	// DateTime artifact was last modified
-	LastModifiedAt *string
-	// Reference to policy used
-	Policy *string `json:"policy"`
-	// Reference to billable account
-	Account  *string `json:"account"`
-	DataHref *string `json:"dataRef,omitempty"`
-	Links    []*LinkT
+	// Entity URN
+	Entity string
+	// Schema URN
+	Schema string
+	// Description of aspect encoded as 'content-type'
+	Content any
+	// Content-Type header, MUST be of application/json.
+	ContentType string `json:"content-type,omitempty"`
+	// Time this record was asserted
+	ValidFrom string
+	// Time this record was retracted
+	ValidTo *string
+	// Entity asserting this metadata record at 'valid-from'
+	Asserter string
+	// Entity retracting this record at 'valid-to'
+	Retracter *string
+	Links     []*LinkT
 }
 
 // Bad arguments supplied.
 type BadRequestT struct {
 	// Information message
 	Message string
+}
+
+// CreatePayload is the payload type of the aspect service create method.
+type CreatePayload struct {
+	// Entity to which attach aspect
+	Entity string `json:"entity,omitempty"`
+	// Schema of the aspect in payload
+	Schema string
+	// Aspect content
+	Content any
+	// Content-Type header, MUST be of application/json.
+	ContentType string `json:"content-type,omitempty"`
+	// Policy guiding visibility and actions performed
+	Policy *string `json:"policy,omitempty"`
+	// JWT used for authentication
+	JWT string
 }
 
 // Provided credential is not valid.
@@ -172,9 +164,18 @@ type LinkT struct {
 	Href string
 }
 
-// ListPayload is the payload type of the artifact service list method.
+// ListPayload is the payload type of the aspect service list method.
 type ListPayload struct {
-	// The $limit system query option requests the number of items in the queried
+	// Optional entity for which to request aspects
+	Entity *string `json:"entity,omitempty"`
+	// Schema prefix using '%' as wildcard indicator
+	Schema *string
+	// To learn more about the supported format, see
+	// https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
+	ContentPath *string `json:"content-path,omitempty"`
+	// Return aspect which where valid at that time [now]
+	AtTime *string `json:"at-time,omitempty"`
+	// The 'limit' system query option requests the number of items in the queried
 	// collection to be included in the result.
 	Limit int
 	// The 'filter' system query option allows clients to filter a collection of
@@ -183,19 +184,18 @@ type ListPayload struct {
 	// is evaluated for each resource in the collection, and only items where the
 	// expression
 	// evaluates to true are included in the response.
-	Filter *string
+	Filter string
 	// The 'orderby' query option allows clients to request resources in either
 	// ascending order using asc or descending order using desc. If asc or desc not
 	// specified,
 	// then the resources will be ordered in ascending order. The request below
 	// orders Trips on
 	// property EndsAt in descending order.
-	OrderBy *string
-	// When set order result in descending order. Ascending order is the lt.
-	OrderDesc bool
-	// Return the state of the respective resources at that time [now]
-	AtTime *string
-	// The content of 'page' is returned in the 'links' part of a previous query and
+	OrderBy string `json:"order-by,omitempty"`
+	// When set order result in descending order. Ascending order is the default.
+	OrderDesc *bool `json:"order-desc,omitempty"`
+	// The content of '$page' is returned in the 'links' part of a previous query
+	// and
 	// will when set, ALL other parameters, except for 'limit' are ignored.
 	Page *string
 	// JWT used for authentication
@@ -208,9 +208,9 @@ type NotImplementedT struct {
 	Message string
 }
 
-// ReadPayload is the payload type of the artifact service read method.
+// ReadPayload is the payload type of the aspect service read method.
 type ReadPayload struct {
-	// ID of artifacts to show
+	// ID of aspects to show
 	ID string
 	// JWT used for authentication
 	JWT string
@@ -225,36 +225,42 @@ type ResourceNotFoundT struct {
 	Message string
 }
 
+// RetractPayload is the payload type of the aspect service retract method.
+type RetractPayload struct {
+	// Aspect ID to restract
+	ID string
+	// JWT used for authentication
+	JWT string
+}
+
+// ServiceNotAvailable is the type returned when the service necessary to
+// fulfil the request is currently not available.
+type ServiceNotAvailableT struct {
+}
+
 // Unauthorized access to resource
 type UnauthorizedT struct {
 }
 
-// UploadPayload is the payload type of the artifact service upload method.
-type UploadPayload struct {
-	// Content-Type header, MUST define type of uploaded content.
-	ContentType *string `json:"content-type,omitempty"`
-	// Content-Encoding header, MAY define encoding of content.
-	ContentEncoding *string `json:"content-encoding,omitempty"`
-	// Content-Length header, MAY define size of expected upload.
-	ContentLength *int `json:"content-length,omitempty"`
-	// X-Name header, MAY define a more human friendly name. Reusing a name will
-	// NOT override an existing artifact with the same name
-	Name *string
-	// X-Collection header, MAY define an collection name as a simple way of
-	// grouping artifacts
-	Collection *string
-	// X-Policy header, MAY define a specific policy to control access to this
-	// artifact
-	Policy *string
-	// X-Content-Type header, used for initial, empty content creation requests.
-	XContentType *string `json:"x-content-type,omitempty"`
-	// X-Content-Length header, used for initial, empty content creation requests.
-	XContentLength *int `json:"x-content-length,omitempty"`
-	// Upload-Length header, sets the expected content size part of the TUS
-	// protocol.
-	UploadLength *int `json:"upload-length,omitempty"`
-	// Tus-Resumable header, specifies TUS protocol version.
-	TusResumable *string `json:"tus-resumable,omitempty"`
+// UnsupportedContentType is the error returned when the provided content type
+// is not supported.
+type UnsupportedContentType struct {
+	// message describing expected type or pattern.
+	Message string
+}
+
+// UpdatePayload is the payload type of the aspect service update method.
+type UpdatePayload struct {
+	// Aspect to update
+	ID string
+	// Entity to which attach aspect
+	Entity string `json:"entity,omitempty"`
+	// Schema of aspect
+	Schema string
+	// Aspect content
+	Content any
+	// Content-Type header, MUST be of application/json.
+	ContentType string `json:"content-type,omitempty"`
 	// JWT used for authentication
 	JWT string
 }
@@ -362,6 +368,23 @@ func (e *ResourceNotFoundT) GoaErrorName() string {
 }
 
 // Error returns an error description.
+func (e *ServiceNotAvailableT) Error() string {
+	return "ServiceNotAvailable is the type returned when the service necessary to fulfil the request is currently not available."
+}
+
+// ErrorName returns "ServiceNotAvailableT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ServiceNotAvailableT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ServiceNotAvailableT".
+func (e *ServiceNotAvailableT) GoaErrorName() string {
+	return "not-available"
+}
+
+// Error returns an error description.
 func (e *UnauthorizedT) Error() string {
 	return "Unauthorized access to resource"
 }
@@ -376,4 +399,21 @@ func (e *UnauthorizedT) ErrorName() string {
 // GoaErrorName returns "UnauthorizedT".
 func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
+}
+
+// Error returns an error description.
+func (e *UnsupportedContentType) Error() string {
+	return "UnsupportedContentType is the error returned when the provided content type is not supported."
+}
+
+// ErrorName returns "UnsupportedContentType".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *UnsupportedContentType) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "UnsupportedContentType".
+func (e *UnsupportedContentType) GoaErrorName() string {
+	return "unsupported-content-type"
 }

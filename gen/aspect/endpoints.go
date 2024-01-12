@@ -14,7 +14,7 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package service
+package aspect
 
 import (
 	"context"
@@ -23,82 +23,39 @@ import (
 	"goa.design/goa/v3/security"
 )
 
-// Endpoints wraps the "service" service endpoints.
+// Endpoints wraps the "aspect" service endpoints.
 type Endpoints struct {
-	List          goa.Endpoint
-	CreateService goa.Endpoint
-	Read          goa.Endpoint
-	Update        goa.Endpoint
-	Delete        goa.Endpoint
+	Read    goa.Endpoint
+	List    goa.Endpoint
+	Create  goa.Endpoint
+	Update  goa.Endpoint
+	Retract goa.Endpoint
 }
 
-// NewEndpoints wraps the methods of the "service" service with endpoints.
+// NewEndpoints wraps the methods of the "aspect" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		List:          NewListEndpoint(s, a.JWTAuth),
-		CreateService: NewCreateServiceEndpoint(s, a.JWTAuth),
-		Read:          NewReadEndpoint(s, a.JWTAuth),
-		Update:        NewUpdateEndpoint(s, a.JWTAuth),
-		Delete:        NewDeleteEndpoint(s, a.JWTAuth),
+		Read:    NewReadEndpoint(s, a.JWTAuth),
+		List:    NewListEndpoint(s, a.JWTAuth),
+		Create:  NewCreateEndpoint(s, a.JWTAuth),
+		Update:  NewUpdateEndpoint(s, a.JWTAuth),
+		Retract: NewRetractEndpoint(s, a.JWTAuth),
 	}
 }
 
-// Use applies the given middleware to all the "service" service endpoints.
+// Use applies the given middleware to all the "aspect" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
-	e.List = m(e.List)
-	e.CreateService = m(e.CreateService)
 	e.Read = m(e.Read)
+	e.List = m(e.List)
+	e.Create = m(e.Create)
 	e.Update = m(e.Update)
-	e.Delete = m(e.Delete)
-}
-
-// NewListEndpoint returns an endpoint function that calls the method "list" of
-// service "service".
-func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*ListPayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:read"},
-		}
-		ctx, err = authJWTFn(ctx, p.JWT, &sc)
-		if err != nil {
-			return nil, err
-		}
-		res, err := s.List(ctx, p)
-		if err != nil {
-			return nil, err
-		}
-		vres := NewViewedServiceListRT(res, "default")
-		return vres, nil
-	}
-}
-
-// NewCreateServiceEndpoint returns an endpoint function that calls the method
-// "create_service" of service "service".
-func NewCreateServiceEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*CreateServicePayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:write"},
-		}
-		ctx, err = authJWTFn(ctx, p.JWT, &sc)
-		if err != nil {
-			return nil, err
-		}
-		return s.CreateService(ctx, p)
-	}
+	e.Retract = m(e.Retract)
 }
 
 // NewReadEndpoint returns an endpoint function that calls the method "read" of
-// service "service".
+// service "aspect".
 func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ReadPayload)
@@ -116,8 +73,46 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	}
 }
 
+// NewListEndpoint returns an endpoint function that calls the method "list" of
+// service "aspect".
+func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*ListPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:read"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.List(ctx, p)
+	}
+}
+
+// NewCreateEndpoint returns an endpoint function that calls the method
+// "create" of service "aspect".
+func NewCreateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*CreatePayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:write"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.Create(ctx, p)
+	}
+}
+
 // NewUpdateEndpoint returns an endpoint function that calls the method
-// "update" of service "service".
+// "update" of service "aspect".
 func NewUpdateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*UpdatePayload)
@@ -135,11 +130,11 @@ func NewUpdateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	}
 }
 
-// NewDeleteEndpoint returns an endpoint function that calls the method
-// "delete" of service "service".
-func NewDeleteEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewRetractEndpoint returns an endpoint function that calls the method
+// "retract" of service "aspect".
+func NewRetractEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*DeletePayload)
+		p := req.(*RetractPayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
@@ -150,6 +145,6 @@ func NewDeleteEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		return nil, s.Delete(ctx, p)
+		return nil, s.Retract(ctx, p)
 	}
 }

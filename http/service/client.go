@@ -1,10 +1,10 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-// $ goa gen github.com/reinventingscience/ivcap-core-api/design
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
 package client
 
@@ -86,7 +86,7 @@ func (c *Client) List() goa.Endpoint {
 		encodeRequest  = EncodeListRequest(c.encoder)
 		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
 	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
+	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildListRequest(ctx, v)
 		if err != nil {
 			return nil, err
@@ -110,7 +110,7 @@ func (c *Client) CreateService() goa.Endpoint {
 		encodeRequest  = EncodeCreateServiceRequest(c.encoder)
 		decodeResponse = DecodeCreateServiceResponse(c.decoder, c.RestoreResponseBody)
 	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
+	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildCreateServiceRequest(ctx, v)
 		if err != nil {
 			return nil, err
@@ -134,7 +134,7 @@ func (c *Client) Read() goa.Endpoint {
 		encodeRequest  = EncodeReadRequest(c.encoder)
 		decodeResponse = DecodeReadResponse(c.decoder, c.RestoreResponseBody)
 	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
+	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildReadRequest(ctx, v)
 		if err != nil {
 			return nil, err
@@ -158,7 +158,7 @@ func (c *Client) Update() goa.Endpoint {
 		encodeRequest  = EncodeUpdateRequest(c.encoder)
 		decodeResponse = DecodeUpdateResponse(c.decoder, c.RestoreResponseBody)
 	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
+	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildUpdateRequest(ctx, v)
 		if err != nil {
 			return nil, err
@@ -182,7 +182,7 @@ func (c *Client) Delete() goa.Endpoint {
 		encodeRequest  = EncodeDeleteRequest(c.encoder)
 		decodeResponse = DecodeDeleteResponse(c.decoder, c.RestoreResponseBody)
 	)
-	return func(ctx context.Context, v interface{}) (interface{}, error) {
+	return func(ctx context.Context, v any) (any, error) {
 		req, err := c.BuildDeleteRequest(ctx, v)
 		if err != nil {
 			return nil, err
