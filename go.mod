@@ -1,4 +1,4 @@
-module github.com/reinventingscience/ivcap-core-api
+module github.com/ivcap-works/ivcap-core-api
 
 go 1.19
 
