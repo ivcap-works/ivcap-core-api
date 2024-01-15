@@ -926,7 +926,9 @@ func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(
 		return nil
 	}
 	res := &BasicWorkflowOptsTRequestBodyRequestBody{
-		Image: v.Image,
+		Image:     v.Image,
+		GpuType:   v.GpuType,
+		GpuNumber: v.GpuNumber,
 	}
 	if v.Command != nil {
 		res.Command = make([]string, len(v.Command))
@@ -1041,7 +1043,9 @@ func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(
 		return nil
 	}
 	res := &service.BasicWorkflowOptsT{
-		Image: v.Image,
+		Image:     v.Image,
+		GpuType:   v.GpuType,
+		GpuNumber: v.GpuNumber,
 	}
 	if v.Command != nil {
 		res.Command = make([]string, len(v.Command))

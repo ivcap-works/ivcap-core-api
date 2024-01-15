@@ -383,6 +383,10 @@ type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
 	EphemeralStorage *ResourceMemoryTRequestBodyRequestBody `json:"ephemeral-storage,omitempty"`
+	// Defines required gpu type
+	GpuType *string `json:"gpu-type,omitempty"`
+	// Defines number of required gpu
+	GpuNumber *int `json:"gpu-number,omitempty"`
 }
 
 // ResourceMemoryTRequestBodyRequestBody is used to define fields on request

@@ -74,6 +74,10 @@ type BasicWorkflowOptsT struct {
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
 	EphemeralStorage *ResourceMemoryT `json:"ephemeral-storage,omitempty"`
+	// Defines required gpu type
+	GpuType *string `json:"gpu-type,omitempty"`
+	// Defines number of required gpu
+	GpuNumber *int `json:"gpu-number,omitempty"`
 }
 
 // CreateServicePayload is the payload type of the service service
