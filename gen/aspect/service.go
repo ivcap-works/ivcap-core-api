@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,12 @@ type Auther interface {
 	JWTAuth(ctx context.Context, token string, schema *security.JWTScheme) (context.Context, error)
 }
 
+// APIName is the name of the API as defined in the design.
+const APIName = "ivcap"
+
+// APIVersion is the version of the API as defined in the design.
+const APIVersion = "0.32"
+
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
@@ -70,6 +76,10 @@ type AspectListItemRT struct {
 	Content any
 	// Content-Type header, MUST be of application/json.
 	ContentType string `json:"content-type,omitempty"`
+	// Time this assertion became valid
+	ValidFrom *string
+	// Time this assertion became valid
+	ValidTo *string
 }
 
 // AspectListRT is the result type of the aspect service list method.
@@ -185,15 +195,23 @@ type ListPayload struct {
 	// expression
 	// evaluates to true are included in the response.
 	Filter string
-	// The 'orderby' query option allows clients to request resources in either
-	// ascending order using asc or descending order using desc. If asc or desc not
-	// specified,
-	// then the resources will be ordered in ascending order. The request below
-	// orders Trips on
-	// property EndsAt in descending order.
+	// Optional comma-separated list of attributes to sort the list by.
+	// * entity
+	// * schema
+	// * content
+	// * policy
+	// * account
+	// * created_by
+	// * retracted_by
+	// * replaces
+	// * valid_from
+	// * valid_to
+
 	OrderBy string `json:"order-by,omitempty"`
-	// When set order result in descending order. Ascending order is the default.
-	OrderDesc *bool `json:"order-desc,omitempty"`
+	// Set the sort direction 'ASC', 'DESC' for each order-by element.
+	OrderDirection string `json:"order-direction,omitempty"`
+	// When set, also include aspect content in list.
+	IncludeContent *bool `json:"include-content,omitempty"`
 	// The content of '$page' is returned in the 'links' part of a previous query
 	// and
 	// will when set, ALL other parameters, except for 'limit' are ignored.

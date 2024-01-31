@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,12 @@ type Auther interface {
 	JWTAuth(ctx context.Context, token string, schema *security.JWTScheme) (context.Context, error)
 }
 
+// APIName is the name of the API as defined in the design.
+const APIName = "ivcap"
+
+// APIVersion is the version of the API as defined in the design.
+const APIVersion = "0.32"
+
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
@@ -66,19 +72,6 @@ type CreatePayload struct {
 	Orders *OrderRequestT
 	// JWT used for authentication
 	JWT string
-}
-
-type DownloadLogRequestT struct {
-	// From unix time, seconds since 1970-01-01
-	From *int64
-	// To unix time, seconds since 1970-01-01
-	To *int64
-	// Reference to namespace name
-	NamespaceName *string `json:"namespace-name,omitempty"`
-	// Reference to container name
-	ContainerName *string `json:"container-name,omitempty"`
-	// Reference to order
-	Order string `json:"order"`
 }
 
 // Provided credential is not valid.
@@ -145,8 +138,12 @@ type ListPayload struct {
 
 // LogsPayload is the payload type of the order service logs method.
 type LogsPayload struct {
-	// Download orders request
-	DownloadLogRequest *DownloadLogRequestT
+	// From unix time, seconds since 1970-01-01
+	From *int64
+	// To unix time, seconds since 1970-01-01
+	To *int64
+	// Reference to order requested
+	OrderID string
 	// JWT used for authentication
 	JWT string
 }
@@ -225,13 +222,6 @@ type OrderStatusRT struct {
 	Parameters []*ParameterT
 }
 
-type OrderTopRequestT struct {
-	// Reference to order
-	Order string `json:"order"`
-	// Reference to namespace name
-	NamespaceName *string `json:"namespace-name,omitempty"`
-}
-
 type OrderTopResultItem struct {
 	// container
 	Container string
@@ -295,8 +285,8 @@ type ServiceNotAvailableT struct {
 
 // TopPayload is the payload type of the order service top method.
 type TopPayload struct {
-	// orders order request
-	OrderTopRequest *OrderTopRequestT
+	// Reference to order requested
+	OrderID string
 	// JWT used for authentication
 	JWT string
 }

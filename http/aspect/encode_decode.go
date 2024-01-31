@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -236,8 +236,9 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		values.Add("limit", fmt.Sprintf("%v", p.Limit))
 		values.Add("filter", p.Filter)
 		values.Add("order-by", p.OrderBy)
-		if p.OrderDesc != nil {
-			values.Add("order-desc", fmt.Sprintf("%v", *p.OrderDesc))
+		values.Add("order-direction", p.OrderDirection)
+		if p.IncludeContent != nil {
+			values.Add("include-content", fmt.Sprintf("%v", *p.IncludeContent))
 		}
 		if p.Page != nil {
 			values.Add("page", *p.Page)
@@ -883,6 +884,8 @@ func unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(v *AspectList
 		Schema:      *v.Schema,
 		Content:     v.Content,
 		ContentType: *v.ContentType,
+		ValidFrom:   v.ValidFrom,
+		ValidTo:     v.ValidTo,
 	}
 
 	return res

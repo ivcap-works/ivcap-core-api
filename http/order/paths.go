@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,11 +36,11 @@ func CreateOrderPath() string {
 }
 
 // LogsOrderPath returns the URL path to the order service logs HTTP endpoint.
-func LogsOrderPath() string {
-	return "/1/orders/logs"
+func LogsOrderPath(orderID string) string {
+	return fmt.Sprintf("/1/orders/%v/logs", orderID)
 }
 
 // TopOrderPath returns the URL path to the order service top HTTP endpoint.
-func TopOrderPath() string {
-	return "/1/orders/top"
+func TopOrderPath(orderID string) string {
+	return fmt.Sprintf("/1/orders/%v/top", orderID)
 }

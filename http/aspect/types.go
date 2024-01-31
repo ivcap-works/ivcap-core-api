@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -273,6 +273,10 @@ type AspectListItemRTResponseBody struct {
 	Content any `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
 	// Content-Type header, MUST be of application/json.
 	ContentType *string `json:"content-type,omitempty"`
+	// Time this assertion became valid
+	ValidFrom *string `form:"valid-from,omitempty" json:"valid-from,omitempty" xml:"valid-from,omitempty"`
+	// Time this assertion became valid
+	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
 }
 
 // NewReadAspectRTOK builds a "aspect" service "read" endpoint result from a
@@ -1003,9 +1007,6 @@ func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (e
 	if body.Schema == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
 	}
-	if body.Content == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("content", "body"))
-	}
 	if body.ContentType == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
 	}
@@ -1017,6 +1018,12 @@ func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (e
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))
+	}
+	if body.ValidFrom != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.valid-from", *body.ValidFrom, goa.FormatDateTime))
+	}
+	if body.ValidTo != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.valid-to", *body.ValidTo, goa.FormatDateTime))
 	}
 	return
 }

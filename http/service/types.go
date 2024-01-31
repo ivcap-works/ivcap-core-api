@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -383,6 +383,10 @@ type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	// (see
 	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
 	EphemeralStorage *ResourceMemoryTRequestBodyRequestBody `json:"ephemeral-storage,omitempty"`
+	// Defines required gpu type
+	GpuType *string `json:"gpu-type,omitempty"`
+	// Defines number of required gpu
+	GpuNumber *int `json:"gpu-number,omitempty"`
 }
 
 // ResourceMemoryTRequestBodyRequestBody is used to define fields on request

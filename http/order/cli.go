@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -174,48 +174,56 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 
 // BuildLogsPayload builds the payload for the order logs endpoint from CLI
 // flags.
-func BuildLogsPayload(orderLogsBody string, orderLogsJWT string) (*order.LogsPayload, error) {
+func BuildLogsPayload(orderLogsOrderID string, orderLogsFrom string, orderLogsTo string, orderLogsJWT string) (*order.LogsPayload, error) {
 	var err error
-	var body LogsRequestBody
+	var orderID string
 	{
-		err = json.Unmarshal([]byte(orderLogsBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"container-name\": \"main\",\n      \"from\": 1257894000,\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\",\n      \"to\": 1257894000\n   }'")
-		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.order", body.Order, goa.FormatURI))
+		orderID = orderLogsOrderID
+		err = goa.MergeErrors(err, goa.ValidateFormat("orderID", orderID, goa.FormatURI))
 		if err != nil {
 			return nil, err
+		}
+	}
+	var from *int64
+	{
+		if orderLogsFrom != "" {
+			val, err := strconv.ParseInt(orderLogsFrom, 10, 64)
+			from = &val
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for from, must be INT64")
+			}
+		}
+	}
+	var to *int64
+	{
+		if orderLogsTo != "" {
+			val, err := strconv.ParseInt(orderLogsTo, 10, 64)
+			to = &val
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for to, must be INT64")
+			}
 		}
 	}
 	var jwt string
 	{
 		jwt = orderLogsJWT
 	}
-	v := &order.DownloadLogRequestT{
-		From:          body.From,
-		To:            body.To,
-		NamespaceName: body.NamespaceName,
-		ContainerName: body.ContainerName,
-		Order:         body.Order,
-	}
-	res := &order.LogsPayload{
-		DownloadLogRequest: v,
-	}
-	res.JWT = jwt
+	v := &order.LogsPayload{}
+	v.OrderID = orderID
+	v.From = from
+	v.To = to
+	v.JWT = jwt
 
-	return res, nil
+	return v, nil
 }
 
 // BuildTopPayload builds the payload for the order top endpoint from CLI flags.
-func BuildTopPayload(orderTopBody string, orderTopJWT string) (*order.TopPayload, error) {
+func BuildTopPayload(orderTopOrderID string, orderTopJWT string) (*order.TopPayload, error) {
 	var err error
-	var body TopRequestBody
+	var orderID string
 	{
-		err = json.Unmarshal([]byte(orderTopBody), &body)
-		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"namespace-name\": \"ivcap-develop-runner\",\n      \"order\": \"urn:ivcap:order:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
-		}
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.order", body.Order, goa.FormatURI))
+		orderID = orderTopOrderID
+		err = goa.MergeErrors(err, goa.ValidateFormat("orderID", orderID, goa.FormatURI))
 		if err != nil {
 			return nil, err
 		}
@@ -224,14 +232,9 @@ func BuildTopPayload(orderTopBody string, orderTopJWT string) (*order.TopPayload
 	{
 		jwt = orderTopJWT
 	}
-	v := &order.OrderTopRequestT{
-		Order:         body.Order,
-		NamespaceName: body.NamespaceName,
-	}
-	res := &order.TopPayload{
-		OrderTopRequest: v,
-	}
-	res.JWT = jwt
+	v := &order.TopPayload{}
+	v.OrderID = orderID
+	v.JWT = jwt
 
-	return res, nil
+	return v, nil
 }

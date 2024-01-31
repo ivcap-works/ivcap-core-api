@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,7 +45,7 @@ func BuildReadPayload(aspectReadID string, aspectReadJWT string) (*aspect.ReadPa
 
 // BuildListPayload builds the payload for the aspect list endpoint from CLI
 // flags.
-func BuildListPayload(aspectListEntity string, aspectListSchema string, aspectListContentPath string, aspectListAtTime string, aspectListLimit string, aspectListFilter string, aspectListOrderBy string, aspectListOrderDesc string, aspectListPage string, aspectListJWT string) (*aspect.ListPayload, error) {
+func BuildListPayload(aspectListEntity string, aspectListSchema string, aspectListContentPath string, aspectListAtTime string, aspectListLimit string, aspectListFilter string, aspectListOrderBy string, aspectListOrderDirection string, aspectListIncludeContent string, aspectListPage string, aspectListJWT string) (*aspect.ListPayload, error) {
 	var err error
 	var entity *string
 	{
@@ -111,14 +111,20 @@ func BuildListPayload(aspectListEntity string, aspectListSchema string, aspectLi
 			orderBy = aspectListOrderBy
 		}
 	}
-	var orderDesc *bool
+	var orderDirection string
 	{
-		if aspectListOrderDesc != "" {
+		if aspectListOrderDirection != "" {
+			orderDirection = aspectListOrderDirection
+		}
+	}
+	var includeContent *bool
+	{
+		if aspectListIncludeContent != "" {
 			var val bool
-			val, err = strconv.ParseBool(aspectListOrderDesc)
-			orderDesc = &val
+			val, err = strconv.ParseBool(aspectListIncludeContent)
+			includeContent = &val
 			if err != nil {
-				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+				return nil, fmt.Errorf("invalid value for includeContent, must be BOOL")
 			}
 		}
 	}
@@ -140,7 +146,8 @@ func BuildListPayload(aspectListEntity string, aspectListSchema string, aspectLi
 	v.Limit = limit
 	v.Filter = filter
 	v.OrderBy = orderBy
-	v.OrderDesc = orderDesc
+	v.OrderDirection = orderDirection
+	v.IncludeContent = includeContent
 	v.Page = page
 	v.JWT = jwt
 

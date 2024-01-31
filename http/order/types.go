@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,30 +36,6 @@ type CreateRequestBody struct {
 	Tags []string `form:"tags,omitempty" json:"tags,omitempty" xml:"tags,omitempty"`
 	// Service parameters
 	Parameters []*ParameterT `form:"parameters" json:"parameters" xml:"parameters"`
-}
-
-// LogsRequestBody is the type of the "order" service "logs" endpoint HTTP
-// request body.
-type LogsRequestBody struct {
-	// From unix time, seconds since 1970-01-01
-	From *int64 `form:"from,omitempty" json:"from,omitempty" xml:"from,omitempty"`
-	// To unix time, seconds since 1970-01-01
-	To *int64 `form:"to,omitempty" json:"to,omitempty" xml:"to,omitempty"`
-	// Reference to namespace name
-	NamespaceName *string `json:"namespace-name,omitempty"`
-	// Reference to container name
-	ContainerName *string `json:"container-name,omitempty"`
-	// Reference to order
-	Order string `json:"order"`
-}
-
-// TopRequestBody is the type of the "order" service "top" endpoint HTTP
-// request body.
-type TopRequestBody struct {
-	// Reference to order
-	Order string `json:"order"`
-	// Reference to namespace name
-	NamespaceName *string `json:"namespace-name,omitempty"`
 }
 
 // ReadResponseBody is the type of the "order" service "read" endpoint HTTP
@@ -423,29 +399,6 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 		}
 	} else {
 		body.Parameters = []*ParameterT{}
-	}
-	return body
-}
-
-// NewLogsRequestBody builds the HTTP request body from the payload of the
-// "logs" endpoint of the "order" service.
-func NewLogsRequestBody(p *order.LogsPayload) *LogsRequestBody {
-	body := &LogsRequestBody{
-		From:          p.DownloadLogRequest.From,
-		To:            p.DownloadLogRequest.To,
-		NamespaceName: p.DownloadLogRequest.NamespaceName,
-		ContainerName: p.DownloadLogRequest.ContainerName,
-		Order:         p.DownloadLogRequest.Order,
-	}
-	return body
-}
-
-// NewTopRequestBody builds the HTTP request body from the payload of the "top"
-// endpoint of the "order" service.
-func NewTopRequestBody(p *order.TopPayload) *TopRequestBody {
-	body := &TopRequestBody{
-		Order:         p.OrderTopRequest.Order,
-		NamespaceName: p.OrderTopRequest.NamespaceName,
 	}
 	return body
 }

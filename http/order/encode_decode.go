@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -533,8 +533,18 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 // BuildLogsRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "logs" endpoint
 func (c *Client) BuildLogsRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: LogsOrderPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+	var (
+		orderID string
+	)
+	{
+		p, ok := v.(*order.LogsPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("order", "logs", "*order.LogsPayload", v)
+		}
+		orderID = p.OrderID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: LogsOrderPath(orderID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("order", "logs", u.String(), err)
 	}
@@ -561,10 +571,14 @@ func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 				req.Header.Set("Authorization", head)
 			}
 		}
-		body := NewLogsRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("order", "logs", err)
+		values := req.URL.Query()
+		if p.From != nil {
+			values.Add("from", fmt.Sprintf("%v", *p.From))
 		}
+		if p.To != nil {
+			values.Add("to", fmt.Sprintf("%v", *p.To))
+		}
+		req.URL.RawQuery = values.Encode()
 		return nil
 	}
 }
@@ -687,8 +701,18 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 // BuildTopRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "top" endpoint
 func (c *Client) BuildTopRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: TopOrderPath()}
-	req, err := http.NewRequest("POST", u.String(), nil)
+	var (
+		orderID string
+	)
+	{
+		p, ok := v.(*order.TopPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("order", "top", "*order.TopPayload", v)
+		}
+		orderID = p.OrderID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: TopOrderPath(orderID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("order", "top", u.String(), err)
 	}
@@ -714,10 +738,6 @@ func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 			} else {
 				req.Header.Set("Authorization", head)
 			}
-		}
-		body := NewTopRequestBody(p)
-		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("order", "top", err)
 		}
 		return nil
 	}

@@ -1,4 +1,4 @@
-// Copyright 2023 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -926,7 +926,9 @@ func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(
 		return nil
 	}
 	res := &BasicWorkflowOptsTRequestBodyRequestBody{
-		Image: v.Image,
+		Image:     v.Image,
+		GpuType:   v.GpuType,
+		GpuNumber: v.GpuNumber,
 	}
 	if v.Command != nil {
 		res.Command = make([]string, len(v.Command))
@@ -1041,7 +1043,9 @@ func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(
 		return nil
 	}
 	res := &service.BasicWorkflowOptsT{
-		Image: v.Image,
+		Image:     v.Image,
+		GpuType:   v.GpuType,
+		GpuNumber: v.GpuNumber,
 	}
 	if v.Command != nil {
 		res.Command = make([]string, len(v.Command))
