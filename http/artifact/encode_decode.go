@@ -18,7 +18,6 @@ package client
 
 import (
 	"bytes"
-	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 	"context"
 	"fmt"
 	"io"
@@ -28,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 
+	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )

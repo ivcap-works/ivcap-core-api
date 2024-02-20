@@ -18,7 +18,6 @@ package client
 
 import (
 	aspect "github.com/ivcap-works/ivcap-core-api/gen/aspect"
-
 	goa "goa.design/goa/v3/pkg"
 )
 

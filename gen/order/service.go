@@ -17,10 +17,10 @@
 package order
 
 import (
-	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 	"context"
 	"io"
 
+	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 	"goa.design/goa/v3/security"
 )
 

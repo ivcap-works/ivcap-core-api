@@ -17,10 +17,10 @@
 package client
 
 import (
-	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 	"fmt"
 	"strconv"
 
+	artifact "github.com/ivcap-works/ivcap-core-api/gen/artifact"
 	goa "goa.design/goa/v3/pkg"
 )
 

@@ -18,7 +18,6 @@ package client
 
 import (
 	"bytes"
-	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
 	"context"
 	"fmt"
 	"io"
@@ -26,6 +25,7 @@ import (
 	"net/url"
 	"strings"
 
+	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
 	goahttp "goa.design/goa/v3/http"
 )
 

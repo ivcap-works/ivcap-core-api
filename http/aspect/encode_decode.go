@@ -18,7 +18,6 @@ package client
 
 import (
 	"bytes"
-	aspect "github.com/ivcap-works/ivcap-core-api/gen/aspect"
 	"context"
 	"fmt"
 	"io"
@@ -26,6 +25,7 @@ import (
 	"net/url"
 	"strings"
 
+	aspect "github.com/ivcap-works/ivcap-core-api/gen/aspect"
 	goahttp "goa.design/goa/v3/http"
 )
 

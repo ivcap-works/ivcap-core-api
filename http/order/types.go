@@ -19,7 +19,6 @@ package client
 import (
 	order "github.com/ivcap-works/ivcap-core-api/gen/order"
 	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
-
 	goa "goa.design/goa/v3/pkg"
 )
 

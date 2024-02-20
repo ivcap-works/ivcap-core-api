@@ -17,11 +17,11 @@
 package client
 
 import (
-	order "github.com/ivcap-works/ivcap-core-api/gen/order"
 	"encoding/json"
 	"fmt"
 	"strconv"
 
+	order "github.com/ivcap-works/ivcap-core-api/gen/order"
 	goa "goa.design/goa/v3/pkg"
 )
 

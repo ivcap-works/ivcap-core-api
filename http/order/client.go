@@ -17,10 +17,10 @@
 package client
 
 import (
-	order "github.com/ivcap-works/ivcap-core-api/gen/order"
 	"context"
 	"net/http"
 
+	order "github.com/ivcap-works/ivcap-core-api/gen/order"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )

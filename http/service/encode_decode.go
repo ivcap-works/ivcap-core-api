@@ -18,8 +18,6 @@ package client
 
 import (
 	"bytes"
-	service "github.com/ivcap-works/ivcap-core-api/gen/service"
-	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
 	"context"
 	"fmt"
 	"io"
@@ -27,6 +25,8 @@ import (
 	"net/url"
 	"strings"
 
+	service "github.com/ivcap-works/ivcap-core-api/gen/service"
+	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
 	goahttp "goa.design/goa/v3/http"
 )
 

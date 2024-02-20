@@ -17,11 +17,11 @@
 package client
 
 import (
-	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
 	"encoding/json"
 	"fmt"
 	"strconv"
 
+	metadata "github.com/ivcap-works/ivcap-core-api/gen/metadata"
 	goa "goa.design/goa/v3/pkg"
 )
 

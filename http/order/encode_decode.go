@@ -18,8 +18,6 @@ package client
 
 import (
 	"bytes"
-	order "github.com/ivcap-works/ivcap-core-api/gen/order"
-	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 	"context"
 	"fmt"
 	"io"
@@ -27,6 +25,8 @@ import (
 	"net/url"
 	"strings"
 
+	order "github.com/ivcap-works/ivcap-core-api/gen/order"
+	orderviews "github.com/ivcap-works/ivcap-core-api/gen/order/views"
 	goahttp "goa.design/goa/v3/http"
 )
 

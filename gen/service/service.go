@@ -17,9 +17,9 @@
 package service
 
 import (
-	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
 	"context"
 
+	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
 	"goa.design/goa/v3/security"
 )
 

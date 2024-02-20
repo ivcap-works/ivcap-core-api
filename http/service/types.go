@@ -19,7 +19,6 @@ package client
 import (
 	service "github.com/ivcap-works/ivcap-core-api/gen/service"
 	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
-
 	goa "goa.design/goa/v3/pkg"
 )
 
