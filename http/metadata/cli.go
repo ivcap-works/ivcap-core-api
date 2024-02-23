@@ -45,7 +45,7 @@ func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.
 
 // BuildListPayload builds the payload for the metadata list endpoint from CLI
 // flags.
-func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListFilter string, metadataListOrderBy string, metadataListOrderDesc string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
+func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListFilter string, metadataListOrderBy string, metadataListOrderDesc string, metadataListIncludeContent string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
 	var err error
 	var entityID *string
 	{
@@ -122,6 +122,15 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 			}
 		}
 	}
+	var includeContent bool
+	{
+		if metadataListIncludeContent != "" {
+			includeContent, err = strconv.ParseBool(metadataListIncludeContent)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for includeContent, must be BOOL")
+			}
+		}
+	}
 	var page *string
 	{
 		if metadataListPage != "" {
@@ -141,6 +150,7 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	v.Filter = filter
 	v.OrderBy = orderBy
 	v.OrderDesc = orderDesc
+	v.IncludeContent = includeContent
 	v.Page = page
 	v.JWT = jwt
 

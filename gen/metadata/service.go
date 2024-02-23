@@ -47,7 +47,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.32"
+const APIVersion = "0.33"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -164,6 +164,8 @@ type ListPayload struct {
 	OrderBy string `json:"order-by,omitempty"`
 	// When set order result in descending order. Ascending order is the default.
 	OrderDesc *bool `json:"order-desc,omitempty"`
+	// When set, also include aspect content in list.
+	IncludeContent bool `json:"include-content,omitempty"`
 	// The content of '$page' is returned in the 'links' part of a previous query
 	// and
 	// will when set, ALL other parameters, except for 'limit' are ignored.

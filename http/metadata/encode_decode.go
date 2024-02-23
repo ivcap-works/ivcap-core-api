@@ -239,6 +239,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		if p.OrderDesc != nil {
 			values.Add("order-desc", fmt.Sprintf("%v", *p.OrderDesc))
 		}
+		values.Add("include-content", fmt.Sprintf("%v", p.IncludeContent))
 		if p.Page != nil {
 			values.Add("page", *p.Page)
 		}
