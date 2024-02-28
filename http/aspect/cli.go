@@ -202,7 +202,7 @@ func BuildCreatePayload(aspectCreateBody string, aspectCreateEntity string, aspe
 
 // BuildUpdatePayload builds the payload for the aspect update endpoint from
 // CLI flags.
-func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateID string, aspectUpdateEntity string, aspectUpdateSchema string, aspectUpdateJWT string, aspectUpdateContentType string) (*aspect.UpdatePayload, error) {
+func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateEntity string, aspectUpdateSchema string, aspectUpdateJWT string, aspectUpdateContentType string) (*aspect.UpdatePayload, error) {
 	var err error
 	var body any
 	{
@@ -210,10 +210,6 @@ func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateID string, aspectUp
 		if err != nil {
 			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"{\\\"$schema\\\": ...}\"")
 		}
-	}
-	var id string
-	{
-		id = aspectUpdateID
 	}
 	var entity string
 	{
@@ -239,7 +235,6 @@ func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateID string, aspectUp
 	res := &aspect.UpdatePayload{
 		Content: v,
 	}
-	res.ID = id
 	res.Entity = entity
 	res.Schema = schema
 	res.JWT = jwt

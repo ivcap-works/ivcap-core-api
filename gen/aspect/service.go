@@ -30,8 +30,9 @@ type Service interface {
 	List(context.Context, *ListPayload) (res *AspectListRT, err error)
 	// Attach new aspect to an entity.
 	Create(context.Context, *CreatePayload) (res *AspectIDRT, err error)
-	// Retract this aspect and create a new one with the information provided.
-	// For any field not provided, the value from the current aspect is used.
+	// A convenience method which will create a new aspect, but will also
+	// retract a potentially existing aspect for the same entity with the same
+	// schema.
 	Update(context.Context, *UpdatePayload) (res *AspectIDRT, err error)
 	// Retract a previously created statement.
 	Retract(context.Context, *RetractPayload) (err error)
@@ -47,7 +48,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.33"
+const APIVersion = "0.34"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -134,6 +135,8 @@ type CreatePayload struct {
 	Schema string
 	// Aspect content
 	Content any
+	// Optionally, an existing aspect this new one will replace (retract)
+	Replaces *string
 	// Content-Type header, MUST be of application/json.
 	ContentType string `json:"content-type,omitempty"`
 	// Policy guiding visibility and actions performed
@@ -226,6 +229,13 @@ type NotImplementedT struct {
 	Message string
 }
 
+// NotUniqueResource indicates that the method assumes that only zero or one
+// existing resources found.
+type NotUniqueResource struct {
+	// message describing expected type or pattern.
+	Message string
+}
+
 // ReadPayload is the payload type of the aspect service read method.
 type ReadPayload struct {
 	// ID of aspects to show
@@ -269,8 +279,6 @@ type UnsupportedContentType struct {
 
 // UpdatePayload is the payload type of the aspect service update method.
 type UpdatePayload struct {
-	// Aspect to update
-	ID string
 	// Entity to which attach aspect
 	Entity string `json:"entity,omitempty"`
 	// Schema of aspect
@@ -279,6 +287,8 @@ type UpdatePayload struct {
 	Content any
 	// Content-Type header, MUST be of application/json.
 	ContentType string `json:"content-type,omitempty"`
+	// Policy guiding visibility and actions performed
+	Policy *string `json:"policy,omitempty"`
 	// JWT used for authentication
 	JWT string
 }
@@ -366,6 +376,23 @@ func (e *NotImplementedT) ErrorName() string {
 // GoaErrorName returns "NotImplementedT".
 func (e *NotImplementedT) GoaErrorName() string {
 	return "not-implemented"
+}
+
+// Error returns an error description.
+func (e *NotUniqueResource) Error() string {
+	return "NotUniqueResource indicates that the method assumes that only zero or one existing resources found."
+}
+
+// ErrorName returns "NotUniqueResource".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *NotUniqueResource) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "NotUniqueResource".
+func (e *NotUniqueResource) GoaErrorName() string {
+	return "not-unique"
 }
 
 // Error returns an error description.

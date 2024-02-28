@@ -546,17 +546,7 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 // BuildUpdateRequest instantiates a HTTP request object with method and path
 // set to call the "aspect" service "update" endpoint
 func (c *Client) BuildUpdateRequest(ctx context.Context, v any) (*http.Request, error) {
-	var (
-		id string
-	)
-	{
-		p, ok := v.(*aspect.UpdatePayload)
-		if !ok {
-			return nil, goahttp.ErrInvalidType("aspect", "update", "*aspect.UpdatePayload", v)
-		}
-		id = p.ID
-	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateAspectPath(id)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateAspectPath()}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
 		return nil, goahttp.ErrInvalidURL("aspect", "update", u.String(), err)

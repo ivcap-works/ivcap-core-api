@@ -36,8 +36,8 @@ func CreateAspectPath() string {
 }
 
 // UpdateAspectPath returns the URL path to the aspect service update HTTP endpoint.
-func UpdateAspectPath(id string) string {
-	return fmt.Sprintf("/1/aspects/%v", id)
+func UpdateAspectPath() string {
+	return "/1/aspects"
 }
 
 // RetractAspectPath returns the URL path to the aspect service retract HTTP endpoint.
