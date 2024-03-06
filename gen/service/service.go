@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -84,6 +84,10 @@ type BasicWorkflowOptsT struct {
 	GpuType *string `json:"gpu-type,omitempty"`
 	// Defines number of required gpu
 	GpuNumber *int `json:"gpu-number,omitempty"`
+	// list of volumes can be mount by containers in a workflow
+	Volumes []*VolumeT
+	// VolumeMount describes a mounting of a Volume within a container
+	VolumeMounts []*VolumeMountT `json:"volume-mounts,omitempty"`
 }
 
 // CreateServicePayload is the payload type of the service service
@@ -306,6 +310,23 @@ type UpdatePayload struct {
 	Services *ServiceDefinitionT
 	// JWT used for authentication
 	JWT string
+}
+
+type VolumeMountT struct {
+	// Name of the volume
+	Name *string
+	// Mount read-only if true
+	ReadOnly *bool `json:"read-only,omitempty"`
+	// Path within the container at which the volume should be mounted
+	MountPath *string `json:"mount-path,omitempty"`
+}
+
+type VolumeT struct {
+	// Name of the volume
+	Name *string
+	// json string of volume source represents the location and type of the mounted
+	// volume
+	VolumeSource *string `json:"volume-source,omitempty"`
 }
 
 // Defines the workflow to use to execute this service. Currently supported

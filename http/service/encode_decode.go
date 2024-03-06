@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -947,6 +947,18 @@ func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(
 	if v.EphemeralStorage != nil {
 		res.EphemeralStorage = marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v.EphemeralStorage)
 	}
+	if v.Volumes != nil {
+		res.Volumes = make([]*VolumeTRequestBodyRequestBody, len(v.Volumes))
+		for i, val := range v.Volumes {
+			res.Volumes[i] = marshalServiceVolumeTToVolumeTRequestBodyRequestBody(val)
+		}
+	}
+	if v.VolumeMounts != nil {
+		res.VolumeMounts = make([]*VolumeMountTRequestBodyRequestBody, len(v.VolumeMounts))
+		for i, val := range v.VolumeMounts {
+			res.VolumeMounts[i] = marshalServiceVolumeMountTToVolumeMountTRequestBodyRequestBody(val)
+		}
+	}
 
 	return res
 }
@@ -961,6 +973,36 @@ func marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v *ser
 	res := &ResourceMemoryTRequestBodyRequestBody{
 		Request: v.Request,
 		Limit:   v.Limit,
+	}
+
+	return res
+}
+
+// marshalServiceVolumeTToVolumeTRequestBodyRequestBody builds a value of type
+// *VolumeTRequestBodyRequestBody from a value of type *service.VolumeT.
+func marshalServiceVolumeTToVolumeTRequestBodyRequestBody(v *service.VolumeT) *VolumeTRequestBodyRequestBody {
+	if v == nil {
+		return nil
+	}
+	res := &VolumeTRequestBodyRequestBody{
+		Name:         v.Name,
+		VolumeSource: v.VolumeSource,
+	}
+
+	return res
+}
+
+// marshalServiceVolumeMountTToVolumeMountTRequestBodyRequestBody builds a
+// value of type *VolumeMountTRequestBodyRequestBody from a value of type
+// *service.VolumeMountT.
+func marshalServiceVolumeMountTToVolumeMountTRequestBodyRequestBody(v *service.VolumeMountT) *VolumeMountTRequestBodyRequestBody {
+	if v == nil {
+		return nil
+	}
+	res := &VolumeMountTRequestBodyRequestBody{
+		Name:      v.Name,
+		ReadOnly:  v.ReadOnly,
+		MountPath: v.MountPath,
 	}
 
 	return res
@@ -1064,6 +1106,18 @@ func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(
 	if v.EphemeralStorage != nil {
 		res.EphemeralStorage = marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v.EphemeralStorage)
 	}
+	if v.Volumes != nil {
+		res.Volumes = make([]*service.VolumeT, len(v.Volumes))
+		for i, val := range v.Volumes {
+			res.Volumes[i] = marshalVolumeTRequestBodyRequestBodyToServiceVolumeT(val)
+		}
+	}
+	if v.VolumeMounts != nil {
+		res.VolumeMounts = make([]*service.VolumeMountT, len(v.VolumeMounts))
+		for i, val := range v.VolumeMounts {
+			res.VolumeMounts[i] = marshalVolumeMountTRequestBodyRequestBodyToServiceVolumeMountT(val)
+		}
+	}
 
 	return res
 }
@@ -1078,6 +1132,36 @@ func marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v *Res
 	res := &service.ResourceMemoryT{
 		Request: v.Request,
 		Limit:   v.Limit,
+	}
+
+	return res
+}
+
+// marshalVolumeTRequestBodyRequestBodyToServiceVolumeT builds a value of type
+// *service.VolumeT from a value of type *VolumeTRequestBodyRequestBody.
+func marshalVolumeTRequestBodyRequestBodyToServiceVolumeT(v *VolumeTRequestBodyRequestBody) *service.VolumeT {
+	if v == nil {
+		return nil
+	}
+	res := &service.VolumeT{
+		Name:         v.Name,
+		VolumeSource: v.VolumeSource,
+	}
+
+	return res
+}
+
+// marshalVolumeMountTRequestBodyRequestBodyToServiceVolumeMountT builds a
+// value of type *service.VolumeMountT from a value of type
+// *VolumeMountTRequestBodyRequestBody.
+func marshalVolumeMountTRequestBodyRequestBodyToServiceVolumeMountT(v *VolumeMountTRequestBodyRequestBody) *service.VolumeMountT {
+	if v == nil {
+		return nil
+	}
+	res := &service.VolumeMountT{
+		Name:      v.Name,
+		ReadOnly:  v.ReadOnly,
+		MountPath: v.MountPath,
 	}
 
 	return res
