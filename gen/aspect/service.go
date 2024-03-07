@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -229,8 +229,8 @@ type NotImplementedT struct {
 	Message string
 }
 
-// NotUniqueResource indicates that the method assumes that only zero or one
-// existing resources found.
+// NotUniqueResource indicates that the method found more than the expected
+// zero or one existing resources.
 type NotUniqueResource struct {
 	// message describing expected type or pattern.
 	Message string
@@ -380,7 +380,7 @@ func (e *NotImplementedT) GoaErrorName() string {
 
 // Error returns an error description.
 func (e *NotUniqueResource) Error() string {
-	return "NotUniqueResource indicates that the method assumes that only zero or one existing resources found."
+	return "NotUniqueResource indicates that the method found more than the expected\n\tzero or one existing resources."
 }
 
 // ErrorName returns "NotUniqueResource".
