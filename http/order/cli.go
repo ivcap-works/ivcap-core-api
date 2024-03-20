@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,7 @@ func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPaylo
 
 // BuildListPayload builds the payload for the order list endpoint from CLI
 // flags.
-func BuildListPayload(orderListLimit string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
+func BuildListPayload(orderListLimit string, orderListOffset string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -64,6 +64,17 @@ func BuildListPayload(orderListLimit string, orderListPage string, orderListFilt
 			}
 			if err != nil {
 				return nil, err
+			}
+		}
+	}
+	var offset int
+	{
+		if orderListOffset != "" {
+			var v int64
+			v, err = strconv.ParseInt(orderListOffset, 10, strconv.IntSize)
+			offset = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for offset, must be INT")
 			}
 		}
 	}
@@ -110,6 +121,7 @@ func BuildListPayload(orderListLimit string, orderListPage string, orderListFilt
 	}
 	v := &order.ListPayload{}
 	v.Limit = limit
+	v.Offset = offset
 	v.Page = page
 	v.Filter = filter
 	v.OrderBy = orderBy

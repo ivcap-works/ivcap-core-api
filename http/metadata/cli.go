@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -45,7 +45,7 @@ func BuildReadPayload(metadataReadID string, metadataReadJWT string) (*metadata.
 
 // BuildListPayload builds the payload for the metadata list endpoint from CLI
 // flags.
-func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListFilter string, metadataListOrderBy string, metadataListOrderDesc string, metadataListIncludeContent string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
+func BuildListPayload(metadataListEntityID string, metadataListSchema string, metadataListAspectPath string, metadataListAtTime string, metadataListLimit string, metadataListOffset string, metadataListFilter string, metadataListOrderBy string, metadataListOrderDesc string, metadataListIncludeContent string, metadataListPage string, metadataListJWT string) (*metadata.ListPayload, error) {
 	var err error
 	var entityID *string
 	{
@@ -99,6 +99,17 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 			}
 		}
 	}
+	var offset int
+	{
+		if metadataListOffset != "" {
+			var v int64
+			v, err = strconv.ParseInt(metadataListOffset, 10, strconv.IntSize)
+			offset = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for offset, must be INT")
+			}
+		}
+	}
 	var filter string
 	{
 		if metadataListFilter != "" {
@@ -147,6 +158,7 @@ func BuildListPayload(metadataListEntityID string, metadataListSchema string, me
 	v.AspectPath = aspectPath
 	v.AtTime = atTime
 	v.Limit = limit
+	v.Offset = offset
 	v.Filter = filter
 	v.OrderBy = orderBy
 	v.OrderDesc = orderDesc

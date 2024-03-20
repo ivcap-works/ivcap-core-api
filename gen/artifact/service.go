@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -183,6 +183,9 @@ type ListPayload struct {
 	// The $limit system query option requests the number of items in the queried
 	// collection to be included in the result.
 	Limit int
+	// The 'offset' system query option skip the number of items in the queried
+	// collection to be included in the result.
+	Offset int
 	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
 	// 'filter'

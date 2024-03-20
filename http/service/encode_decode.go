@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -63,6 +63,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		}
 		values := req.URL.Query()
 		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		values.Add("offset", fmt.Sprintf("%v", p.Offset))
 		if p.Page != nil {
 			values.Add("page", *p.Page)
 		}
