@@ -27,7 +27,7 @@ import (
 
 // BuildListPayload builds the payload for the service list endpoint from CLI
 // flags.
-func BuildListPayload(serviceListLimit string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string, serviceListJWT string) (*service.ListPayload, error) {
+func BuildListPayload(serviceListLimit string, serviceListOffset string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string, serviceListJWT string) (*service.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -46,6 +46,17 @@ func BuildListPayload(serviceListLimit string, serviceListPage string, serviceLi
 			}
 			if err != nil {
 				return nil, err
+			}
+		}
+	}
+	var offset int
+	{
+		if serviceListOffset != "" {
+			var v int64
+			v, err = strconv.ParseInt(serviceListOffset, 10, strconv.IntSize)
+			offset = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for offset, must be INT")
 			}
 		}
 	}
@@ -92,6 +103,7 @@ func BuildListPayload(serviceListLimit string, serviceListPage string, serviceLi
 	}
 	v := &service.ListPayload{}
 	v.Limit = limit
+	v.Offset = offset
 	v.Page = page
 	v.Filter = filter
 	v.OrderBy = orderBy

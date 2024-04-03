@@ -26,7 +26,7 @@ import (
 
 // BuildListPayload builds the payload for the artifact list endpoint from CLI
 // flags.
-func BuildListPayload(artifactListLimit string, artifactListPage string, artifactListFilter string, artifactListOrderBy string, artifactListOrderDesc string, artifactListAtTime string, artifactListJWT string) (*artifact.ListPayload, error) {
+func BuildListPayload(artifactListLimit string, artifactListOffset string, artifactListPage string, artifactListFilter string, artifactListOrderBy string, artifactListOrderDesc string, artifactListAtTime string, artifactListJWT string) (*artifact.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -45,6 +45,17 @@ func BuildListPayload(artifactListLimit string, artifactListPage string, artifac
 			}
 			if err != nil {
 				return nil, err
+			}
+		}
+	}
+	var offset int
+	{
+		if artifactListOffset != "" {
+			var v int64
+			v, err = strconv.ParseInt(artifactListOffset, 10, strconv.IntSize)
+			offset = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for offset, must be INT")
 			}
 		}
 	}
@@ -91,6 +102,7 @@ func BuildListPayload(artifactListLimit string, artifactListPage string, artifac
 	}
 	v := &artifact.ListPayload{}
 	v.Limit = limit
+	v.Offset = offset
 	v.Page = page
 	v.Filter = filter
 	v.OrderBy = orderBy

@@ -43,7 +43,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.34"
+const APIVersion = "0.35"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -183,6 +183,9 @@ type ListPayload struct {
 	// The $limit system query option requests the number of items in the queried
 	// collection to be included in the result.
 	Limit int
+	// The 'offset' system query option skip the number of items in the queried
+	// collection to be included in the result.
+	Offset int
 	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
 	// 'filter'
