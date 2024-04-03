@@ -37,6 +37,16 @@ type CreateRequestBody struct {
 	Parameters []*ParameterT `form:"parameters" json:"parameters" xml:"parameters"`
 }
 
+// ListResponseBody is the type of the "order" service "list" endpoint HTTP
+// response body.
+type ListResponseBody struct {
+	// Orders
+	Items []*OrderListItemResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
+	// Time at which this list was valid
+	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+}
+
 // ReadResponseBody is the type of the "order" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
@@ -64,14 +74,13 @@ type ReadResponseBody struct {
 	Parameters []*ParameterTResponseBody `form:"parameters,omitempty" json:"parameters,omitempty" xml:"parameters,omitempty"`
 }
 
-// ListResponseBody is the type of the "order" service "list" endpoint HTTP
-// response body.
-type ListResponseBody struct {
-	// Orders
-	Items []*OrderListItemResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
-	// Time at which this list was valid
-	AtTime *string              `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+// ProductsResponseBody is the type of the "order" service "products" endpoint
+// HTTP response body.
+type ProductsResponseBody struct {
+	// (Partial) list of products delivered by this order
+	Items []*ProductListItemTResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
+	// Links to more products, if there are any
+	Links []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // CreateResponseBody is the type of the "order" service "create" endpoint HTTP
@@ -105,6 +114,40 @@ type CreateResponseBody struct {
 // response body.
 type TopResponseBody []*OrderTopResultItemResponse
 
+// ListBadRequestResponseBody is the type of the "order" service "list"
+// endpoint HTTP response body for the "bad-request" error.
+type ListBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListInvalidParameterResponseBody is the type of the "order" service "list"
+// endpoint HTTP response body for the "invalid-parameter" error.
+type ListInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// ListInvalidScopesResponseBody is the type of the "order" service "list"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type ListInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ListNotImplementedResponseBody is the type of the "order" service "list"
+// endpoint HTTP response body for the "not-implemented" error.
+type ListNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ReadBadRequestResponseBody is the type of the "order" service "read"
 // endpoint HTTP response body for the "bad-request" error.
 type ReadBadRequestResponseBody struct {
@@ -137,16 +180,16 @@ type ReadNotFoundResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// ListBadRequestResponseBody is the type of the "order" service "list"
+// ProductsBadRequestResponseBody is the type of the "order" service "products"
 // endpoint HTTP response body for the "bad-request" error.
-type ListBadRequestResponseBody struct {
+type ProductsBadRequestResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// ListInvalidParameterResponseBody is the type of the "order" service "list"
-// endpoint HTTP response body for the "invalid-parameter" error.
-type ListInvalidParameterResponseBody struct {
+// ProductsInvalidParameterResponseBody is the type of the "order" service
+// "products" endpoint HTTP response body for the "invalid-parameter" error.
+type ProductsInvalidParameterResponseBody struct {
 	// message describing expected type or pattern.
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 	// name of parameter.
@@ -155,19 +198,28 @@ type ListInvalidParameterResponseBody struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
-// ListInvalidScopesResponseBody is the type of the "order" service "list"
-// endpoint HTTP response body for the "invalid-scopes" error.
-type ListInvalidScopesResponseBody struct {
+// ProductsInvalidScopesResponseBody is the type of the "order" service
+// "products" endpoint HTTP response body for the "invalid-scopes" error.
+type ProductsInvalidScopesResponseBody struct {
 	// ID of involved resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// ListNotImplementedResponseBody is the type of the "order" service "list"
-// endpoint HTTP response body for the "not-implemented" error.
-type ListNotImplementedResponseBody struct {
+// ProductsNotImplementedResponseBody is the type of the "order" service
+// "products" endpoint HTTP response body for the "not-implemented" error.
+type ProductsNotImplementedResponseBody struct {
 	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// ProductsNotFoundResponseBody is the type of the "order" service "products"
+// endpoint HTTP response body for the "not-found" error.
+type ProductsNotFoundResponseBody struct {
+	// ID of missing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -300,6 +352,37 @@ type TopNotFoundResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// OrderListItemResponseBody is used to define fields on response body types.
+type OrderListItemResponseBody struct {
+	// ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Optional customer provided name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Order status
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	// DateTime order was placed
+	OrderedAt *string `form:"ordered-at,omitempty" json:"ordered-at,omitempty" xml:"ordered-at,omitempty"`
+	// DateTime order processing started
+	StartedAt *string `form:"started-at,omitempty" json:"started-at,omitempty" xml:"started-at,omitempty"`
+	// DateTime order processing finished
+	FinishedAt *string `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
+	// Reference to service requested
+	Service *string `json:"service"`
+	// Reference to billable account
+	Account *string `json:"account"`
+	Href    *string `json:"href,omitempty"`
+}
+
+// LinkTResponseBody is used to define fields on response body types.
+type LinkTResponseBody struct {
+	// relation type
+	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
+	// mime type
+	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
+	// web link
+	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
+}
+
 // PartialProductListTResponseBody is used to define fields on response body
 // types.
 type PartialProductListTResponseBody struct {
@@ -320,41 +403,10 @@ type ProductListItemTResponseBody struct {
 	DataHref *string `json:"dataRef,omitempty"`
 }
 
-// LinkTResponseBody is used to define fields on response body types.
-type LinkTResponseBody struct {
-	// relation type
-	Rel *string `form:"rel,omitempty" json:"rel,omitempty" xml:"rel,omitempty"`
-	// mime type
-	Type *string `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
-	// web link
-	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
-}
-
 // ParameterTResponseBody is used to define fields on response body types.
 type ParameterTResponseBody struct {
 	Name  *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
-}
-
-// OrderListItemResponseBody is used to define fields on response body types.
-type OrderListItemResponseBody struct {
-	// ID
-	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
-	// Optional customer provided name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
-	// Order status
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// DateTime order was placed
-	OrderedAt *string `form:"ordered-at,omitempty" json:"ordered-at,omitempty" xml:"ordered-at,omitempty"`
-	// DateTime order processing started
-	StartedAt *string `form:"started-at,omitempty" json:"started-at,omitempty" xml:"started-at,omitempty"`
-	// DateTime order processing finished
-	FinishedAt *string `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
-	// Reference to service requested
-	Service *string `json:"service"`
-	// Reference to billable account
-	Account *string `json:"account"`
-	Href    *string `json:"href,omitempty"`
 }
 
 // ParameterT is used to define fields on request body types.
@@ -400,6 +452,82 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 		body.Parameters = []*ParameterT{}
 	}
 	return body
+}
+
+// NewListOrderListRTOK builds a "order" service "list" endpoint result from a
+// HTTP "OK" response.
+func NewListOrderListRTOK(body *ListResponseBody) *orderviews.OrderListRTView {
+	v := &orderviews.OrderListRTView{
+		AtTime: body.AtTime,
+	}
+	v.Items = make([]*orderviews.OrderListItemView, len(body.Items))
+	for i, val := range body.Items {
+		v.Items[i] = unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(val)
+	}
+	v.Links = make([]*orderviews.LinkTView, len(body.Links))
+	for i, val := range body.Links {
+		v.Links[i] = unmarshalLinkTResponseBodyToOrderviewsLinkTView(val)
+	}
+
+	return v
+}
+
+// NewListBadRequest builds a order service list endpoint bad-request error.
+func NewListBadRequest(body *ListBadRequestResponseBody) *order.BadRequestT {
+	v := &order.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListInvalidCredential builds a order service list endpoint
+// invalid-credential error.
+func NewListInvalidCredential() *order.InvalidCredentialsT {
+	v := &order.InvalidCredentialsT{}
+
+	return v
+}
+
+// NewListInvalidParameter builds a order service list endpoint
+// invalid-parameter error.
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *order.InvalidParameterValue {
+	v := &order.InvalidParameterValue{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewListInvalidScopes builds a order service list endpoint invalid-scopes
+// error.
+func NewListInvalidScopes(body *ListInvalidScopesResponseBody) *order.InvalidScopesT {
+	v := &order.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListNotImplemented builds a order service list endpoint not-implemented
+// error.
+func NewListNotImplemented(body *ListNotImplementedResponseBody) *order.NotImplementedT {
+	v := &order.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewListNotAuthorized builds a order service list endpoint not-authorized
+// error.
+func NewListNotAuthorized() *order.UnauthorizedT {
+	v := &order.UnauthorizedT{}
+
+	return v
 }
 
 // NewReadOrderStatusRTOK builds a "order" service "read" endpoint result from
@@ -490,26 +618,25 @@ func NewReadNotAuthorized() *order.UnauthorizedT {
 	return v
 }
 
-// NewListOrderListRTOK builds a "order" service "list" endpoint result from a
-// HTTP "OK" response.
-func NewListOrderListRTOK(body *ListResponseBody) *orderviews.OrderListRTView {
-	v := &orderviews.OrderListRTView{
-		AtTime: body.AtTime,
-	}
-	v.Items = make([]*orderviews.OrderListItemView, len(body.Items))
+// NewProductsPartialProductListTOK builds a "order" service "products"
+// endpoint result from a HTTP "OK" response.
+func NewProductsPartialProductListTOK(body *ProductsResponseBody) *order.PartialProductListT {
+	v := &order.PartialProductListT{}
+	v.Items = make([]*order.ProductListItemT, len(body.Items))
 	for i, val := range body.Items {
-		v.Items[i] = unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(val)
+		v.Items[i] = unmarshalProductListItemTResponseBodyToOrderProductListItemT(val)
 	}
-	v.Links = make([]*orderviews.LinkTView, len(body.Links))
+	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
-		v.Links[i] = unmarshalLinkTResponseBodyToOrderviewsLinkTView(val)
+		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 
 	return v
 }
 
-// NewListBadRequest builds a order service list endpoint bad-request error.
-func NewListBadRequest(body *ListBadRequestResponseBody) *order.BadRequestT {
+// NewProductsBadRequest builds a order service products endpoint bad-request
+// error.
+func NewProductsBadRequest(body *ProductsBadRequestResponseBody) *order.BadRequestT {
 	v := &order.BadRequestT{
 		Message: *body.Message,
 	}
@@ -517,17 +644,17 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *order.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a order service list endpoint
+// NewProductsInvalidCredential builds a order service products endpoint
 // invalid-credential error.
-func NewListInvalidCredential() *order.InvalidCredentialsT {
+func NewProductsInvalidCredential() *order.InvalidCredentialsT {
 	v := &order.InvalidCredentialsT{}
 
 	return v
 }
 
-// NewListInvalidParameter builds a order service list endpoint
+// NewProductsInvalidParameter builds a order service products endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *order.InvalidParameterValue {
+func NewProductsInvalidParameter(body *ProductsInvalidParameterResponseBody) *order.InvalidParameterValue {
 	v := &order.InvalidParameterValue{
 		Message: *body.Message,
 		Name:    *body.Name,
@@ -537,9 +664,9 @@ func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *order.Inva
 	return v
 }
 
-// NewListInvalidScopes builds a order service list endpoint invalid-scopes
-// error.
-func NewListInvalidScopes(body *ListInvalidScopesResponseBody) *order.InvalidScopesT {
+// NewProductsInvalidScopes builds a order service products endpoint
+// invalid-scopes error.
+func NewProductsInvalidScopes(body *ProductsInvalidScopesResponseBody) *order.InvalidScopesT {
 	v := &order.InvalidScopesT{
 		ID:      body.ID,
 		Message: *body.Message,
@@ -548,9 +675,9 @@ func NewListInvalidScopes(body *ListInvalidScopesResponseBody) *order.InvalidSco
 	return v
 }
 
-// NewListNotImplemented builds a order service list endpoint not-implemented
-// error.
-func NewListNotImplemented(body *ListNotImplementedResponseBody) *order.NotImplementedT {
+// NewProductsNotImplemented builds a order service products endpoint
+// not-implemented error.
+func NewProductsNotImplemented(body *ProductsNotImplementedResponseBody) *order.NotImplementedT {
 	v := &order.NotImplementedT{
 		Message: *body.Message,
 	}
@@ -558,9 +685,19 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *order.NotImple
 	return v
 }
 
-// NewListNotAuthorized builds a order service list endpoint not-authorized
-// error.
-func NewListNotAuthorized() *order.UnauthorizedT {
+// NewProductsNotFound builds a order service products endpoint not-found error.
+func NewProductsNotFound(body *ProductsNotFoundResponseBody) *order.ResourceNotFoundT {
+	v := &order.ResourceNotFoundT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewProductsNotAuthorized builds a order service products endpoint
+// not-authorized error.
+func NewProductsNotAuthorized() *order.UnauthorizedT {
 	v := &order.UnauthorizedT{}
 
 	return v
@@ -880,6 +1017,32 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 	return
 }
 
+// ValidateProductsResponseBody runs the validations defined on
+// ProductsResponseBody
+func ValidateProductsResponseBody(body *ProductsResponseBody) (err error) {
+	if body.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	for _, e := range body.Items {
+		if e != nil {
+			if err2 := ValidateProductListItemTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
 // ValidateCreateResponseBody runs the validations defined on CreateResponseBody
 func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 	if body.Links == nil {
@@ -941,6 +1104,48 @@ func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 	return
 }
 
+// ValidateListBadRequestResponseBody runs the validations defined on
+// list_bad-request_response_body
+func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListInvalidParameterResponseBody runs the validations defined on
+// list_invalid-parameter_response_body
+func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateListInvalidScopesResponseBody runs the validations defined on
+// list_invalid-scopes_response_body
+func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateListNotImplementedResponseBody runs the validations defined on
+// list_not-implemented_response_body
+func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
 // ValidateReadBadRequestResponseBody runs the validations defined on
 // read_bad-request_response_body
 func ValidateReadBadRequestResponseBody(body *ReadBadRequestResponseBody) (err error) {
@@ -986,18 +1191,18 @@ func ValidateReadNotFoundResponseBody(body *ReadNotFoundResponseBody) (err error
 	return
 }
 
-// ValidateListBadRequestResponseBody runs the validations defined on
-// list_bad-request_response_body
-func ValidateListBadRequestResponseBody(body *ListBadRequestResponseBody) (err error) {
+// ValidateProductsBadRequestResponseBody runs the validations defined on
+// products_bad-request_response_body
+func ValidateProductsBadRequestResponseBody(body *ProductsBadRequestResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
 
-// ValidateListInvalidParameterResponseBody runs the validations defined on
-// list_invalid-parameter_response_body
-func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponseBody) (err error) {
+// ValidateProductsInvalidParameterResponseBody runs the validations defined on
+// products_invalid-parameter_response_body
+func ValidateProductsInvalidParameterResponseBody(body *ProductsInvalidParameterResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -1007,9 +1212,9 @@ func ValidateListInvalidParameterResponseBody(body *ListInvalidParameterResponse
 	return
 }
 
-// ValidateListInvalidScopesResponseBody runs the validations defined on
-// list_invalid-scopes_response_body
-func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) (err error) {
+// ValidateProductsInvalidScopesResponseBody runs the validations defined on
+// products_invalid-scopes_response_body
+func ValidateProductsInvalidScopesResponseBody(body *ProductsInvalidScopesResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -1019,11 +1224,26 @@ func ValidateListInvalidScopesResponseBody(body *ListInvalidScopesResponseBody) 
 	return
 }
 
-// ValidateListNotImplementedResponseBody runs the validations defined on
-// list_not-implemented_response_body
-func ValidateListNotImplementedResponseBody(body *ListNotImplementedResponseBody) (err error) {
+// ValidateProductsNotImplementedResponseBody runs the validations defined on
+// products_not-implemented_response_body
+func ValidateProductsNotImplementedResponseBody(body *ProductsNotImplementedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateProductsNotFoundResponseBody runs the validations defined on
+// products_not-found_response_body
+func ValidateProductsNotFoundResponseBody(body *ProductsNotFoundResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	return
 }
@@ -1199,61 +1419,6 @@ func ValidateTopNotFoundResponseBody(body *TopNotFoundResponseBody) (err error) 
 	return
 }
 
-// ValidatePartialProductListTResponseBody runs the validations defined on
-// PartialProductListTResponseBody
-func ValidatePartialProductListTResponseBody(body *PartialProductListTResponseBody) (err error) {
-	if body.Items == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
-	}
-	if body.Links == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
-	}
-	for _, e := range body.Items {
-		if e != nil {
-			if err2 := ValidateProductListItemTResponseBody(e); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
-	for _, e := range body.Links {
-		if e != nil {
-			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
-				err = goa.MergeErrors(err, err2)
-			}
-		}
-	}
-	return
-}
-
-// ValidateProductListItemTResponseBody runs the validations defined on
-// ProductListItemTResponseBody
-func ValidateProductListItemTResponseBody(body *ProductListItemTResponseBody) (err error) {
-	if body.ID == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
-	}
-	if body.Status == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
-	}
-	if body.Href == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
-	}
-	return
-}
-
-// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
-func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
-	if body.Rel == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
-	}
-	if body.Type == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
-	}
-	if body.Href == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
-	}
-	return
-}
-
 // ValidateOrderListItemResponseBody runs the validations defined on
 // OrderListItemResponseBody
 func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err error) {
@@ -1294,6 +1459,61 @@ func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err err
 	}
 	if body.Account != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateLinkTResponseBody runs the validations defined on LinkTResponseBody
+func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
+	if body.Rel == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("rel", "body"))
+	}
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	return
+}
+
+// ValidatePartialProductListTResponseBody runs the validations defined on
+// PartialProductListTResponseBody
+func ValidatePartialProductListTResponseBody(body *PartialProductListTResponseBody) (err error) {
+	if body.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	}
+	if body.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "body"))
+	}
+	for _, e := range body.Items {
+		if e != nil {
+			if err2 := ValidateProductListItemTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range body.Links {
+		if e != nil {
+			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateProductListItemTResponseBody runs the validations defined on
+// ProductListItemTResponseBody
+func ValidateProductListItemTResponseBody(body *ProductListItemTResponseBody) (err error) {
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+	}
+	if body.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	return
 }

@@ -30,166 +30,6 @@ import (
 	goahttp "goa.design/goa/v3/http"
 )
 
-// BuildReadRequest instantiates a HTTP request object with method and path set
-// to call the "order" service "read" endpoint
-func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
-	var (
-		id string
-	)
-	{
-		p, ok := v.(*order.ReadPayload)
-		if !ok {
-			return nil, goahttp.ErrInvalidType("order", "read", "*order.ReadPayload", v)
-		}
-		id = p.ID
-	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReadOrderPath(id)}
-	req, err := http.NewRequest("GET", u.String(), nil)
-	if err != nil {
-		return nil, goahttp.ErrInvalidURL("order", "read", u.String(), err)
-	}
-	if ctx != nil {
-		req = req.WithContext(ctx)
-	}
-
-	return req, nil
-}
-
-// EncodeReadRequest returns an encoder for requests sent to the order read
-// server.
-func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
-	return func(req *http.Request, v any) error {
-		p, ok := v.(*order.ReadPayload)
-		if !ok {
-			return goahttp.ErrInvalidType("order", "read", "*order.ReadPayload", v)
-		}
-		{
-			head := p.JWT
-			if !strings.Contains(head, " ") {
-				req.Header.Set("Authorization", "Bearer "+head)
-			} else {
-				req.Header.Set("Authorization", head)
-			}
-		}
-		return nil
-	}
-}
-
-// DecodeReadResponse returns a decoder for responses returned by the order
-// read endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
-// DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
-//   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
-//   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
-//   - error: internal error
-func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
-	return func(resp *http.Response) (any, error) {
-		if restoreBody {
-			b, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-			resp.Body = io.NopCloser(bytes.NewBuffer(b))
-			defer func() {
-				resp.Body = io.NopCloser(bytes.NewBuffer(b))
-			}()
-		} else {
-			defer resp.Body.Close()
-		}
-		switch resp.StatusCode {
-		case http.StatusOK:
-			var (
-				body ReadResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("order", "read", err)
-			}
-			err = ValidateReadResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("order", "read", err)
-			}
-			res := NewReadOrderStatusRTOK(&body)
-			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ReadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "read", err)
-				}
-				err = ValidateReadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "read", err)
-				}
-				return nil, NewReadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewReadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "read", resp.StatusCode, string(body))
-			}
-		case http.StatusForbidden:
-			var (
-				body ReadInvalidScopesResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("order", "read", err)
-			}
-			err = ValidateReadInvalidScopesResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("order", "read", err)
-			}
-			return nil, NewReadInvalidScopes(&body)
-		case http.StatusNotImplemented:
-			var (
-				body ReadNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("order", "read", err)
-			}
-			err = ValidateReadNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("order", "read", err)
-			}
-			return nil, NewReadNotImplemented(&body)
-		case http.StatusNotFound:
-			var (
-				body ReadNotFoundResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("order", "read", err)
-			}
-			err = ValidateReadNotFoundResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("order", "read", err)
-			}
-			return nil, NewReadNotFound(&body)
-		case http.StatusUnauthorized:
-			return nil, NewReadNotAuthorized()
-		default:
-			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("order", "read", resp.StatusCode, string(body))
-		}
-	}
-}
-
 // BuildListRequest instantiates a HTTP request object with method and path set
 // to call the "order" service "list" endpoint
 func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
@@ -354,6 +194,347 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("order", "list", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildReadRequest instantiates a HTTP request object with method and path set
+// to call the "order" service "read" endpoint
+func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		id string
+	)
+	{
+		p, ok := v.(*order.ReadPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("order", "read", "*order.ReadPayload", v)
+		}
+		id = p.ID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReadOrderPath(id)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("order", "read", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeReadRequest returns an encoder for requests sent to the order read
+// server.
+func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*order.ReadPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("order", "read", "*order.ReadPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeReadResponse returns a decoder for responses returned by the order
+// read endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeReadResponse may return the following errors:
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
+//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ReadResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "read", err)
+			}
+			err = ValidateReadResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "read", err)
+			}
+			res := NewReadOrderStatusRTOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body ReadBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("order", "read", err)
+				}
+				err = ValidateReadBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("order", "read", err)
+				}
+				return nil, NewReadBadRequest(&body)
+			case "invalid-credential":
+				return nil, NewReadInvalidCredential()
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("order", "read", resp.StatusCode, string(body))
+			}
+		case http.StatusForbidden:
+			var (
+				body ReadInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "read", err)
+			}
+			err = ValidateReadInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "read", err)
+			}
+			return nil, NewReadInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body ReadNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "read", err)
+			}
+			err = ValidateReadNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "read", err)
+			}
+			return nil, NewReadNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body ReadNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "read", err)
+			}
+			err = ValidateReadNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "read", err)
+			}
+			return nil, NewReadNotFound(&body)
+		case http.StatusUnauthorized:
+			return nil, NewReadNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("order", "read", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildProductsRequest instantiates a HTTP request object with method and path
+// set to call the "order" service "products" endpoint
+func (c *Client) BuildProductsRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		orderID string
+	)
+	{
+		p, ok := v.(*order.ProductsPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("order", "products", "*order.ProductsPayload", v)
+		}
+		orderID = p.OrderID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ProductsOrderPath(orderID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("order", "products", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeProductsRequest returns an encoder for requests sent to the order
+// products server.
+func EncodeProductsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*order.ProductsPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("order", "products", "*order.ProductsPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		values := req.URL.Query()
+		values.Add("limit", fmt.Sprintf("%v", p.Limit))
+		if p.Page != nil {
+			values.Add("page", *p.Page)
+		}
+		req.URL.RawQuery = values.Encode()
+		return nil
+	}
+}
+
+// DecodeProductsResponse returns a decoder for responses returned by the order
+// products endpoint. restoreBody controls whether the response body should be
+// restored after having been read.
+// DecodeProductsResponse may return the following errors:
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
+//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
+//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeProductsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body ProductsResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "products", err)
+			}
+			err = ValidateProductsResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "products", err)
+			}
+			res := NewProductsPartialProductListTOK(&body)
+			return res, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body ProductsBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("order", "products", err)
+				}
+				err = ValidateProductsBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("order", "products", err)
+				}
+				return nil, NewProductsBadRequest(&body)
+			case "invalid-credential":
+				return nil, NewProductsInvalidCredential()
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("order", "products", resp.StatusCode, string(body))
+			}
+		case http.StatusUnprocessableEntity:
+			var (
+				body ProductsInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "products", err)
+			}
+			err = ValidateProductsInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "products", err)
+			}
+			return nil, NewProductsInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body ProductsInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "products", err)
+			}
+			err = ValidateProductsInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "products", err)
+			}
+			return nil, NewProductsInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body ProductsNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "products", err)
+			}
+			err = ValidateProductsNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "products", err)
+			}
+			return nil, NewProductsNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body ProductsNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "products", err)
+			}
+			err = ValidateProductsNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "products", err)
+			}
+			return nil, NewProductsNotFound(&body)
+		case http.StatusUnauthorized:
+			return nil, NewProductsNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("order", "products", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -875,6 +1056,37 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 	}
 }
 
+// unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView builds a
+// value of type *orderviews.OrderListItemView from a value of type
+// *OrderListItemResponseBody.
+func unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(v *OrderListItemResponseBody) *orderviews.OrderListItemView {
+	res := &orderviews.OrderListItemView{
+		ID:         v.ID,
+		Name:       v.Name,
+		Status:     v.Status,
+		OrderedAt:  v.OrderedAt,
+		StartedAt:  v.StartedAt,
+		FinishedAt: v.FinishedAt,
+		Service:    v.Service,
+		Account:    v.Account,
+		Href:       v.Href,
+	}
+
+	return res
+}
+
+// unmarshalLinkTResponseBodyToOrderviewsLinkTView builds a value of type
+// *orderviews.LinkTView from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToOrderviewsLinkTView(v *LinkTResponseBody) *orderviews.LinkTView {
+	res := &orderviews.LinkTView{
+		Rel:  v.Rel,
+		Type: v.Type,
+		Href: v.Href,
+	}
+
+	return res
+}
+
 // unmarshalPartialProductListTResponseBodyToOrderPartialProductListT builds a
 // value of type *order.PartialProductListT from a value of type
 // *PartialProductListTResponseBody.
@@ -927,37 +1139,6 @@ func unmarshalParameterTResponseBodyToOrderParameterT(v *ParameterTResponseBody)
 	res := &order.ParameterT{
 		Name:  v.Name,
 		Value: v.Value,
-	}
-
-	return res
-}
-
-// unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView builds a
-// value of type *orderviews.OrderListItemView from a value of type
-// *OrderListItemResponseBody.
-func unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(v *OrderListItemResponseBody) *orderviews.OrderListItemView {
-	res := &orderviews.OrderListItemView{
-		ID:         v.ID,
-		Name:       v.Name,
-		Status:     v.Status,
-		OrderedAt:  v.OrderedAt,
-		StartedAt:  v.StartedAt,
-		FinishedAt: v.FinishedAt,
-		Service:    v.Service,
-		Account:    v.Account,
-		Href:       v.Href,
-	}
-
-	return res
-}
-
-// unmarshalLinkTResponseBodyToOrderviewsLinkTView builds a value of type
-// *orderviews.LinkTView from a value of type *LinkTResponseBody.
-func unmarshalLinkTResponseBodyToOrderviewsLinkTView(v *LinkTResponseBody) *orderviews.LinkTView {
-	res := &orderviews.LinkTView{
-		Rel:  v.Rel,
-		Type: v.Type,
-		Href: v.Href,
 	}
 
 	return res

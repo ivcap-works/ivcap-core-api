@@ -26,10 +26,12 @@ import (
 
 // Manage the life cycle of an order for CRE services.
 type Service interface {
-	// Show orders by ID
-	Read(context.Context, *ReadPayload) (res *OrderStatusRT, err error)
 	// list orders
 	List(context.Context, *ListPayload) (res *OrderListRT, err error)
+	// Show orders by ID
+	Read(context.Context, *ReadPayload) (res *OrderStatusRT, err error)
+	// list products created by an order
+	Products(context.Context, *ProductsPayload) (res *PartialProductListT, err error)
 	// Create a new orders and return its status.
 	Create(context.Context, *CreatePayload) (res *OrderStatusRT, err error)
 	// download order logs
@@ -58,7 +60,7 @@ const ServiceName = "order"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [5]string{"read", "list", "create", "logs", "top"}
+var MethodNames = [6]string{"list", "read", "products", "create", "logs", "top"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -244,6 +246,7 @@ type ParameterT struct {
 	Value *string
 }
 
+// PartialProductListT is the result type of the order service products method.
 type PartialProductListT struct {
 	// (Partial) list of products delivered by this order
 	Items []*ProductListItemT
@@ -259,6 +262,20 @@ type ProductListItemT struct {
 	Size     *int64
 	Href     string  `json:"href,omitempty"`
 	DataHref *string `json:"dataRef,omitempty"`
+}
+
+// ProductsPayload is the payload type of the order service products method.
+type ProductsPayload struct {
+	// Reference to order requested
+	OrderID string
+	// The $limit system query option requests the number of items in the queried
+	// collection to be included in the result.
+	Limit int
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
+	// JWT used for authentication
+	JWT string
 }
 
 // ReadPayload is the payload type of the order service read method.

@@ -25,24 +25,6 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildReadPayload builds the payload for the order read endpoint from CLI
-// flags.
-func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPayload, error) {
-	var id string
-	{
-		id = orderReadID
-	}
-	var jwt string
-	{
-		jwt = orderReadJWT
-	}
-	v := &order.ReadPayload{}
-	v.ID = id
-	v.JWT = jwt
-
-	return v, nil
-}
-
 // BuildListPayload builds the payload for the order list endpoint from CLI
 // flags.
 func BuildListPayload(orderListLimit string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
@@ -115,6 +97,75 @@ func BuildListPayload(orderListLimit string, orderListPage string, orderListFilt
 	v.OrderBy = orderBy
 	v.OrderDesc = orderDesc
 	v.AtTime = atTime
+	v.JWT = jwt
+
+	return v, nil
+}
+
+// BuildReadPayload builds the payload for the order read endpoint from CLI
+// flags.
+func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPayload, error) {
+	var id string
+	{
+		id = orderReadID
+	}
+	var jwt string
+	{
+		jwt = orderReadJWT
+	}
+	v := &order.ReadPayload{}
+	v.ID = id
+	v.JWT = jwt
+
+	return v, nil
+}
+
+// BuildProductsPayload builds the payload for the order products endpoint from
+// CLI flags.
+func BuildProductsPayload(orderProductsOrderID string, orderProductsLimit string, orderProductsPage string, orderProductsJWT string) (*order.ProductsPayload, error) {
+	var err error
+	var orderID string
+	{
+		orderID = orderProductsOrderID
+		err = goa.MergeErrors(err, goa.ValidateFormat("orderID", orderID, goa.FormatURI))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var limit int
+	{
+		if orderProductsLimit != "" {
+			var v int64
+			v, err = strconv.ParseInt(orderProductsLimit, 10, strconv.IntSize)
+			limit = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for limit, must be INT")
+			}
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+			}
+			if limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var page *string
+	{
+		if orderProductsPage != "" {
+			page = &orderProductsPage
+		}
+	}
+	var jwt string
+	{
+		jwt = orderProductsJWT
+	}
+	v := &order.ProductsPayload{}
+	v.OrderID = orderID
+	v.Limit = limit
+	v.Page = page
 	v.JWT = jwt
 
 	return v, nil
