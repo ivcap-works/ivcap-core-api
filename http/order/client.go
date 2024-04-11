@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,11 +27,19 @@ import (
 
 // Client lists the order service endpoint HTTP clients.
 type Client struct {
+	// List Doer is the HTTP client used to make requests to the list endpoint.
+	ListDoer goahttp.Doer
+
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
 
-	// List Doer is the HTTP client used to make requests to the list endpoint.
-	ListDoer goahttp.Doer
+	// Products Doer is the HTTP client used to make requests to the products
+	// endpoint.
+	ProductsDoer goahttp.Doer
+
+	// Metadata Doer is the HTTP client used to make requests to the metadata
+	// endpoint.
+	MetadataDoer goahttp.Doer
 
 	// Create Doer is the HTTP client used to make requests to the create endpoint.
 	CreateDoer goahttp.Doer
@@ -65,8 +73,10 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ReadDoer:            doer,
 		ListDoer:            doer,
+		ReadDoer:            doer,
+		ProductsDoer:        doer,
+		MetadataDoer:        doer,
 		CreateDoer:          doer,
 		LogsDoer:            doer,
 		TopDoer:             doer,
@@ -76,6 +86,30 @@ func NewClient(
 		host:                host,
 		decoder:             dec,
 		encoder:             enc,
+	}
+}
+
+// List returns an endpoint that makes HTTP requests to the order service list
+// server.
+func (c *Client) List() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeListRequest(c.encoder)
+		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildListRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ListDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("order", "list", err)
+		}
+		return decodeResponse(resp)
 	}
 }
 
@@ -103,15 +137,15 @@ func (c *Client) Read() goa.Endpoint {
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the order service list
-// server.
-func (c *Client) List() goa.Endpoint {
+// Products returns an endpoint that makes HTTP requests to the order service
+// products server.
+func (c *Client) Products() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeListRequest(c.encoder)
-		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeProductsRequest(c.encoder)
+		decodeResponse = DecodeProductsResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildListRequest(ctx, v)
+		req, err := c.BuildProductsRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -119,9 +153,33 @@ func (c *Client) List() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ListDoer.Do(req)
+		resp, err := c.ProductsDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("order", "list", err)
+			return nil, goahttp.ErrRequestError("order", "products", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Metadata returns an endpoint that makes HTTP requests to the order service
+// metadata server.
+func (c *Client) Metadata() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeMetadataRequest(c.encoder)
+		decodeResponse = DecodeMetadataResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildMetadataRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.MetadataDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("order", "metadata", err)
 		}
 		return decodeResponse(resp)
 	}

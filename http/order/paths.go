@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,14 +20,24 @@ import (
 	"fmt"
 )
 
+// ListOrderPath returns the URL path to the order service list HTTP endpoint.
+func ListOrderPath() string {
+	return "/1/orders"
+}
+
 // ReadOrderPath returns the URL path to the order service read HTTP endpoint.
 func ReadOrderPath(id string) string {
 	return fmt.Sprintf("/1/orders/%v", id)
 }
 
-// ListOrderPath returns the URL path to the order service list HTTP endpoint.
-func ListOrderPath() string {
-	return "/1/orders"
+// ProductsOrderPath returns the URL path to the order service products HTTP endpoint.
+func ProductsOrderPath(orderID string) string {
+	return fmt.Sprintf("/1/orders/%v/products", orderID)
+}
+
+// MetadataOrderPath returns the URL path to the order service metadata HTTP endpoint.
+func MetadataOrderPath(orderID string) string {
+	return fmt.Sprintf("/1/orders/%v/metadata", orderID)
 }
 
 // CreateOrderPath returns the URL path to the order service create HTTP endpoint.

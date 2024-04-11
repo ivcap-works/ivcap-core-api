@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -27,7 +27,7 @@ import (
 
 // BuildListPayload builds the payload for the service list endpoint from CLI
 // flags.
-func BuildListPayload(serviceListLimit string, serviceListOffset string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string, serviceListJWT string) (*service.ListPayload, error) {
+func BuildListPayload(serviceListLimit string, serviceListPage string, serviceListFilter string, serviceListOrderBy string, serviceListOrderDesc string, serviceListAtTime string, serviceListJWT string) (*service.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -46,17 +46,6 @@ func BuildListPayload(serviceListLimit string, serviceListOffset string, service
 			}
 			if err != nil {
 				return nil, err
-			}
-		}
-	}
-	var offset int
-	{
-		if serviceListOffset != "" {
-			var v int64
-			v, err = strconv.ParseInt(serviceListOffset, 10, strconv.IntSize)
-			offset = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for offset, must be INT")
 			}
 		}
 	}
@@ -103,7 +92,6 @@ func BuildListPayload(serviceListLimit string, serviceListOffset string, service
 	}
 	v := &service.ListPayload{}
 	v.Limit = limit
-	v.Offset = offset
 	v.Page = page
 	v.Filter = filter
 	v.OrderBy = orderBy
@@ -122,7 +110,7 @@ func BuildCreateServicePayload(serviceCreateServiceBody string, serviceCreateSer
 	{
 		err = json.Unmarshal([]byte(serviceCreateServiceBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://raynorromaguera.info/ruthe\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         },\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         },\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Incidunt vel et voluptas voluptatem ea.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Et ut et.\",\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://cartwright.org/lavinia_marquardt\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Dignissimos fuga facere minus aliquid qui magnam.\",\n            \"uri\": \"http://mcglynn.info/yvette.pouros\"\n         },\n         {\n            \"title\": \"Dignissimos fuga facere minus aliquid qui magnam.\",\n            \"uri\": \"http://mcglynn.info/yvette.pouros\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Natus officia quae sed blanditiis vero.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Aut consequuntur occaecati sint et dolor.\",\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -219,7 +207,7 @@ func BuildUpdatePayload(serviceUpdateBody string, serviceUpdateID string, servic
 	{
 		err = json.Unmarshal([]byte(serviceUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://oconner.com/fermin_abbott\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         },\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         },\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         },\n         {\n            \"title\": \"Magni voluptatem quae nemo numquam dolorem eum.\",\n            \"uri\": \"http://yostcronin.info/shayna_wunsch\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Incidunt vel et voluptas voluptatem ea.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Et ut et.\",\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://quigley.net/hollie\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Dignissimos fuga facere minus aliquid qui magnam.\",\n            \"uri\": \"http://mcglynn.info/yvette.pouros\"\n         },\n         {\n            \"title\": \"Dignissimos fuga facere minus aliquid qui magnam.\",\n            \"uri\": \"http://mcglynn.info/yvette.pouros\"\n         },\n         {\n            \"title\": \"Dignissimos fuga facere minus aliquid qui magnam.\",\n            \"uri\": \"http://mcglynn.info/yvette.pouros\"\n         },\n         {\n            \"title\": \"Dignissimos fuga facere minus aliquid qui magnam.\",\n            \"uri\": \"http://mcglynn.info/yvette.pouros\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Natus officia quae sed blanditiis vero.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            }\n         },\n         \"opts\": \"Aut consequuntur occaecati sint et dolor.\",\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))

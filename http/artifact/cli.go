@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,7 +26,7 @@ import (
 
 // BuildListPayload builds the payload for the artifact list endpoint from CLI
 // flags.
-func BuildListPayload(artifactListLimit string, artifactListOffset string, artifactListPage string, artifactListFilter string, artifactListOrderBy string, artifactListOrderDesc string, artifactListAtTime string, artifactListJWT string) (*artifact.ListPayload, error) {
+func BuildListPayload(artifactListLimit string, artifactListPage string, artifactListFilter string, artifactListOrderBy string, artifactListOrderDesc string, artifactListAtTime string, artifactListJWT string) (*artifact.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -45,17 +45,6 @@ func BuildListPayload(artifactListLimit string, artifactListOffset string, artif
 			}
 			if err != nil {
 				return nil, err
-			}
-		}
-	}
-	var offset int
-	{
-		if artifactListOffset != "" {
-			var v int64
-			v, err = strconv.ParseInt(artifactListOffset, 10, strconv.IntSize)
-			offset = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for offset, must be INT")
 			}
 		}
 	}
@@ -102,7 +91,6 @@ func BuildListPayload(artifactListLimit string, artifactListOffset string, artif
 	}
 	v := &artifact.ListPayload{}
 	v.Limit = limit
-	v.Offset = offset
 	v.Page = page
 	v.Filter = filter
 	v.OrderBy = orderBy

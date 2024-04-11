@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -25,27 +25,9 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// BuildReadPayload builds the payload for the order read endpoint from CLI
-// flags.
-func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPayload, error) {
-	var id string
-	{
-		id = orderReadID
-	}
-	var jwt string
-	{
-		jwt = orderReadJWT
-	}
-	v := &order.ReadPayload{}
-	v.ID = id
-	v.JWT = jwt
-
-	return v, nil
-}
-
 // BuildListPayload builds the payload for the order list endpoint from CLI
 // flags.
-func BuildListPayload(orderListLimit string, orderListOffset string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
+func BuildListPayload(orderListLimit string, orderListPage string, orderListFilter string, orderListOrderBy string, orderListOrderDesc string, orderListAtTime string, orderListJWT string) (*order.ListPayload, error) {
 	var err error
 	var limit int
 	{
@@ -64,17 +46,6 @@ func BuildListPayload(orderListLimit string, orderListOffset string, orderListPa
 			}
 			if err != nil {
 				return nil, err
-			}
-		}
-	}
-	var offset int
-	{
-		if orderListOffset != "" {
-			var v int64
-			v, err = strconv.ParseInt(orderListOffset, 10, strconv.IntSize)
-			offset = int(v)
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for offset, must be INT")
 			}
 		}
 	}
@@ -121,12 +92,157 @@ func BuildListPayload(orderListLimit string, orderListOffset string, orderListPa
 	}
 	v := &order.ListPayload{}
 	v.Limit = limit
-	v.Offset = offset
 	v.Page = page
 	v.Filter = filter
 	v.OrderBy = orderBy
 	v.OrderDesc = orderDesc
 	v.AtTime = atTime
+	v.JWT = jwt
+
+	return v, nil
+}
+
+// BuildReadPayload builds the payload for the order read endpoint from CLI
+// flags.
+func BuildReadPayload(orderReadID string, orderReadJWT string) (*order.ReadPayload, error) {
+	var id string
+	{
+		id = orderReadID
+	}
+	var jwt string
+	{
+		jwt = orderReadJWT
+	}
+	v := &order.ReadPayload{}
+	v.ID = id
+	v.JWT = jwt
+
+	return v, nil
+}
+
+// BuildProductsPayload builds the payload for the order products endpoint from
+// CLI flags.
+func BuildProductsPayload(orderProductsOrderID string, orderProductsOrderBy string, orderProductsOrderDesc string, orderProductsLimit string, orderProductsPage string, orderProductsJWT string) (*order.ProductsPayload, error) {
+	var err error
+	var orderID string
+	{
+		orderID = orderProductsOrderID
+	}
+	var orderBy *string
+	{
+		if orderProductsOrderBy != "" {
+			orderBy = &orderProductsOrderBy
+		}
+	}
+	var orderDesc bool
+	{
+		if orderProductsOrderDesc != "" {
+			orderDesc, err = strconv.ParseBool(orderProductsOrderDesc)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+			}
+		}
+	}
+	var limit int
+	{
+		if orderProductsLimit != "" {
+			var v int64
+			v, err = strconv.ParseInt(orderProductsLimit, 10, strconv.IntSize)
+			limit = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for limit, must be INT")
+			}
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+			}
+			if limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var page *string
+	{
+		if orderProductsPage != "" {
+			page = &orderProductsPage
+		}
+	}
+	var jwt string
+	{
+		jwt = orderProductsJWT
+	}
+	v := &order.ProductsPayload{}
+	v.OrderID = orderID
+	v.OrderBy = orderBy
+	v.OrderDesc = orderDesc
+	v.Limit = limit
+	v.Page = page
+	v.JWT = jwt
+
+	return v, nil
+}
+
+// BuildMetadataPayload builds the payload for the order metadata endpoint from
+// CLI flags.
+func BuildMetadataPayload(orderMetadataOrderID string, orderMetadataOrderBy string, orderMetadataOrderDesc string, orderMetadataLimit string, orderMetadataPage string, orderMetadataJWT string) (*order.MetadataPayload, error) {
+	var err error
+	var orderID string
+	{
+		orderID = orderMetadataOrderID
+	}
+	var orderBy *string
+	{
+		if orderMetadataOrderBy != "" {
+			orderBy = &orderMetadataOrderBy
+		}
+	}
+	var orderDesc bool
+	{
+		if orderMetadataOrderDesc != "" {
+			orderDesc, err = strconv.ParseBool(orderMetadataOrderDesc)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for orderDesc, must be BOOL")
+			}
+		}
+	}
+	var limit int
+	{
+		if orderMetadataLimit != "" {
+			var v int64
+			v, err = strconv.ParseInt(orderMetadataLimit, 10, strconv.IntSize)
+			limit = int(v)
+			if err != nil {
+				return nil, fmt.Errorf("invalid value for limit, must be INT")
+			}
+			if limit < 1 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 1, true))
+			}
+			if limit > 50 {
+				err = goa.MergeErrors(err, goa.InvalidRangeError("limit", limit, 50, false))
+			}
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	var page *string
+	{
+		if orderMetadataPage != "" {
+			page = &orderMetadataPage
+		}
+	}
+	var jwt string
+	{
+		jwt = orderMetadataJWT
+	}
+	v := &order.MetadataPayload{}
+	v.OrderID = orderID
+	v.OrderBy = orderBy
+	v.OrderDesc = orderDesc
+	v.Limit = limit
+	v.Page = page
 	v.JWT = jwt
 
 	return v, nil

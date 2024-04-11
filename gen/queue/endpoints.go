@@ -14,7 +14,7 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package metadata
+package queue
 
 import (
 	"context"
@@ -23,39 +23,66 @@ import (
 	"goa.design/goa/v3/security"
 )
 
-// Endpoints wraps the "metadata" service endpoints.
+// Endpoints wraps the "queue" service endpoints.
 type Endpoints struct {
-	Read         goa.Endpoint
-	List         goa.Endpoint
-	Add          goa.Endpoint
-	UpdateRecord goa.Endpoint
-	Revoke       goa.Endpoint
+	Create  goa.Endpoint
+	Read    goa.Endpoint
+	Delete  goa.Endpoint
+	List    goa.Endpoint
+	Enqueue goa.Endpoint
+	Dequeue goa.Endpoint
 }
 
-// NewEndpoints wraps the methods of the "metadata" service with endpoints.
+// NewEndpoints wraps the methods of the "queue" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		Read:         NewReadEndpoint(s, a.JWTAuth),
-		List:         NewListEndpoint(s, a.JWTAuth),
-		Add:          NewAddEndpoint(s, a.JWTAuth),
-		UpdateRecord: NewUpdateRecordEndpoint(s, a.JWTAuth),
-		Revoke:       NewRevokeEndpoint(s, a.JWTAuth),
+		Create:  NewCreateEndpoint(s, a.JWTAuth),
+		Read:    NewReadEndpoint(s, a.JWTAuth),
+		Delete:  NewDeleteEndpoint(s, a.JWTAuth),
+		List:    NewListEndpoint(s, a.JWTAuth),
+		Enqueue: NewEnqueueEndpoint(s, a.JWTAuth),
+		Dequeue: NewDequeueEndpoint(s, a.JWTAuth),
 	}
 }
 
-// Use applies the given middleware to all the "metadata" service endpoints.
+// Use applies the given middleware to all the "queue" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
+	e.Create = m(e.Create)
 	e.Read = m(e.Read)
+	e.Delete = m(e.Delete)
 	e.List = m(e.List)
-	e.Add = m(e.Add)
-	e.UpdateRecord = m(e.UpdateRecord)
-	e.Revoke = m(e.Revoke)
+	e.Enqueue = m(e.Enqueue)
+	e.Dequeue = m(e.Dequeue)
+}
+
+// NewCreateEndpoint returns an endpoint function that calls the method
+// "create" of service "queue".
+func NewCreateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*CreatePayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:write"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, err := s.Create(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedCreatequeueresponse(res, "default")
+		return vres, nil
+	}
 }
 
 // NewReadEndpoint returns an endpoint function that calls the method "read" of
-// service "metadata".
+// service "queue".
 func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ReadPayload)
@@ -69,12 +96,36 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		return s.Read(ctx, p)
+		res, err := s.Read(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedReadqueueresponse(res, "default")
+		return vres, nil
+	}
+}
+
+// NewDeleteEndpoint returns an endpoint function that calls the method
+// "delete" of service "queue".
+func NewDeleteEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*DeletePayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:write"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return nil, s.Delete(ctx, p)
 	}
 }
 
 // NewListEndpoint returns an endpoint function that calls the method "list" of
-// service "metadata".
+// service "queue".
 func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ListPayload)
@@ -92,11 +143,11 @@ func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	}
 }
 
-// NewAddEndpoint returns an endpoint function that calls the method "add" of
-// service "metadata".
-func NewAddEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewEnqueueEndpoint returns an endpoint function that calls the method
+// "enqueue" of service "queue".
+func NewEnqueueEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*AddPayload)
+		p := req.(*EnqueuePayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
@@ -107,44 +158,25 @@ func NewAddEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		return s.Add(ctx, p)
+		return s.Enqueue(ctx, p)
 	}
 }
 
-// NewUpdateRecordEndpoint returns an endpoint function that calls the method
-// "update_record" of service "metadata".
-func NewUpdateRecordEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewDequeueEndpoint returns an endpoint function that calls the method
+// "dequeue" of service "queue".
+func NewDequeueEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*UpdateRecordPayload)
+		p := req.(*DequeuePayload)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
 			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:write"},
+			RequiredScopes: []string{"consumer:read"},
 		}
 		ctx, err = authJWTFn(ctx, p.JWT, &sc)
 		if err != nil {
 			return nil, err
 		}
-		return s.UpdateRecord(ctx, p)
-	}
-}
-
-// NewRevokeEndpoint returns an endpoint function that calls the method
-// "revoke" of service "metadata".
-func NewRevokeEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
-	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*RevokePayload)
-		var err error
-		sc := security.JWTScheme{
-			Name:           "jwt",
-			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:write"},
-		}
-		ctx, err = authJWTFn(ctx, p.JWT, &sc)
-		if err != nil {
-			return nil, err
-		}
-		return nil, s.Revoke(ctx, p)
+		return s.Dequeue(ctx, p)
 	}
 }

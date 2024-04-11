@@ -24,23 +24,27 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// Client lists the metadata service endpoint HTTP clients.
+// Client lists the queue service endpoint HTTP clients.
 type Client struct {
+	// Create Doer is the HTTP client used to make requests to the create endpoint.
+	CreateDoer goahttp.Doer
+
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
+
+	// Delete Doer is the HTTP client used to make requests to the delete endpoint.
+	DeleteDoer goahttp.Doer
 
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
 
-	// Add Doer is the HTTP client used to make requests to the add endpoint.
-	AddDoer goahttp.Doer
+	// Enqueue Doer is the HTTP client used to make requests to the enqueue
+	// endpoint.
+	EnqueueDoer goahttp.Doer
 
-	// UpdateRecord Doer is the HTTP client used to make requests to the
-	// update_record endpoint.
-	UpdateRecordDoer goahttp.Doer
-
-	// Revoke Doer is the HTTP client used to make requests to the revoke endpoint.
-	RevokeDoer goahttp.Doer
+	// Dequeue Doer is the HTTP client used to make requests to the dequeue
+	// endpoint.
+	DequeueDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -55,7 +59,7 @@ type Client struct {
 	decoder func(*http.Response) goahttp.Decoder
 }
 
-// NewClient instantiates HTTP clients for all the metadata service servers.
+// NewClient instantiates HTTP clients for all the queue service servers.
 func NewClient(
 	scheme string,
 	host string,
@@ -65,11 +69,12 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
+		CreateDoer:          doer,
 		ReadDoer:            doer,
+		DeleteDoer:          doer,
 		ListDoer:            doer,
-		AddDoer:             doer,
-		UpdateRecordDoer:    doer,
-		RevokeDoer:          doer,
+		EnqueueDoer:         doer,
+		DequeueDoer:         doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -79,8 +84,32 @@ func NewClient(
 	}
 }
 
-// Read returns an endpoint that makes HTTP requests to the metadata service
-// read server.
+// Create returns an endpoint that makes HTTP requests to the queue service
+// create server.
+func (c *Client) Create() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeCreateRequest(c.encoder)
+		decodeResponse = DecodeCreateResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildCreateRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.CreateDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("queue", "create", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// Read returns an endpoint that makes HTTP requests to the queue service read
+// server.
 func (c *Client) Read() goa.Endpoint {
 	var (
 		encodeRequest  = EncodeReadRequest(c.encoder)
@@ -97,14 +126,38 @@ func (c *Client) Read() goa.Endpoint {
 		}
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "read", err)
+			return nil, goahttp.ErrRequestError("queue", "read", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the metadata service
-// list server.
+// Delete returns an endpoint that makes HTTP requests to the queue service
+// delete server.
+func (c *Client) Delete() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeDeleteRequest(c.encoder)
+		decodeResponse = DecodeDeleteResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildDeleteRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.DeleteDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("queue", "delete", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// List returns an endpoint that makes HTTP requests to the queue service list
+// server.
 func (c *Client) List() goa.Endpoint {
 	var (
 		encodeRequest  = EncodeListRequest(c.encoder)
@@ -121,21 +174,21 @@ func (c *Client) List() goa.Endpoint {
 		}
 		resp, err := c.ListDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "list", err)
+			return nil, goahttp.ErrRequestError("queue", "list", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Add returns an endpoint that makes HTTP requests to the metadata service add
-// server.
-func (c *Client) Add() goa.Endpoint {
+// Enqueue returns an endpoint that makes HTTP requests to the queue service
+// enqueue server.
+func (c *Client) Enqueue() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeAddRequest(c.encoder)
-		decodeResponse = DecodeAddResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeEnqueueRequest(c.encoder)
+		decodeResponse = DecodeEnqueueResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildAddRequest(ctx, v)
+		req, err := c.BuildEnqueueRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -143,23 +196,23 @@ func (c *Client) Add() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.AddDoer.Do(req)
+		resp, err := c.EnqueueDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "add", err)
+			return nil, goahttp.ErrRequestError("queue", "enqueue", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// UpdateRecord returns an endpoint that makes HTTP requests to the metadata
-// service update_record server.
-func (c *Client) UpdateRecord() goa.Endpoint {
+// Dequeue returns an endpoint that makes HTTP requests to the queue service
+// dequeue server.
+func (c *Client) Dequeue() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeUpdateRecordRequest(c.encoder)
-		decodeResponse = DecodeUpdateRecordResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeDequeueRequest(c.encoder)
+		decodeResponse = DecodeDequeueResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildUpdateRecordRequest(ctx, v)
+		req, err := c.BuildDequeueRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -167,33 +220,9 @@ func (c *Client) UpdateRecord() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.UpdateRecordDoer.Do(req)
+		resp, err := c.DequeueDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "update_record", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// Revoke returns an endpoint that makes HTTP requests to the metadata service
-// revoke server.
-func (c *Client) Revoke() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeRevokeRequest(c.encoder)
-		decodeResponse = DecodeRevokeResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildRevokeRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.RevokeDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("metadata", "revoke", err)
+			return nil, goahttp.ErrRequestError("queue", "dequeue", err)
 		}
 		return decodeResponse(resp)
 	}

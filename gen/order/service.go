@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -26,10 +26,14 @@ import (
 
 // Manage the life cycle of an order for CRE services.
 type Service interface {
-	// Show orders by ID
-	Read(context.Context, *ReadPayload) (res *OrderStatusRT, err error)
 	// list orders
 	List(context.Context, *ListPayload) (res *OrderListRT, err error)
+	// Show orders by ID
+	Read(context.Context, *ReadPayload) (res *OrderStatusRT, err error)
+	// list products created by an order
+	Products(context.Context, *ProductsPayload) (res *PartialProductListT, err error)
+	// list metadata created by an order
+	Metadata(context.Context, *MetadataPayload) (res *PartialMetaListT, err error)
 	// Create a new orders and return its status.
 	Create(context.Context, *CreatePayload) (res *OrderStatusRT, err error)
 	// download order logs
@@ -48,7 +52,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.34"
+const APIVersion = "0.35"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -58,7 +62,7 @@ const ServiceName = "order"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [5]string{"read", "list", "create", "logs", "top"}
+var MethodNames = [7]string{"list", "read", "products", "metadata", "create", "logs", "top"}
 
 // Bad arguments supplied.
 type BadRequestT struct {
@@ -108,12 +112,9 @@ type LinkT struct {
 
 // ListPayload is the payload type of the order service list method.
 type ListPayload struct {
-	// The $limit system query option requests the number of items in the queried
-	// collection to be included in the result.
+	// The 'limit' query option sets the maximum number of items
+	// to be included in the result.
 	Limit int
-	// The 'offset' system query option skip the number of items in the queried
-	// collection to be included in the result.
-	Offset int
 	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
 	// 'filter'
@@ -151,6 +152,29 @@ type LogsPayload struct {
 	JWT string
 }
 
+// MetadataPayload is the payload type of the order service metadata method.
+type MetadataPayload struct {
+	// Reference to order requested
+	OrderID string
+	// The 'limit' query option sets the maximum number of items
+	// to be included in the result.
+	Limit int
+	// The 'orderby' query option allows clients to request resources in either
+	// ascending order using asc or descending order using desc. If asc or desc not
+	// specified,
+	// then the resources will be ordered in ascending order. The request below
+	// orders Trips on
+	// property EndsAt in descending order.
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the lt.
+	OrderDesc bool
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
+	// JWT used for authentication
+	JWT string
+}
+
 // Method is not yet implemented.
 type NotImplementedT struct {
 	// Information message
@@ -184,6 +208,17 @@ type OrderListRT struct {
 	// Time at which this list was valid
 	AtTime string
 	Links  []*LinkT
+}
+
+type OrderMetadataListItemRT struct {
+	// ID
+	ID string
+	// Schema ID
+	Schema string
+	// reference to content of metadata
+	Href string
+	// type of metadata content
+	ContentType string
 }
 
 type OrderRequestT struct {
@@ -247,6 +282,15 @@ type ParameterT struct {
 	Value *string
 }
 
+// PartialMetaListT is the result type of the order service metadata method.
+type PartialMetaListT struct {
+	// (Partial) list of metadata associated with this order
+	Items []*OrderMetadataListItemRT
+	// Links to more metadata, if there are any
+	Links []*LinkT
+}
+
+// PartialProductListT is the result type of the order service products method.
 type PartialProductListT struct {
 	// (Partial) list of products delivered by this order
 	Items []*ProductListItemT
@@ -262,6 +306,29 @@ type ProductListItemT struct {
 	Size     *int64
 	Href     string  `json:"href,omitempty"`
 	DataHref *string `json:"dataRef,omitempty"`
+}
+
+// ProductsPayload is the payload type of the order service products method.
+type ProductsPayload struct {
+	// Reference to order requested
+	OrderID string
+	// The 'limit' query option sets the maximum number of items
+	// to be included in the result.
+	Limit int
+	// The 'orderby' query option allows clients to request resources in either
+	// ascending order using asc or descending order using desc. If asc or desc not
+	// specified,
+	// then the resources will be ordered in ascending order. The request below
+	// orders Trips on
+	// property EndsAt in descending order.
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the lt.
+	OrderDesc bool
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
+	// JWT used for authentication
+	JWT string
 }
 
 // ReadPayload is the payload type of the order service read method.
