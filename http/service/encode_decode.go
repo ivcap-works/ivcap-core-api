@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -909,7 +909,6 @@ func marshalServiceWorkflowTToWorkflowTRequestBodyRequestBody(v *service.Workflo
 	res := &WorkflowTRequestBodyRequestBody{
 		Type: v.Type,
 		Argo: v.Argo,
-		Opts: v.Opts,
 	}
 	if v.Basic != nil {
 		res.Basic = marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(v.Basic)
@@ -926,9 +925,17 @@ func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(
 		return nil
 	}
 	res := &BasicWorkflowOptsTRequestBodyRequestBody{
-		Image:     v.Image,
-		GpuType:   v.GpuType,
-		GpuNumber: v.GpuNumber,
+		Image:           v.Image,
+		ImagePullPolicy: v.ImagePullPolicy,
+		GpuType:         v.GpuType,
+		GpuNumber:       v.GpuNumber,
+		SharedMemory:    v.SharedMemory,
+	}
+	{
+		var zero string
+		if res.ImagePullPolicy == zero {
+			res.ImagePullPolicy = "IfNotPresent"
+		}
 	}
 	if v.Command != nil {
 		res.Command = make([]string, len(v.Command))
@@ -1026,7 +1033,6 @@ func marshalWorkflowTRequestBodyRequestBodyToServiceWorkflowT(v *WorkflowTReques
 	res := &service.WorkflowT{
 		Type: v.Type,
 		Argo: v.Argo,
-		Opts: v.Opts,
 	}
 	if v.Basic != nil {
 		res.Basic = marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(v.Basic)
@@ -1043,9 +1049,17 @@ func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(
 		return nil
 	}
 	res := &service.BasicWorkflowOptsT{
-		Image:     v.Image,
-		GpuType:   v.GpuType,
-		GpuNumber: v.GpuNumber,
+		Image:           v.Image,
+		ImagePullPolicy: v.ImagePullPolicy,
+		GpuType:         v.GpuType,
+		GpuNumber:       v.GpuNumber,
+		SharedMemory:    v.SharedMemory,
+	}
+	{
+		var zero string
+		if res.ImagePullPolicy == zero {
+			res.ImagePullPolicy = "IfNotPresent"
+		}
 	}
 	if v.Command != nil {
 		res.Command = make([]string, len(v.Command))

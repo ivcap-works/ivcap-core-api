@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -360,9 +360,6 @@ type WorkflowTRequestBodyRequestBody struct {
 	Basic *BasicWorkflowOptsTRequestBodyRequestBody `form:"basic,omitempty" json:"basic,omitempty" xml:"basic,omitempty"`
 	// Defines the workflow using argo's WF schema
 	Argo any `form:"argo,omitempty" json:"argo,omitempty" xml:"argo,omitempty"`
-	// Type specific options - left for backward compatibility, if possible use
-	// type specific elements
-	Opts any `form:"opts,omitempty" json:"opts,omitempty" xml:"opts,omitempty"`
 }
 
 // BasicWorkflowOptsTRequestBodyRequestBody is used to define fields on request
@@ -370,6 +367,8 @@ type WorkflowTRequestBodyRequestBody struct {
 type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	// container image name
 	Image string `form:"image" json:"image" xml:"image"`
+	// Optionally definesq the image pull policy
+	ImagePullPolicy string `json:"image-pull-policy,omitempty"`
 	// Command to start the container - needed for some container runtimes
 	Command []string `form:"command" json:"command" xml:"command"`
 	// Defines memory resource requests and limits
@@ -386,6 +385,8 @@ type BasicWorkflowOptsTRequestBodyRequestBody struct {
 	GpuType *string `json:"gpu-type,omitempty"`
 	// Defines number of required gpu
 	GpuNumber *int `json:"gpu-number,omitempty"`
+	// Defines needed amount of shared-memory
+	SharedMemory *string `json:"shared-memory,omitempty"`
 }
 
 // ResourceMemoryTRequestBodyRequestBody is used to define fields on request

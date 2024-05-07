@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -68,6 +68,8 @@ type BadRequestT struct {
 type BasicWorkflowOptsT struct {
 	// container image name
 	Image string
+	// Optionally definesq the image pull policy
+	ImagePullPolicy string `json:"image-pull-policy,omitempty"`
 	// Command to start the container - needed for some container runtimes
 	Command []string
 	// Defines memory resource requests and limits
@@ -84,6 +86,8 @@ type BasicWorkflowOptsT struct {
 	GpuType *string `json:"gpu-type,omitempty"`
 	// Defines number of required gpu
 	GpuNumber *int `json:"gpu-number,omitempty"`
+	// Defines needed amount of shared-memory
+	SharedMemory *string `json:"shared-memory,omitempty"`
 }
 
 // CreateServicePayload is the payload type of the service service
@@ -320,9 +324,6 @@ type WorkflowT struct {
 	Basic *BasicWorkflowOptsT
 	// Defines the workflow using argo's WF schema
 	Argo any
-	// Type specific options - left for backward compatibility, if possible use
-	// type specific elements
-	Opts any
 }
 
 // Error returns an error description.
