@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,14 @@ type Readqueueresponse struct {
 	View string
 }
 
+// Messagestatus is the viewed result type that is projected based on a view.
+type Messagestatus struct {
+	// Type to project
+	Projected *MessagestatusView
+	// View to render
+	View string
+}
+
 // CreatequeueresponseView is a type that runs validations on a projected type.
 type CreatequeueresponseView struct {
 	// queue
@@ -54,6 +62,8 @@ type CreatequeueresponseView struct {
 
 // ReadqueueresponseView is a type that runs validations on a projected type.
 type ReadqueueresponseView struct {
+	// ID
+	ID *string
 	// Name of the queue.
 	Name *string
 	// Description of the queue.
@@ -62,18 +72,24 @@ type ReadqueueresponseView struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First sequence in the queue
-	FirstSeq *uint64
+	// First identifier in the queue
+	FirstID *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last sequence in the queue
-	LastSeq *uint64
+	// Last identifier in the queue
+	LastID *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
 	ConsumerCount *int
 	// Timestamp when the queue was created
 	CreatedAt *string
+}
+
+// MessagestatusView is a type that runs validations on a projected type.
+type MessagestatusView struct {
+	// queue
+	ID *string
 }
 
 var (
@@ -92,16 +108,24 @@ var (
 	// Readqueueresponse by view name.
 	ReadqueueresponseMap = map[string][]string{
 		"default": {
+			"id",
 			"name",
 			"description",
 			"total-messages",
 			"bytes",
-			"first-seq",
+			"first-id",
 			"first-time",
-			"last-seq",
+			"last-id",
 			"last-time",
 			"consumer-count",
 			"created-at",
+		},
+	}
+	// MessagestatusMap is a map indexing the attribute names of Messagestatus by
+	// view name.
+	MessagestatusMap = map[string][]string{
+		"default": {
+			"id",
 		},
 	}
 )
@@ -124,6 +148,18 @@ func ValidateReadqueueresponse(result *Readqueueresponse) (err error) {
 	switch result.View {
 	case "default", "":
 		err = ValidateReadqueueresponseView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
+	}
+	return
+}
+
+// ValidateMessagestatus runs the validations defined on the viewed result type
+// Messagestatus.
+func ValidateMessagestatus(result *Messagestatus) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateMessagestatusView(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
@@ -157,20 +193,41 @@ func ValidateCreatequeueresponseView(result *CreatequeueresponseView) (err error
 // ValidateReadqueueresponseView runs the validations defined on
 // ReadqueueresponseView using the "default" view.
 func ValidateReadqueueresponseView(result *ReadqueueresponseView) (err error) {
+	if result.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
 	if result.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "result"))
 	}
 	if result.CreatedAt == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("created-at", "result"))
 	}
+	if result.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+	}
+	if result.FirstID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-id", *result.FirstID, goa.FormatURI))
+	}
 	if result.FirstTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-time", *result.FirstTime, goa.FormatDateTime))
+	}
+	if result.LastID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-id", *result.LastID, goa.FormatURI))
 	}
 	if result.LastTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-time", *result.LastTime, goa.FormatDateTime))
 	}
 	if result.CreatedAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.created-at", *result.CreatedAt, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidateMessagestatusView runs the validations defined on MessagestatusView
+// using the "default" view.
+func ValidateMessagestatusView(result *MessagestatusView) (err error) {
+	if result.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
 	return
 }

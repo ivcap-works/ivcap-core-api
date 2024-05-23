@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -52,6 +52,8 @@ type CreateResponseBody struct {
 // ReadResponseBody is the type of the "queue" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
+	// ID
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Name of the queue.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Description of the queue.
@@ -60,12 +62,12 @@ type ReadResponseBody struct {
 	TotalMessages *uint64 `form:"total-messages,omitempty" json:"total-messages,omitempty" xml:"total-messages,omitempty"`
 	// Number of bytes in the queue
 	Bytes *uint64 `form:"bytes,omitempty" json:"bytes,omitempty" xml:"bytes,omitempty"`
-	// First sequence in the queue
-	FirstSeq *uint64 `form:"first-seq,omitempty" json:"first-seq,omitempty" xml:"first-seq,omitempty"`
+	// First identifier in the queue
+	FirstID *string `form:"first-id,omitempty" json:"first-id,omitempty" xml:"first-id,omitempty"`
 	// Timestamp of the first message in the queue
 	FirstTime *string `form:"first-time,omitempty" json:"first-time,omitempty" xml:"first-time,omitempty"`
-	// Last sequence in the queue
-	LastSeq *uint64 `form:"last-seq,omitempty" json:"last-seq,omitempty" xml:"last-seq,omitempty"`
+	// Last identifier in the queue
+	LastID *string `form:"last-id,omitempty" json:"last-id,omitempty" xml:"last-id,omitempty"`
 	// Timestamp of the last message in the queue
 	LastTime *string `form:"last-time,omitempty" json:"last-time,omitempty" xml:"last-time,omitempty"`
 	// Number of consumers
@@ -87,17 +89,15 @@ type ListResponseBody struct {
 // EnqueueResponseBody is the type of the "queue" service "enqueue" endpoint
 // HTTP response body.
 type EnqueueResponseBody struct {
-	// Message status
-	Items []*MessagestatusResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
-	// Time at which this list was valid
-	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	// queue
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 }
 
 // DequeueResponseBody is the type of the "queue" service "dequeue" endpoint
 // HTTP response body.
 type DequeueResponseBody struct {
-	// Message status
-	Items []*MessagestatusResponseBody `form:"items,omitempty" json:"items,omitempty" xml:"items,omitempty"`
+	// Messages in the queue
+	Messages []*PublishedmessageResponseBody `form:"messages,omitempty" json:"messages,omitempty" xml:"messages,omitempty"`
 	// Time at which this list was valid
 	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
 }
@@ -334,29 +334,12 @@ type LinkTResponseBody struct {
 	Href *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
 }
 
-// QueueMessageRequestBodyRequestBody is used to define fields on request body
-// types.
-type QueueMessageRequestBodyRequestBody struct {
-	// Users should encode their JSON payloads as byte slices.
-	Content []byte `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
-	// Schema used for message
-	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
-	// Encoding type of message content (defaults to 'application/json')
-	ContentType *string `form:"content-type,omitempty" json:"content-type,omitempty" xml:"content-type,omitempty"`
-}
-
-// MessagestatusResponseBody is used to define fields on response body types.
-type MessagestatusResponseBody struct {
-	// Queue message
-	Data *QueueMessageResponseBody `form:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
-	// Sequence number
-	Sequence *uint64 `form:"sequence,omitempty" json:"sequence,omitempty" xml:"sequence,omitempty"`
-}
-
-// QueueMessageResponseBody is used to define fields on response body types.
-type QueueMessageResponseBody struct {
-	// Users should encode their JSON payloads as byte slices.
-	Content []byte `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
+// PublishedmessageResponseBody is used to define fields on response body types.
+type PublishedmessageResponseBody struct {
+	// Message identifier
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message content in JSON format.
+	Content any `form:"content,omitempty" json:"content,omitempty" xml:"content,omitempty"`
 	// Schema used for message
 	Schema *string `form:"schema,omitempty" json:"schema,omitempty" xml:"schema,omitempty"`
 	// Encoding type of message content (defaults to 'application/json')
@@ -370,16 +353,6 @@ func NewCreateRequestBody(p *queue.CreatePayload) *CreateRequestBody {
 		Name:        p.Queues.Name,
 		Description: p.Queues.Description,
 		Policy:      p.Queues.Policy,
-	}
-	return body
-}
-
-// NewQueueMessageRequestBodyRequestBody builds the HTTP request body from the
-// payload of the "enqueue" endpoint of the "queue" service.
-func NewQueueMessageRequestBodyRequestBody(p *queue.EnqueuePayload) []*QueueMessageRequestBodyRequestBody {
-	body := make([]*QueueMessageRequestBodyRequestBody, len(p.Messages))
-	for i, val := range p.Messages {
-		body[i] = marshalQueueQueueMessageToQueueMessageRequestBodyRequestBody(val)
 	}
 	return body
 }
@@ -481,13 +454,14 @@ func NewCreateNotAuthorized() *queue.UnauthorizedT {
 // from a HTTP "OK" response.
 func NewReadqueueresponseViewOK(body *ReadResponseBody) *queueviews.ReadqueueresponseView {
 	v := &queueviews.ReadqueueresponseView{
+		ID:            body.ID,
 		Name:          body.Name,
 		Description:   body.Description,
 		TotalMessages: body.TotalMessages,
 		Bytes:         body.Bytes,
-		FirstSeq:      body.FirstSeq,
+		FirstID:       body.FirstID,
 		FirstTime:     body.FirstTime,
-		LastSeq:       body.LastSeq,
+		LastID:        body.LastID,
 		LastTime:      body.LastTime,
 		ConsumerCount: body.ConsumerCount,
 		CreatedAt:     body.CreatedAt,
@@ -674,15 +648,11 @@ func NewListNotAuthorized() *queue.UnauthorizedT {
 	return v
 }
 
-// NewEnqueueMessageStatusListOK builds a "queue" service "enqueue" endpoint
-// result from a HTTP "OK" response.
-func NewEnqueueMessageStatusListOK(body *EnqueueResponseBody) *queue.MessageStatusList {
-	v := &queue.MessageStatusList{
-		AtTime: body.AtTime,
-	}
-	v.Items = make([]*queue.Messagestatus, len(body.Items))
-	for i, val := range body.Items {
-		v.Items[i] = unmarshalMessagestatusResponseBodyToQueueMessagestatus(val)
+// NewEnqueueMessagestatusOK builds a "queue" service "enqueue" endpoint result
+// from a HTTP "OK" response.
+func NewEnqueueMessagestatusOK(body *EnqueueResponseBody) *queueviews.MessagestatusView {
+	v := &queueviews.MessagestatusView{
+		ID: body.ID,
 	}
 
 	return v
@@ -755,15 +725,15 @@ func NewEnqueueNotAuthorized() *queue.UnauthorizedT {
 	return v
 }
 
-// NewDequeueMessageStatusListOK builds a "queue" service "dequeue" endpoint
-// result from a HTTP "OK" response.
-func NewDequeueMessageStatusListOK(body *DequeueResponseBody) *queue.MessageStatusList {
-	v := &queue.MessageStatusList{
+// NewDequeueMessageListOK builds a "queue" service "dequeue" endpoint result
+// from a HTTP "OK" response.
+func NewDequeueMessageListOK(body *DequeueResponseBody) *queue.MessageList {
+	v := &queue.MessageList{
 		AtTime: body.AtTime,
 	}
-	v.Items = make([]*queue.Messagestatus, len(body.Items))
-	for i, val := range body.Items {
-		v.Items[i] = unmarshalMessagestatusResponseBodyToQueueMessagestatus(val)
+	v.Messages = make([]*queue.Publishedmessage, len(body.Messages))
+	for i, val := range body.Messages {
+		v.Messages[i] = unmarshalPublishedmessageResponseBodyToQueuePublishedmessage(val)
 	}
 
 	return v
@@ -867,23 +837,18 @@ func ValidateListResponseBody(body *ListResponseBody) (err error) {
 	return
 }
 
-// ValidateEnqueueResponseBody runs the validations defined on
-// EnqueueResponseBody
-func ValidateEnqueueResponseBody(body *EnqueueResponseBody) (err error) {
-	if body.Items == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
-	}
-	if body.AtTime != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.at-time", *body.AtTime, goa.FormatDateTime))
-	}
-	return
-}
-
 // ValidateDequeueResponseBody runs the validations defined on
 // DequeueResponseBody
 func ValidateDequeueResponseBody(body *DequeueResponseBody) (err error) {
-	if body.Items == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("items", "body"))
+	if body.Messages == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("messages", "body"))
+	}
+	for _, e := range body.Messages {
+		if e != nil {
+			if err2 := ValidatePublishedmessageResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
 	}
 	if body.AtTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.at-time", *body.AtTime, goa.FormatDateTime))
@@ -1195,6 +1160,15 @@ func ValidateLinkTResponseBody(body *LinkTResponseBody) (err error) {
 	}
 	if body.Href == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
+	}
+	return
+}
+
+// ValidatePublishedmessageResponseBody runs the validations defined on
+// PublishedmessageResponseBody
+func ValidatePublishedmessageResponseBody(body *PublishedmessageResponseBody) (err error) {
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	return
 }

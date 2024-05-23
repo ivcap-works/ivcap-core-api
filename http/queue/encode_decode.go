@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -717,7 +717,16 @@ func EncodeEnqueueRequest(encoder func(*http.Request) goahttp.Encoder) func(*htt
 				req.Header.Set("Authorization", head)
 			}
 		}
-		body := NewQueueMessageRequestBodyRequestBody(p)
+		if p.ContentType != nil {
+			head := *p.ContentType
+			req.Header.Set("Content-Type", head)
+		}
+		values := req.URL.Query()
+		if p.Schema != nil {
+			values.Add("schema", *p.Schema)
+		}
+		req.URL.RawQuery = values.Encode()
+		body := p.Content
 		if err := encoder(req).Encode(&body); err != nil {
 			return goahttp.ErrEncodingError("queue", "enqueue", err)
 		}
@@ -761,11 +770,13 @@ func DecodeEnqueueResponse(decoder func(*http.Response) goahttp.Decoder, restore
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("queue", "enqueue", err)
 			}
-			err = ValidateEnqueueResponseBody(&body)
-			if err != nil {
+			p := NewEnqueueMessagestatusOK(&body)
+			view := "default"
+			vres := &queueviews.Messagestatus{Projected: p, View: view}
+			if err = queueviews.ValidateMessagestatus(vres); err != nil {
 				return nil, goahttp.ErrValidationError("queue", "enqueue", err)
 			}
-			res := NewEnqueueMessageStatusListOK(&body)
+			res := queue.NewMessagestatus(vres)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -885,8 +896,8 @@ func EncodeDequeueRequest(encoder func(*http.Request) goahttp.Encoder) func(*htt
 			}
 		}
 		values := req.URL.Query()
-		if p.Batch != nil {
-			values.Add("batch", fmt.Sprintf("%v", *p.Batch))
+		if p.Limit != nil {
+			values.Add("limit", fmt.Sprintf("%v", *p.Limit))
 		}
 		req.URL.RawQuery = values.Encode()
 		return nil
@@ -933,7 +944,7 @@ func DecodeDequeueResponse(decoder func(*http.Response) goahttp.Decoder, restore
 			if err != nil {
 				return nil, goahttp.ErrValidationError("queue", "dequeue", err)
 			}
-			res := NewDequeueMessageStatusListOK(&body)
+			res := NewDequeueMessageListOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			en := resp.Header.Get("goa-error")
@@ -1037,52 +1048,12 @@ func unmarshalLinkTResponseBodyToQueueLinkT(v *LinkTResponseBody) *queue.LinkT {
 	return res
 }
 
-// marshalQueueQueueMessageToQueueMessageRequestBodyRequestBody builds a value
-// of type *QueueMessageRequestBodyRequestBody from a value of type
-// *queue.QueueMessage.
-func marshalQueueQueueMessageToQueueMessageRequestBodyRequestBody(v *queue.QueueMessage) *QueueMessageRequestBodyRequestBody {
-	res := &QueueMessageRequestBodyRequestBody{
-		Content:     v.Content,
-		Schema:      v.Schema,
-		ContentType: v.ContentType,
-	}
-
-	return res
-}
-
-// marshalQueueMessageRequestBodyRequestBodyToQueueQueueMessage builds a value
-// of type *queue.QueueMessage from a value of type
-// *QueueMessageRequestBodyRequestBody.
-func marshalQueueMessageRequestBodyRequestBodyToQueueQueueMessage(v *QueueMessageRequestBodyRequestBody) *queue.QueueMessage {
-	res := &queue.QueueMessage{
-		Content:     v.Content,
-		Schema:      v.Schema,
-		ContentType: v.ContentType,
-	}
-
-	return res
-}
-
-// unmarshalMessagestatusResponseBodyToQueueMessagestatus builds a value of
-// type *queue.Messagestatus from a value of type *MessagestatusResponseBody.
-func unmarshalMessagestatusResponseBodyToQueueMessagestatus(v *MessagestatusResponseBody) *queue.Messagestatus {
-	res := &queue.Messagestatus{
-		Sequence: v.Sequence,
-	}
-	if v.Data != nil {
-		res.Data = unmarshalQueueMessageResponseBodyToQueueQueueMessage(v.Data)
-	}
-
-	return res
-}
-
-// unmarshalQueueMessageResponseBodyToQueueQueueMessage builds a value of type
-// *queue.QueueMessage from a value of type *QueueMessageResponseBody.
-func unmarshalQueueMessageResponseBodyToQueueQueueMessage(v *QueueMessageResponseBody) *queue.QueueMessage {
-	if v == nil {
-		return nil
-	}
-	res := &queue.QueueMessage{
+// unmarshalPublishedmessageResponseBodyToQueuePublishedmessage builds a value
+// of type *queue.Publishedmessage from a value of type
+// *PublishedmessageResponseBody.
+func unmarshalPublishedmessageResponseBodyToQueuePublishedmessage(v *PublishedmessageResponseBody) *queue.Publishedmessage {
+	res := &queue.Publishedmessage{
+		ID:          v.ID,
 		Content:     v.Content,
 		Schema:      v.Schema,
 		ContentType: v.ContentType,

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -34,9 +34,9 @@ type Service interface {
 	// list queues
 	List(context.Context, *ListPayload) (res *QueueListResult, err error)
 	// Send a message to a specific queues.
-	Enqueue(context.Context, *EnqueuePayload) (res *MessageStatusList, err error)
+	Enqueue(context.Context, *EnqueuePayload) (res *Messagestatus, err error)
 	// Read a message from a specific queues.
-	Dequeue(context.Context, *DequeuePayload) (res *MessageStatusList, err error)
+	Dequeue(context.Context, *DequeuePayload) (res *MessageList, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -49,7 +49,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.35"
+const APIVersion = "0.38"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -101,8 +101,8 @@ type DeletePayload struct {
 type DequeuePayload struct {
 	// queue
 	ID string
-	// Number of messages to dequeue
-	Batch *int
+	// Maximum number of messages to dequeue
+	Limit *int
 	// JWT used for authentication
 	JWT string
 }
@@ -111,8 +111,12 @@ type DequeuePayload struct {
 type EnqueuePayload struct {
 	// queue
 	ID string
-	// Messages to queue
-	Messages []*QueueMessage
+	// Content-Type header, MUST be of application/json.
+	ContentType *string `json:"content-type,omitempty"`
+	// Schema used for message
+	Schema *string
+	// Message content
+	Content any `json:"content,omitempty"`
 	// JWT used for authentication
 	JWT string
 }
@@ -179,19 +183,18 @@ type ListPayload struct {
 	JWT string
 }
 
-// MessageStatusList is the result type of the queue service enqueue method.
-type MessageStatusList struct {
-	// Message status
-	Items []*Messagestatus
+// MessageList is the result type of the queue service dequeue method.
+type MessageList struct {
+	// Messages in the queue
+	Messages []*Publishedmessage
 	// Time at which this list was valid
 	AtTime *string
 }
 
+// Messagestatus is the result type of the queue service enqueue method.
 type Messagestatus struct {
-	// Queue message
-	Data *QueueMessage
-	// Sequence number
-	Sequence *uint64
+	// queue
+	ID *string
 }
 
 // Method is not yet implemented.
@@ -208,6 +211,17 @@ type PayloadForCreateEndpoint struct {
 	Description *string
 	// Reference to policy used
 	Policy *string `json:"policy"`
+}
+
+type Publishedmessage struct {
+	// Message identifier
+	ID *string
+	// Message content in JSON format.
+	Content any
+	// Schema used for message
+	Schema *string
+	// Encoding type of message content (defaults to 'application/json')
+	ContentType *string
 }
 
 type QueueListItem struct {
@@ -231,15 +245,6 @@ type QueueListResult struct {
 	Links  []*LinkT
 }
 
-type QueueMessage struct {
-	// Users should encode their JSON payloads as byte slices.
-	Content []byte
-	// Schema used for message
-	Schema *string
-	// Encoding type of message content (defaults to 'application/json')
-	ContentType *string
-}
-
 // ReadPayload is the payload type of the queue service read method.
 type ReadPayload struct {
 	// ID of queues to show
@@ -250,6 +255,8 @@ type ReadPayload struct {
 
 // Readqueueresponse is the result type of the queue service read method.
 type Readqueueresponse struct {
+	// ID
+	ID string
 	// Name of the queue.
 	Name string
 	// Description of the queue.
@@ -258,12 +265,12 @@ type Readqueueresponse struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First sequence in the queue
-	FirstSeq *uint64
+	// First identifier in the queue
+	FirstID *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last sequence in the queue
-	LastSeq *uint64
+	// Last identifier in the queue
+	LastID *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
@@ -479,6 +486,19 @@ func NewViewedReadqueueresponse(res *Readqueueresponse, view string) *queueviews
 	return &queueviews.Readqueueresponse{Projected: p, View: "default"}
 }
 
+// NewMessagestatus initializes result type Messagestatus from viewed result
+// type Messagestatus.
+func NewMessagestatus(vres *queueviews.Messagestatus) *Messagestatus {
+	return newMessagestatus(vres.Projected)
+}
+
+// NewViewedMessagestatus initializes viewed result type Messagestatus from
+// result type Messagestatus using the given view.
+func NewViewedMessagestatus(res *Messagestatus, view string) *queueviews.Messagestatus {
+	p := newMessagestatusView(res)
+	return &queueviews.Messagestatus{Projected: p, View: "default"}
+}
+
 // newCreatequeueresponse converts projected type Createqueueresponse to
 // service type Createqueueresponse.
 func newCreatequeueresponse(vres *queueviews.CreatequeueresponseView) *Createqueueresponse {
@@ -518,11 +538,14 @@ func newReadqueueresponse(vres *queueviews.ReadqueueresponseView) *Readqueueresp
 		Description:   vres.Description,
 		TotalMessages: vres.TotalMessages,
 		Bytes:         vres.Bytes,
-		FirstSeq:      vres.FirstSeq,
+		FirstID:       vres.FirstID,
 		FirstTime:     vres.FirstTime,
-		LastSeq:       vres.LastSeq,
+		LastID:        vres.LastID,
 		LastTime:      vres.LastTime,
 		ConsumerCount: vres.ConsumerCount,
+	}
+	if vres.ID != nil {
+		res.ID = *vres.ID
 	}
 	if vres.Name != nil {
 		res.Name = *vres.Name
@@ -537,16 +560,35 @@ func newReadqueueresponse(vres *queueviews.ReadqueueresponseView) *Readqueueresp
 // type ReadqueueresponseView using the "default" view.
 func newReadqueueresponseView(res *Readqueueresponse) *queueviews.ReadqueueresponseView {
 	vres := &queueviews.ReadqueueresponseView{
+		ID:            &res.ID,
 		Name:          &res.Name,
 		Description:   res.Description,
 		TotalMessages: res.TotalMessages,
 		Bytes:         res.Bytes,
-		FirstSeq:      res.FirstSeq,
+		FirstID:       res.FirstID,
 		FirstTime:     res.FirstTime,
-		LastSeq:       res.LastSeq,
+		LastID:        res.LastID,
 		LastTime:      res.LastTime,
 		ConsumerCount: res.ConsumerCount,
 		CreatedAt:     &res.CreatedAt,
+	}
+	return vres
+}
+
+// newMessagestatus converts projected type Messagestatus to service type
+// Messagestatus.
+func newMessagestatus(vres *queueviews.MessagestatusView) *Messagestatus {
+	res := &Messagestatus{
+		ID: vres.ID,
+	}
+	return res
+}
+
+// newMessagestatusView projects result type Messagestatus to projected type
+// MessagestatusView using the "default" view.
+func newMessagestatusView(res *Messagestatus) *queueviews.MessagestatusView {
+	vres := &queueviews.MessagestatusView{
+		ID: res.ID,
 	}
 	return vres
 }
