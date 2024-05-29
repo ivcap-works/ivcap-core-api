@@ -85,11 +85,11 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -124,29 +124,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := order.NewOrderListRT(vres)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ListBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "list", err)
-				}
-				err = ValidateListBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "list", err)
-				}
-				return nil, NewListBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewListInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "list", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ListBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "list", err)
 			}
+			err = ValidateListBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "list", err)
+			}
+			return nil, NewListBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body ListInvalidParameterResponseBody
@@ -189,6 +180,8 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("order", "list", err)
 			}
 			return nil, NewListNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewListNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewListNotAuthorized()
 		default:
@@ -247,11 +240,11 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -284,29 +277,20 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadOrderStatusRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ReadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "read", err)
-				}
-				err = ValidateReadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "read", err)
-				}
-				return nil, NewReadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewReadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "read", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ReadBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "read", err)
 			}
+			err = ValidateReadBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "read", err)
+			}
+			return nil, NewReadBadRequest(&body)
 		case http.StatusForbidden:
 			var (
 				body ReadInvalidScopesResponseBody
@@ -349,6 +333,8 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("order", "read", err)
 			}
 			return nil, NewReadNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewReadNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewReadNotAuthorized()
 		default:
@@ -417,12 +403,12 @@ func EncodeProductsRequest(encoder func(*http.Request) goahttp.Encoder) func(*ht
 // products endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeProductsResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeProductsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -455,29 +441,20 @@ func DecodeProductsResponse(decoder func(*http.Response) goahttp.Decoder, restor
 			}
 			res := NewProductsPartialProductListTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ProductsBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "products", err)
-				}
-				err = ValidateProductsBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "products", err)
-				}
-				return nil, NewProductsBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewProductsInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "products", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ProductsBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "products", err)
 			}
+			err = ValidateProductsBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "products", err)
+			}
+			return nil, NewProductsBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body ProductsInvalidParameterResponseBody
@@ -534,6 +511,8 @@ func DecodeProductsResponse(decoder func(*http.Response) goahttp.Decoder, restor
 				return nil, goahttp.ErrValidationError("order", "products", err)
 			}
 			return nil, NewProductsNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewProductsNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewProductsNotAuthorized()
 		default:
@@ -602,12 +581,12 @@ func EncodeMetadataRequest(encoder func(*http.Request) goahttp.Encoder) func(*ht
 // metadata endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeMetadataResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeMetadataResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -640,29 +619,20 @@ func DecodeMetadataResponse(decoder func(*http.Response) goahttp.Decoder, restor
 			}
 			res := NewMetadataPartialMetaListTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body MetadataBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "metadata", err)
-				}
-				err = ValidateMetadataBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "metadata", err)
-				}
-				return nil, NewMetadataBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewMetadataInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "metadata", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body MetadataBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "metadata", err)
 			}
+			err = ValidateMetadataBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "metadata", err)
+			}
+			return nil, NewMetadataBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body MetadataInvalidParameterResponseBody
@@ -719,6 +689,8 @@ func DecodeMetadataResponse(decoder func(*http.Response) goahttp.Decoder, restor
 				return nil, goahttp.ErrValidationError("order", "metadata", err)
 			}
 			return nil, NewMetadataNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewMetadataNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewMetadataNotAuthorized()
 		default:
@@ -771,9 +743,8 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeCreateResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
@@ -810,29 +781,20 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewCreateOrderStatusRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body CreateBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "create", err)
-				}
-				err = ValidateCreateBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "create", err)
-				}
-				return nil, NewCreateBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewCreateInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "create", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body CreateBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "create", err)
 			}
+			err = ValidateCreateBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "create", err)
+			}
+			return nil, NewCreateBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body CreateInvalidParameterResponseBody
@@ -957,12 +919,12 @@ func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // logs endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeLogsResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -980,29 +942,20 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 		switch resp.StatusCode {
 		case http.StatusOK:
 			return nil, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body LogsBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "logs", err)
-				}
-				err = ValidateLogsBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "logs", err)
-				}
-				return nil, NewLogsBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewLogsInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "logs", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body LogsBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "logs", err)
 			}
+			err = ValidateLogsBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "logs", err)
+			}
+			return nil, NewLogsBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body LogsInvalidParameterResponseBody
@@ -1059,6 +1012,8 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("order", "logs", err)
 			}
 			return nil, NewLogsNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewLogsNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewLogsNotAuthorized()
 		default:
@@ -1117,12 +1072,12 @@ func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 // endpoint. restoreBody controls whether the response body should be restored
 // after having been read.
 // DecodeTopResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *order.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *order.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *order.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *order.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -1157,29 +1112,20 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 			}
 			res := order.NewOrderTopResultItemCollection(vres)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body TopBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("order", "top", err)
-				}
-				err = ValidateTopBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("order", "top", err)
-				}
-				return nil, NewTopBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewTopInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("order", "top", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body TopBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("order", "top", err)
 			}
+			err = ValidateTopBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("order", "top", err)
+			}
+			return nil, NewTopBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body TopInvalidParameterResponseBody
@@ -1236,6 +1182,8 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 				return nil, goahttp.ErrValidationError("order", "top", err)
 			}
 			return nil, NewTopNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewTopNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewTopNotAuthorized()
 		default:

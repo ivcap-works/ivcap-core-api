@@ -52,7 +52,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.38"
+const APIVersion = "0.39"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -64,7 +64,7 @@ const ServiceName = "order"
 // MethodKey key.
 var MethodNames = [7]string{"list", "read", "products", "metadata", "create", "logs", "top"}
 
-// Bad arguments supplied.
+// Something wasn't right with this request
 type BadRequestT struct {
 	// Information message
 	Message string
@@ -78,13 +78,8 @@ type CreatePayload struct {
 	JWT string
 }
 
-// Provided credential is not valid.
-type InvalidCredentialsT struct {
-}
-
-// InvalidParameterValue is the error returned when a parameter has the wrong
-// value.
-type InvalidParameterValue struct {
+// InvalidParameterT is the error returned when a parameter has the wrong value.
+type InvalidParameterT struct {
 	// message describing expected type or pattern.
 	Message string
 	// name of parameter.
@@ -348,8 +343,7 @@ type ResourceNotFoundT struct {
 	Message string
 }
 
-// ServiceNotAvailable is the type returned when the service necessary to
-// fulfil the request is currently not available.
+// Service necessary to fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
 }
 
@@ -367,7 +361,7 @@ type UnauthorizedT struct {
 
 // Error returns an error description.
 func (e *BadRequestT) Error() string {
-	return "Bad arguments supplied."
+	return "Something wasn't right with this request"
 }
 
 // ErrorName returns "BadRequestT".
@@ -383,36 +377,19 @@ func (e *BadRequestT) GoaErrorName() string {
 }
 
 // Error returns an error description.
-func (e *InvalidCredentialsT) Error() string {
-	return "Provided credential is not valid."
+func (e *InvalidParameterT) Error() string {
+	return "InvalidParameterT is the error returned when a parameter has the wrong value."
 }
 
-// ErrorName returns "InvalidCredentialsT".
+// ErrorName returns "InvalidParameterT".
 //
 // Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *InvalidCredentialsT) ErrorName() string {
+func (e *InvalidParameterT) ErrorName() string {
 	return e.GoaErrorName()
 }
 
-// GoaErrorName returns "InvalidCredentialsT".
-func (e *InvalidCredentialsT) GoaErrorName() string {
-	return "invalid-credential"
-}
-
-// Error returns an error description.
-func (e *InvalidParameterValue) Error() string {
-	return "InvalidParameterValue is the error returned when a parameter has the wrong value."
-}
-
-// ErrorName returns "InvalidParameterValue".
-//
-// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *InvalidParameterValue) ErrorName() string {
-	return e.GoaErrorName()
-}
-
-// GoaErrorName returns "InvalidParameterValue".
-func (e *InvalidParameterValue) GoaErrorName() string {
+// GoaErrorName returns "InvalidParameterT".
+func (e *InvalidParameterT) GoaErrorName() string {
 	return "invalid-parameter"
 }
 
@@ -469,7 +446,7 @@ func (e *ResourceNotFoundT) GoaErrorName() string {
 
 // Error returns an error description.
 func (e *ServiceNotAvailableT) Error() string {
-	return "ServiceNotAvailable is the type returned when the service necessary to fulfil the request is currently not available."
+	return "Service necessary to fulfil the request is currently not available."
 }
 
 // ErrorName returns "ServiceNotAvailableT".

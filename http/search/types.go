@@ -111,18 +111,10 @@ func NewSearchBadRequest(body *SearchBadRequestResponseBody) *search.BadRequestT
 	return v
 }
 
-// NewSearchInvalidCredential builds a search service search endpoint
-// invalid-credential error.
-func NewSearchInvalidCredential() *search.InvalidCredentialsT {
-	v := &search.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewSearchInvalidParameter builds a search service search endpoint
 // invalid-parameter error.
-func NewSearchInvalidParameter(body *SearchInvalidParameterResponseBody) *search.InvalidParameterValue {
-	v := &search.InvalidParameterValue{
+func NewSearchInvalidParameter(body *SearchInvalidParameterResponseBody) *search.InvalidParameterT {
+	v := &search.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -152,6 +144,14 @@ func NewSearchNotImplemented(body *SearchNotImplementedResponseBody) *search.Not
 	return v
 }
 
+// NewSearchNotAvailable builds a search service search endpoint not-available
+// error.
+func NewSearchNotAvailable() *search.ServiceNotAvailableT {
+	v := &search.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewSearchNotAuthorized builds a search service search endpoint
 // not-authorized error.
 func NewSearchNotAuthorized() *search.UnauthorizedT {
@@ -162,8 +162,8 @@ func NewSearchNotAuthorized() *search.UnauthorizedT {
 
 // NewSearchUnsupportedContentType builds a search service search endpoint
 // unsupported-content-type error.
-func NewSearchUnsupportedContentType(body *SearchUnsupportedContentTypeResponseBody) *search.UnsupportedContentType {
-	v := &search.UnsupportedContentType{
+func NewSearchUnsupportedContentType(body *SearchUnsupportedContentTypeResponseBody) *search.UnsupportedContentTypeT {
+	v := &search.UnsupportedContentTypeT{
 		Message: *body.Message,
 	}
 

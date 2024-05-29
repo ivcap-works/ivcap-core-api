@@ -48,7 +48,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.38"
+const APIVersion = "0.39"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -121,7 +121,7 @@ type AspectRT struct {
 	Links     []*LinkT
 }
 
-// Bad arguments supplied.
+// Something wasn't right with this request
 type BadRequestT struct {
 	// Information message
 	Message string
@@ -145,13 +145,8 @@ type CreatePayload struct {
 	JWT string
 }
 
-// Provided credential is not valid.
-type InvalidCredentialsT struct {
-}
-
-// InvalidParameterValue is the error returned when a parameter has the wrong
-// value.
-type InvalidParameterValue struct {
+// InvalidParameterT is the error returned when a parameter has the wrong value.
+type InvalidParameterT struct {
 	// message describing expected type or pattern.
 	Message string
 	// name of parameter.
@@ -231,7 +226,7 @@ type NotImplementedT struct {
 
 // NotUniqueResource indicates that the method found more than the expected
 // zero or one existing resources.
-type NotUniqueResource struct {
+type NotUniqueResourceT struct {
 	// message describing expected type or pattern.
 	Message string
 }
@@ -261,8 +256,7 @@ type RetractPayload struct {
 	JWT string
 }
 
-// ServiceNotAvailable is the type returned when the service necessary to
-// fulfil the request is currently not available.
+// Service necessary to fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
 }
 
@@ -272,7 +266,7 @@ type UnauthorizedT struct {
 
 // UnsupportedContentType is the error returned when the provided content type
 // is not supported.
-type UnsupportedContentType struct {
+type UnsupportedContentTypeT struct {
 	// message describing expected type or pattern.
 	Message string
 }
@@ -295,7 +289,7 @@ type UpdatePayload struct {
 
 // Error returns an error description.
 func (e *BadRequestT) Error() string {
-	return "Bad arguments supplied."
+	return "Something wasn't right with this request"
 }
 
 // ErrorName returns "BadRequestT".
@@ -311,36 +305,19 @@ func (e *BadRequestT) GoaErrorName() string {
 }
 
 // Error returns an error description.
-func (e *InvalidCredentialsT) Error() string {
-	return "Provided credential is not valid."
+func (e *InvalidParameterT) Error() string {
+	return "InvalidParameterT is the error returned when a parameter has the wrong value."
 }
 
-// ErrorName returns "InvalidCredentialsT".
+// ErrorName returns "InvalidParameterT".
 //
 // Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *InvalidCredentialsT) ErrorName() string {
+func (e *InvalidParameterT) ErrorName() string {
 	return e.GoaErrorName()
 }
 
-// GoaErrorName returns "InvalidCredentialsT".
-func (e *InvalidCredentialsT) GoaErrorName() string {
-	return "invalid-credential"
-}
-
-// Error returns an error description.
-func (e *InvalidParameterValue) Error() string {
-	return "InvalidParameterValue is the error returned when a parameter has the wrong value."
-}
-
-// ErrorName returns "InvalidParameterValue".
-//
-// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *InvalidParameterValue) ErrorName() string {
-	return e.GoaErrorName()
-}
-
-// GoaErrorName returns "InvalidParameterValue".
-func (e *InvalidParameterValue) GoaErrorName() string {
+// GoaErrorName returns "InvalidParameterT".
+func (e *InvalidParameterT) GoaErrorName() string {
 	return "invalid-parameter"
 }
 
@@ -379,19 +356,19 @@ func (e *NotImplementedT) GoaErrorName() string {
 }
 
 // Error returns an error description.
-func (e *NotUniqueResource) Error() string {
+func (e *NotUniqueResourceT) Error() string {
 	return "NotUniqueResource indicates that the method found more than the expected\n\tzero or one existing resources."
 }
 
-// ErrorName returns "NotUniqueResource".
+// ErrorName returns "NotUniqueResourceT".
 //
 // Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *NotUniqueResource) ErrorName() string {
+func (e *NotUniqueResourceT) ErrorName() string {
 	return e.GoaErrorName()
 }
 
-// GoaErrorName returns "NotUniqueResource".
-func (e *NotUniqueResource) GoaErrorName() string {
+// GoaErrorName returns "NotUniqueResourceT".
+func (e *NotUniqueResourceT) GoaErrorName() string {
 	return "not-unique"
 }
 
@@ -414,7 +391,7 @@ func (e *ResourceNotFoundT) GoaErrorName() string {
 
 // Error returns an error description.
 func (e *ServiceNotAvailableT) Error() string {
-	return "ServiceNotAvailable is the type returned when the service necessary to fulfil the request is currently not available."
+	return "Service necessary to fulfil the request is currently not available."
 }
 
 // ErrorName returns "ServiceNotAvailableT".
@@ -447,18 +424,18 @@ func (e *UnauthorizedT) GoaErrorName() string {
 }
 
 // Error returns an error description.
-func (e *UnsupportedContentType) Error() string {
+func (e *UnsupportedContentTypeT) Error() string {
 	return "UnsupportedContentType is the error returned when the provided content type is not supported."
 }
 
-// ErrorName returns "UnsupportedContentType".
+// ErrorName returns "UnsupportedContentTypeT".
 //
 // Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *UnsupportedContentType) ErrorName() string {
+func (e *UnsupportedContentTypeT) ErrorName() string {
 	return e.GoaErrorName()
 }
 
-// GoaErrorName returns "UnsupportedContentType".
-func (e *UnsupportedContentType) GoaErrorName() string {
+// GoaErrorName returns "UnsupportedContentTypeT".
+func (e *UnsupportedContentTypeT) GoaErrorName() string {
 	return "unsupported-content-type"
 }

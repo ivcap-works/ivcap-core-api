@@ -380,18 +380,10 @@ func NewCreateBadRequest(body *CreateBadRequestResponseBody) *queue.BadRequestT 
 	return v
 }
 
-// NewCreateInvalidCredential builds a queue service create endpoint
-// invalid-credential error.
-func NewCreateInvalidCredential() *queue.InvalidCredentialsT {
-	v := &queue.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewCreateInvalidParameter builds a queue service create endpoint
 // invalid-parameter error.
-func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *queue.InvalidParameterValue {
-	v := &queue.InvalidParameterValue{
+func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *queue.InvalidParameterT {
+	v := &queue.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -442,6 +434,14 @@ func NewCreateNotFound(body *CreateNotFoundResponseBody) *queue.ResourceNotFound
 	return v
 }
 
+// NewCreateNotAvailable builds a queue service create endpoint not-available
+// error.
+func NewCreateNotAvailable() *queue.ServiceNotAvailableT {
+	v := &queue.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewCreateNotAuthorized builds a queue service create endpoint not-authorized
 // error.
 func NewCreateNotAuthorized() *queue.UnauthorizedT {
@@ -479,14 +479,6 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *queue.BadRequestT {
 	return v
 }
 
-// NewReadInvalidCredential builds a queue service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *queue.InvalidCredentialsT {
-	v := &queue.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewReadInvalidScopes builds a queue service read endpoint invalid-scopes
 // error.
 func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *queue.InvalidScopesT {
@@ -518,6 +510,13 @@ func NewReadNotFound(body *ReadNotFoundResponseBody) *queue.ResourceNotFoundT {
 	return v
 }
 
+// NewReadNotAvailable builds a queue service read endpoint not-available error.
+func NewReadNotAvailable() *queue.ServiceNotAvailableT {
+	v := &queue.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewReadNotAuthorized builds a queue service read endpoint not-authorized
 // error.
 func NewReadNotAuthorized() *queue.UnauthorizedT {
@@ -531,14 +530,6 @@ func NewDeleteBadRequest(body *DeleteBadRequestResponseBody) *queue.BadRequestT 
 	v := &queue.BadRequestT{
 		Message: *body.Message,
 	}
-
-	return v
-}
-
-// NewDeleteInvalidCredential builds a queue service delete endpoint
-// invalid-credential error.
-func NewDeleteInvalidCredential() *queue.InvalidCredentialsT {
-	v := &queue.InvalidCredentialsT{}
 
 	return v
 }
@@ -560,6 +551,14 @@ func NewDeleteNotImplemented(body *DeleteNotImplementedResponseBody) *queue.NotI
 	v := &queue.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewDeleteNotAvailable builds a queue service delete endpoint not-available
+// error.
+func NewDeleteNotAvailable() *queue.ServiceNotAvailableT {
+	v := &queue.ServiceNotAvailableT{}
 
 	return v
 }
@@ -599,18 +598,10 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *queue.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a queue service list endpoint
-// invalid-credential error.
-func NewListInvalidCredential() *queue.InvalidCredentialsT {
-	v := &queue.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewListInvalidParameter builds a queue service list endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *queue.InvalidParameterValue {
-	v := &queue.InvalidParameterValue{
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *queue.InvalidParameterT {
+	v := &queue.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -636,6 +627,13 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *queue.NotImple
 	v := &queue.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewListNotAvailable builds a queue service list endpoint not-available error.
+func NewListNotAvailable() *queue.ServiceNotAvailableT {
+	v := &queue.ServiceNotAvailableT{}
 
 	return v
 }
@@ -668,18 +666,10 @@ func NewEnqueueBadRequest(body *EnqueueBadRequestResponseBody) *queue.BadRequest
 	return v
 }
 
-// NewEnqueueInvalidCredential builds a queue service enqueue endpoint
-// invalid-credential error.
-func NewEnqueueInvalidCredential() *queue.InvalidCredentialsT {
-	v := &queue.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewEnqueueInvalidParameter builds a queue service enqueue endpoint
 // invalid-parameter error.
-func NewEnqueueInvalidParameter(body *EnqueueInvalidParameterResponseBody) *queue.InvalidParameterValue {
-	v := &queue.InvalidParameterValue{
+func NewEnqueueInvalidParameter(body *EnqueueInvalidParameterResponseBody) *queue.InvalidParameterT {
+	v := &queue.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -749,18 +739,10 @@ func NewDequeueBadRequest(body *DequeueBadRequestResponseBody) *queue.BadRequest
 	return v
 }
 
-// NewDequeueInvalidCredential builds a queue service dequeue endpoint
-// invalid-credential error.
-func NewDequeueInvalidCredential() *queue.InvalidCredentialsT {
-	v := &queue.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewDequeueInvalidParameter builds a queue service dequeue endpoint
 // invalid-parameter error.
-func NewDequeueInvalidParameter(body *DequeueInvalidParameterResponseBody) *queue.InvalidParameterValue {
-	v := &queue.InvalidParameterValue{
+func NewDequeueInvalidParameter(body *DequeueInvalidParameterResponseBody) *queue.InvalidParameterT {
+	v := &queue.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,

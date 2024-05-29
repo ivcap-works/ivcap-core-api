@@ -546,18 +546,10 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *order.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a order service list endpoint
-// invalid-credential error.
-func NewListInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewListInvalidParameter builds a order service list endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *order.InvalidParameterValue {
-	v := &order.InvalidParameterValue{
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *order.InvalidParameterT {
+	v := &order.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -583,6 +575,13 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *order.NotImple
 	v := &order.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewListNotAvailable builds a order service list endpoint not-available error.
+func NewListNotAvailable() *order.ServiceNotAvailableT {
+	v := &order.ServiceNotAvailableT{}
 
 	return v
 }
@@ -636,14 +635,6 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *order.BadRequestT {
 	return v
 }
 
-// NewReadInvalidCredential builds a order service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewReadInvalidScopes builds a order service read endpoint invalid-scopes
 // error.
 func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *order.InvalidScopesT {
@@ -671,6 +662,13 @@ func NewReadNotFound(body *ReadNotFoundResponseBody) *order.ResourceNotFoundT {
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewReadNotAvailable builds a order service read endpoint not-available error.
+func NewReadNotAvailable() *order.ServiceNotAvailableT {
+	v := &order.ServiceNotAvailableT{}
 
 	return v
 }
@@ -709,18 +707,10 @@ func NewProductsBadRequest(body *ProductsBadRequestResponseBody) *order.BadReque
 	return v
 }
 
-// NewProductsInvalidCredential builds a order service products endpoint
-// invalid-credential error.
-func NewProductsInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewProductsInvalidParameter builds a order service products endpoint
 // invalid-parameter error.
-func NewProductsInvalidParameter(body *ProductsInvalidParameterResponseBody) *order.InvalidParameterValue {
-	v := &order.InvalidParameterValue{
+func NewProductsInvalidParameter(body *ProductsInvalidParameterResponseBody) *order.InvalidParameterT {
+	v := &order.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -760,6 +750,14 @@ func NewProductsNotFound(body *ProductsNotFoundResponseBody) *order.ResourceNotF
 	return v
 }
 
+// NewProductsNotAvailable builds a order service products endpoint
+// not-available error.
+func NewProductsNotAvailable() *order.ServiceNotAvailableT {
+	v := &order.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewProductsNotAuthorized builds a order service products endpoint
 // not-authorized error.
 func NewProductsNotAuthorized() *order.UnauthorizedT {
@@ -794,18 +792,10 @@ func NewMetadataBadRequest(body *MetadataBadRequestResponseBody) *order.BadReque
 	return v
 }
 
-// NewMetadataInvalidCredential builds a order service metadata endpoint
-// invalid-credential error.
-func NewMetadataInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewMetadataInvalidParameter builds a order service metadata endpoint
 // invalid-parameter error.
-func NewMetadataInvalidParameter(body *MetadataInvalidParameterResponseBody) *order.InvalidParameterValue {
-	v := &order.InvalidParameterValue{
+func NewMetadataInvalidParameter(body *MetadataInvalidParameterResponseBody) *order.InvalidParameterT {
+	v := &order.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -841,6 +831,14 @@ func NewMetadataNotFound(body *MetadataNotFoundResponseBody) *order.ResourceNotF
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewMetadataNotAvailable builds a order service metadata endpoint
+// not-available error.
+func NewMetadataNotAvailable() *order.ServiceNotAvailableT {
+	v := &order.ServiceNotAvailableT{}
 
 	return v
 }
@@ -894,18 +892,10 @@ func NewCreateBadRequest(body *CreateBadRequestResponseBody) *order.BadRequestT 
 	return v
 }
 
-// NewCreateInvalidCredential builds a order service create endpoint
-// invalid-credential error.
-func NewCreateInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewCreateInvalidParameter builds a order service create endpoint
 // invalid-parameter error.
-func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *order.InvalidParameterValue {
-	v := &order.InvalidParameterValue{
+func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *order.InvalidParameterT {
+	v := &order.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -970,18 +960,10 @@ func NewLogsBadRequest(body *LogsBadRequestResponseBody) *order.BadRequestT {
 	return v
 }
 
-// NewLogsInvalidCredential builds a order service logs endpoint
-// invalid-credential error.
-func NewLogsInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewLogsInvalidParameter builds a order service logs endpoint
 // invalid-parameter error.
-func NewLogsInvalidParameter(body *LogsInvalidParameterResponseBody) *order.InvalidParameterValue {
-	v := &order.InvalidParameterValue{
+func NewLogsInvalidParameter(body *LogsInvalidParameterResponseBody) *order.InvalidParameterT {
+	v := &order.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -1021,6 +1003,13 @@ func NewLogsNotFound(body *LogsNotFoundResponseBody) *order.ResourceNotFoundT {
 	return v
 }
 
+// NewLogsNotAvailable builds a order service logs endpoint not-available error.
+func NewLogsNotAvailable() *order.ServiceNotAvailableT {
+	v := &order.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewLogsNotAuthorized builds a order service logs endpoint not-authorized
 // error.
 func NewLogsNotAuthorized() *order.UnauthorizedT {
@@ -1049,18 +1038,10 @@ func NewTopBadRequest(body *TopBadRequestResponseBody) *order.BadRequestT {
 	return v
 }
 
-// NewTopInvalidCredential builds a order service top endpoint
-// invalid-credential error.
-func NewTopInvalidCredential() *order.InvalidCredentialsT {
-	v := &order.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewTopInvalidParameter builds a order service top endpoint invalid-parameter
 // error.
-func NewTopInvalidParameter(body *TopInvalidParameterResponseBody) *order.InvalidParameterValue {
-	v := &order.InvalidParameterValue{
+func NewTopInvalidParameter(body *TopInvalidParameterResponseBody) *order.InvalidParameterT {
+	v := &order.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -1095,6 +1076,13 @@ func NewTopNotFound(body *TopNotFoundResponseBody) *order.ResourceNotFoundT {
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewTopNotAvailable builds a order service top endpoint not-available error.
+func NewTopNotAvailable() *order.ServiceNotAvailableT {
+	v := &order.ServiceNotAvailableT{}
 
 	return v
 }

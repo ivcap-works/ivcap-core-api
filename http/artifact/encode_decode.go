@@ -87,11 +87,11 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *artifact.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *artifact.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *artifact.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *artifact.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -124,29 +124,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewListArtifactListRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ListBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("artifact", "list", err)
-				}
-				err = ValidateListBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("artifact", "list", err)
-				}
-				return nil, NewListBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewListInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("artifact", "list", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ListBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "list", err)
 			}
+			err = ValidateListBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "list", err)
+			}
+			return nil, NewListBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body ListInvalidParameterResponseBody
@@ -189,6 +180,8 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("artifact", "list", err)
 			}
 			return nil, NewListNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewListNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewListNotAuthorized()
 		default:
@@ -247,11 +240,11 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *artifact.InvalidCredentialsT): http.StatusBadRequest
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusFailedDependency
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *artifact.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *artifact.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -284,29 +277,20 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadArtifactStatusRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ReadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("artifact", "read", err)
-				}
-				err = ValidateReadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("artifact", "read", err)
-				}
-				return nil, NewReadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewReadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("artifact", "read", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ReadBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "read", err)
 			}
+			err = ValidateReadBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "read", err)
+			}
+			return nil, NewReadBadRequest(&body)
 		case http.StatusForbidden:
 			var (
 				body ReadInvalidScopesResponseBody
@@ -349,6 +333,8 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("artifact", "read", err)
 			}
 			return nil, NewReadNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewReadNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewReadNotAuthorized()
 		default:
@@ -449,10 +435,10 @@ func EncodeUploadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // artifact upload endpoint. restoreBody controls whether the response body
 // should be restored after having been read.
 // DecodeUploadResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *artifact.InvalidCredentialsT): http.StatusBadRequest
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusFailedDependency
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *artifact.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *artifact.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -512,29 +498,20 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewUploadArtifactUploadRTCreated(&body, location, tusResumable, tusOffset)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body UploadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("artifact", "upload", err)
-				}
-				err = ValidateUploadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("artifact", "upload", err)
-				}
-				return nil, NewUploadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewUploadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("artifact", "upload", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body UploadBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("artifact", "upload", err)
 			}
+			err = ValidateUploadBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("artifact", "upload", err)
+			}
+			return nil, NewUploadBadRequest(&body)
 		case http.StatusForbidden:
 			var (
 				body UploadInvalidScopesResponseBody
@@ -563,6 +540,8 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("artifact", "upload", err)
 			}
 			return nil, NewUploadNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewUploadNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewUploadNotAuthorized()
 		default:

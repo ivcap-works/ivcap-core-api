@@ -297,14 +297,6 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *metadata.BadRequestT {
 	return v
 }
 
-// NewReadInvalidCredential builds a metadata service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewReadInvalidScopes builds a metadata service read endpoint invalid-scopes
 // error.
 func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *metadata.InvalidScopesT {
@@ -332,6 +324,14 @@ func NewReadNotFound(body *ReadNotFoundResponseBody) *metadata.ResourceNotFoundT
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewReadNotAvailable builds a metadata service read endpoint not-available
+// error.
+func NewReadNotAvailable() *metadata.ServiceNotAvailableT {
+	v := &metadata.ServiceNotAvailableT{}
 
 	return v
 }
@@ -374,18 +374,10 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *metadata.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a metadata service list endpoint
-// invalid-credential error.
-func NewListInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewListInvalidParameter builds a metadata service list endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *metadata.InvalidParameterValue {
-	v := &metadata.InvalidParameterValue{
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *metadata.InvalidParameterT {
+	v := &metadata.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -411,6 +403,14 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *metadata.NotIm
 	v := &metadata.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewListNotAvailable builds a metadata service list endpoint not-available
+// error.
+func NewListNotAvailable() *metadata.ServiceNotAvailableT {
+	v := &metadata.ServiceNotAvailableT{}
 
 	return v
 }
@@ -442,18 +442,10 @@ func NewAddBadRequest(body *AddBadRequestResponseBody) *metadata.BadRequestT {
 	return v
 }
 
-// NewAddInvalidCredential builds a metadata service add endpoint
-// invalid-credential error.
-func NewAddInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewAddInvalidParameter builds a metadata service add endpoint
 // invalid-parameter error.
-func NewAddInvalidParameter(body *AddInvalidParameterResponseBody) *metadata.InvalidParameterValue {
-	v := &metadata.InvalidParameterValue{
+func NewAddInvalidParameter(body *AddInvalidParameterResponseBody) *metadata.InvalidParameterT {
+	v := &metadata.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -479,6 +471,14 @@ func NewAddNotImplemented(body *AddNotImplementedResponseBody) *metadata.NotImpl
 	v := &metadata.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewAddNotAvailable builds a metadata service add endpoint not-available
+// error.
+func NewAddNotAvailable() *metadata.ServiceNotAvailableT {
+	v := &metadata.ServiceNotAvailableT{}
 
 	return v
 }
@@ -511,18 +511,10 @@ func NewUpdateRecordBadRequest(body *UpdateRecordBadRequestResponseBody) *metada
 	return v
 }
 
-// NewUpdateRecordInvalidCredential builds a metadata service update_record
-// endpoint invalid-credential error.
-func NewUpdateRecordInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewUpdateRecordInvalidParameter builds a metadata service update_record
 // endpoint invalid-parameter error.
-func NewUpdateRecordInvalidParameter(body *UpdateRecordInvalidParameterResponseBody) *metadata.InvalidParameterValue {
-	v := &metadata.InvalidParameterValue{
+func NewUpdateRecordInvalidParameter(body *UpdateRecordInvalidParameterResponseBody) *metadata.InvalidParameterT {
+	v := &metadata.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -552,6 +544,14 @@ func NewUpdateRecordNotImplemented(body *UpdateRecordNotImplementedResponseBody)
 	return v
 }
 
+// NewUpdateRecordNotAvailable builds a metadata service update_record endpoint
+// not-available error.
+func NewUpdateRecordNotAvailable() *metadata.ServiceNotAvailableT {
+	v := &metadata.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewUpdateRecordNotAuthorized builds a metadata service update_record
 // endpoint not-authorized error.
 func NewUpdateRecordNotAuthorized() *metadata.UnauthorizedT {
@@ -570,18 +570,10 @@ func NewRevokeBadRequest(body *RevokeBadRequestResponseBody) *metadata.BadReques
 	return v
 }
 
-// NewRevokeInvalidCredential builds a metadata service revoke endpoint
-// invalid-credential error.
-func NewRevokeInvalidCredential() *metadata.InvalidCredentialsT {
-	v := &metadata.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewRevokeInvalidParameter builds a metadata service revoke endpoint
 // invalid-parameter error.
-func NewRevokeInvalidParameter(body *RevokeInvalidParameterResponseBody) *metadata.InvalidParameterValue {
-	v := &metadata.InvalidParameterValue{
+func NewRevokeInvalidParameter(body *RevokeInvalidParameterResponseBody) *metadata.InvalidParameterT {
+	v := &metadata.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -607,6 +599,14 @@ func NewRevokeNotImplemented(body *RevokeNotImplementedResponseBody) *metadata.N
 	v := &metadata.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewRevokeNotAvailable builds a metadata service revoke endpoint
+// not-available error.
+func NewRevokeNotAvailable() *metadata.ServiceNotAvailableT {
+	v := &metadata.ServiceNotAvailableT{}
 
 	return v
 }

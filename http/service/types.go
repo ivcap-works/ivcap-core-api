@@ -535,18 +535,10 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *service.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a service service list endpoint
-// invalid-credential error.
-func NewListInvalidCredential() *service.InvalidCredentialsT {
-	v := &service.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewListInvalidParameter builds a service service list endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *service.InvalidParameterValue {
-	v := &service.InvalidParameterValue{
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *service.InvalidParameterT {
+	v := &service.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -572,6 +564,14 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *service.NotImp
 	v := &service.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewListNotAvailable builds a service service list endpoint not-available
+// error.
+func NewListNotAvailable() *service.ServiceNotAvailableT {
+	v := &service.ServiceNotAvailableT{}
 
 	return v
 }
@@ -622,18 +622,10 @@ func NewCreateServiceBadRequest(body *CreateServiceBadRequestResponseBody) *serv
 	return v
 }
 
-// NewCreateServiceInvalidCredential builds a service service create_service
-// endpoint invalid-credential error.
-func NewCreateServiceInvalidCredential() *service.InvalidCredentialsT {
-	v := &service.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewCreateServiceInvalidParameter builds a service service create_service
 // endpoint invalid-parameter error.
-func NewCreateServiceInvalidParameter(body *CreateServiceInvalidParameterResponseBody) *service.InvalidParameterValue {
-	v := &service.InvalidParameterValue{
+func NewCreateServiceInvalidParameter(body *CreateServiceInvalidParameterResponseBody) *service.InvalidParameterT {
+	v := &service.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -685,6 +677,14 @@ func NewCreateServiceNotFound(body *CreateServiceNotFoundResponseBody) *service.
 	return v
 }
 
+// NewCreateServiceNotAvailable builds a service service create_service
+// endpoint not-available error.
+func NewCreateServiceNotAvailable() *service.ServiceNotAvailableT {
+	v := &service.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewCreateServiceNotAuthorized builds a service service create_service
 // endpoint not-authorized error.
 func NewCreateServiceNotAuthorized() *service.UnauthorizedT {
@@ -730,14 +730,6 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *service.BadRequestT {
 	return v
 }
 
-// NewReadInvalidCredential builds a service service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *service.InvalidCredentialsT {
-	v := &service.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewReadInvalidScopes builds a service service read endpoint invalid-scopes
 // error.
 func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *service.InvalidScopesT {
@@ -765,6 +757,14 @@ func NewReadNotFound(body *ReadNotFoundResponseBody) *service.ResourceNotFoundT 
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewReadNotAvailable builds a service service read endpoint not-available
+// error.
+func NewReadNotAvailable() *service.ServiceNotAvailableT {
+	v := &service.ServiceNotAvailableT{}
 
 	return v
 }
@@ -815,18 +815,10 @@ func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *service.BadRequest
 	return v
 }
 
-// NewUpdateInvalidCredential builds a service service update endpoint
-// invalid-credential error.
-func NewUpdateInvalidCredential() *service.InvalidCredentialsT {
-	v := &service.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewUpdateInvalidParameter builds a service service update endpoint
 // invalid-parameter error.
-func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *service.InvalidParameterValue {
-	v := &service.InvalidParameterValue{
+func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *service.InvalidParameterT {
+	v := &service.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -866,6 +858,14 @@ func NewUpdateNotFound(body *UpdateNotFoundResponseBody) *service.ResourceNotFou
 	return v
 }
 
+// NewUpdateNotAvailable builds a service service update endpoint not-available
+// error.
+func NewUpdateNotAvailable() *service.ServiceNotAvailableT {
+	v := &service.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewUpdateNotAuthorized builds a service service update endpoint
 // not-authorized error.
 func NewUpdateNotAuthorized() *service.UnauthorizedT {
@@ -880,14 +880,6 @@ func NewDeleteBadRequest(body *DeleteBadRequestResponseBody) *service.BadRequest
 	v := &service.BadRequestT{
 		Message: *body.Message,
 	}
-
-	return v
-}
-
-// NewDeleteInvalidCredential builds a service service delete endpoint
-// invalid-credential error.
-func NewDeleteInvalidCredential() *service.InvalidCredentialsT {
-	v := &service.InvalidCredentialsT{}
 
 	return v
 }
@@ -909,6 +901,14 @@ func NewDeleteNotImplemented(body *DeleteNotImplementedResponseBody) *service.No
 	v := &service.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewDeleteNotAvailable builds a service service delete endpoint not-available
+// error.
+func NewDeleteNotAvailable() *service.ServiceNotAvailableT {
+	v := &service.ServiceNotAvailableT{}
 
 	return v
 }

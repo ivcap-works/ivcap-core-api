@@ -85,11 +85,11 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *service.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -124,29 +124,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := service.NewServiceListRT(vres)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ListBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("service", "list", err)
-				}
-				err = ValidateListBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("service", "list", err)
-				}
-				return nil, NewListBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewListInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("service", "list", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ListBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "list", err)
 			}
+			err = ValidateListBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "list", err)
+			}
+			return nil, NewListBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body ListInvalidParameterResponseBody
@@ -189,6 +180,8 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("service", "list", err)
 			}
 			return nil, NewListNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewListNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewListNotAuthorized()
 		default:
@@ -241,13 +234,13 @@ func EncodeCreateServiceRequest(encoder func(*http.Request) goahttp.Encoder) fun
 // service create_service endpoint. restoreBody controls whether the response
 // body should be restored after having been read.
 // DecodeCreateServiceResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *service.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "already-created" (type *service.ResourceAlreadyCreatedT): http.StatusConflict
 //   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -280,29 +273,20 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			}
 			res := NewCreateServiceServiceStatusRTCreated(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body CreateServiceBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("service", "create_service", err)
-				}
-				err = ValidateCreateServiceBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("service", "create_service", err)
-				}
-				return nil, NewCreateServiceBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewCreateServiceInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("service", "create_service", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body CreateServiceBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "create_service", err)
 			}
+			err = ValidateCreateServiceBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "create_service", err)
+			}
+			return nil, NewCreateServiceBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body CreateServiceInvalidParameterResponseBody
@@ -373,6 +357,8 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 				return nil, goahttp.ErrValidationError("service", "create_service", err)
 			}
 			return nil, NewCreateServiceNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewCreateServiceNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewCreateServiceNotAuthorized()
 		default:
@@ -431,11 +417,11 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
+//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -468,29 +454,20 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadServiceStatusRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ReadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("service", "read", err)
-				}
-				err = ValidateReadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("service", "read", err)
-				}
-				return nil, NewReadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewReadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("service", "read", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ReadBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "read", err)
 			}
+			err = ValidateReadBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "read", err)
+			}
+			return nil, NewReadBadRequest(&body)
 		case http.StatusForbidden:
 			var (
 				body ReadInvalidScopesResponseBody
@@ -533,6 +510,8 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("service", "read", err)
 			}
 			return nil, NewReadNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewReadNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewReadNotAuthorized()
 		default:
@@ -602,12 +581,12 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // update endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeUpdateResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *service.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -640,29 +619,20 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewUpdateServiceStatusRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body UpdateBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("service", "update", err)
-				}
-				err = ValidateUpdateBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("service", "update", err)
-				}
-				return nil, NewUpdateBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewUpdateInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("service", "update", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body UpdateBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "update", err)
 			}
+			err = ValidateUpdateBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "update", err)
+			}
+			return nil, NewUpdateBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body UpdateInvalidParameterResponseBody
@@ -719,6 +689,8 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("service", "update", err)
 			}
 			return nil, NewUpdateNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewUpdateNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewUpdateNotAuthorized()
 		default:
@@ -777,10 +749,10 @@ func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // delete endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeDeleteResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *service.InvalidCredentialsT): http.StatusBadRequest
+//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -800,29 +772,20 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			return nil, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body DeleteBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("service", "delete", err)
-				}
-				err = ValidateDeleteBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("service", "delete", err)
-				}
-				return nil, NewDeleteBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewDeleteInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("service", "delete", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body DeleteBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "delete", err)
 			}
+			err = ValidateDeleteBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "delete", err)
+			}
+			return nil, NewDeleteBadRequest(&body)
 		case http.StatusForbidden:
 			var (
 				body DeleteInvalidScopesResponseBody
@@ -851,6 +814,8 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("service", "delete", err)
 			}
 			return nil, NewDeleteNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewDeleteNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewDeleteNotAuthorized()
 		default:

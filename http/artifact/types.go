@@ -230,18 +230,10 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *artifact.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a artifact service list endpoint
-// invalid-credential error.
-func NewListInvalidCredential() *artifact.InvalidCredentialsT {
-	v := &artifact.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewListInvalidParameter builds a artifact service list endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *artifact.InvalidParameterValue {
-	v := &artifact.InvalidParameterValue{
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *artifact.InvalidParameterT {
+	v := &artifact.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -267,6 +259,14 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *artifact.NotIm
 	v := &artifact.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewListNotAvailable builds a artifact service list endpoint not-available
+// error.
+func NewListNotAvailable() *artifact.ServiceNotAvailableT {
+	v := &artifact.ServiceNotAvailableT{}
 
 	return v
 }
@@ -313,14 +313,6 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *artifact.BadRequestT {
 	return v
 }
 
-// NewReadInvalidCredential builds a artifact service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *artifact.InvalidCredentialsT {
-	v := &artifact.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewReadInvalidScopes builds a artifact service read endpoint invalid-scopes
 // error.
 func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *artifact.InvalidScopesT {
@@ -348,6 +340,14 @@ func NewReadNotFound(body *ReadNotFoundResponseBody) *artifact.ResourceNotFoundT
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewReadNotAvailable builds a artifact service read endpoint not-available
+// error.
+func NewReadNotAvailable() *artifact.ServiceNotAvailableT {
+	v := &artifact.ServiceNotAvailableT{}
 
 	return v
 }
@@ -398,14 +398,6 @@ func NewUploadBadRequest(body *UploadBadRequestResponseBody) *artifact.BadReques
 	return v
 }
 
-// NewUploadInvalidCredential builds a artifact service upload endpoint
-// invalid-credential error.
-func NewUploadInvalidCredential() *artifact.InvalidCredentialsT {
-	v := &artifact.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewUploadInvalidScopes builds a artifact service upload endpoint
 // invalid-scopes error.
 func NewUploadInvalidScopes(body *UploadInvalidScopesResponseBody) *artifact.InvalidScopesT {
@@ -423,6 +415,14 @@ func NewUploadNotImplemented(body *UploadNotImplementedResponseBody) *artifact.N
 	v := &artifact.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewUploadNotAvailable builds a artifact service upload endpoint
+// not-available error.
+func NewUploadNotAvailable() *artifact.ServiceNotAvailableT {
+	v := &artifact.ServiceNotAvailableT{}
 
 	return v
 }

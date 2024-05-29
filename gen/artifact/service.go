@@ -43,7 +43,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.38"
+const APIVersion = "0.39"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -140,19 +140,14 @@ type ArtifactUploadRT struct {
 	Links    []*LinkT
 }
 
-// Bad arguments supplied.
+// Something wasn't right with this request
 type BadRequestT struct {
 	// Information message
 	Message string
 }
 
-// Provided credential is not valid.
-type InvalidCredentialsT struct {
-}
-
-// InvalidParameterValue is the error returned when a parameter has the wrong
-// value.
-type InvalidParameterValue struct {
+// InvalidParameterT is the error returned when a parameter has the wrong value.
+type InvalidParameterT struct {
 	// message describing expected type or pattern.
 	Message string
 	// name of parameter.
@@ -231,6 +226,10 @@ type ResourceNotFoundT struct {
 	Message string
 }
 
+// Service necessary to fulfil the request is currently not available.
+type ServiceNotAvailableT struct {
+}
+
 // Unauthorized access to resource
 type UnauthorizedT struct {
 }
@@ -267,7 +266,7 @@ type UploadPayload struct {
 
 // Error returns an error description.
 func (e *BadRequestT) Error() string {
-	return "Bad arguments supplied."
+	return "Something wasn't right with this request"
 }
 
 // ErrorName returns "BadRequestT".
@@ -283,36 +282,19 @@ func (e *BadRequestT) GoaErrorName() string {
 }
 
 // Error returns an error description.
-func (e *InvalidCredentialsT) Error() string {
-	return "Provided credential is not valid."
+func (e *InvalidParameterT) Error() string {
+	return "InvalidParameterT is the error returned when a parameter has the wrong value."
 }
 
-// ErrorName returns "InvalidCredentialsT".
+// ErrorName returns "InvalidParameterT".
 //
 // Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *InvalidCredentialsT) ErrorName() string {
+func (e *InvalidParameterT) ErrorName() string {
 	return e.GoaErrorName()
 }
 
-// GoaErrorName returns "InvalidCredentialsT".
-func (e *InvalidCredentialsT) GoaErrorName() string {
-	return "invalid-credential"
-}
-
-// Error returns an error description.
-func (e *InvalidParameterValue) Error() string {
-	return "InvalidParameterValue is the error returned when a parameter has the wrong value."
-}
-
-// ErrorName returns "InvalidParameterValue".
-//
-// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *InvalidParameterValue) ErrorName() string {
-	return e.GoaErrorName()
-}
-
-// GoaErrorName returns "InvalidParameterValue".
-func (e *InvalidParameterValue) GoaErrorName() string {
+// GoaErrorName returns "InvalidParameterT".
+func (e *InvalidParameterT) GoaErrorName() string {
 	return "invalid-parameter"
 }
 
@@ -365,6 +347,23 @@ func (e *ResourceNotFoundT) ErrorName() string {
 // GoaErrorName returns "ResourceNotFoundT".
 func (e *ResourceNotFoundT) GoaErrorName() string {
 	return "not-found"
+}
+
+// Error returns an error description.
+func (e *ServiceNotAvailableT) Error() string {
+	return "Service necessary to fulfil the request is currently not available."
+}
+
+// ErrorName returns "ServiceNotAvailableT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ServiceNotAvailableT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ServiceNotAvailableT".
+func (e *ServiceNotAvailableT) GoaErrorName() string {
+	return "not-available"
 }
 
 // Error returns an error description.

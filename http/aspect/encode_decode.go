@@ -78,11 +78,11 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *aspect.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *aspect.InvalidCredentialsT): http.StatusBadRequest
+//   - "bad-request" (type *aspect.BadRequestT): http.StatusFailedDependency
 //   - "invalid-scopes" (type *aspect.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *aspect.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *aspect.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *aspect.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *aspect.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -115,29 +115,20 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadAspectRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ReadBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("aspect", "read", err)
-				}
-				err = ValidateReadBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("aspect", "read", err)
-				}
-				return nil, NewReadBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewReadInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("aspect", "read", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ReadBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("aspect", "read", err)
 			}
+			err = ValidateReadBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("aspect", "read", err)
+			}
+			return nil, NewReadBadRequest(&body)
 		case http.StatusForbidden:
 			var (
 				body ReadInvalidScopesResponseBody
@@ -180,6 +171,8 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("aspect", "read", err)
 			}
 			return nil, NewReadNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewReadNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewReadNotAuthorized()
 		default:
@@ -252,13 +245,13 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *aspect.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *aspect.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *aspect.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *aspect.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *aspect.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *aspect.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *aspect.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *aspect.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *aspect.UnauthorizedT): http.StatusUnauthorized
-//   - "unsupported-content-type" (type *aspect.UnsupportedContentType): http.StatusUnsupportedMediaType
+//   - "unsupported-content-type" (type *aspect.UnsupportedContentTypeT): http.StatusUnsupportedMediaType
 //   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -290,29 +283,20 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewListAspectListRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body ListBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("aspect", "list", err)
-				}
-				err = ValidateListBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("aspect", "list", err)
-				}
-				return nil, NewListBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewListInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("aspect", "list", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body ListBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("aspect", "list", err)
 			}
+			err = ValidateListBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("aspect", "list", err)
+			}
+			return nil, NewListBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body ListInvalidParameterResponseBody
@@ -355,6 +339,8 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 				return nil, goahttp.ErrValidationError("aspect", "list", err)
 			}
 			return nil, NewListNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewListNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewListNotAuthorized()
 		case http.StatusUnsupportedMediaType:
@@ -432,11 +418,11 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeCreateResponse may return the following errors:
-//   - "bad-request" (type *aspect.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *aspect.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *aspect.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *aspect.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *aspect.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *aspect.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *aspect.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *aspect.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *aspect.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -469,29 +455,20 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewCreateAspectIDRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body CreateBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("aspect", "create", err)
-				}
-				err = ValidateCreateBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("aspect", "create", err)
-				}
-				return nil, NewCreateBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewCreateInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("aspect", "create", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body CreateBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("aspect", "create", err)
 			}
+			err = ValidateCreateBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("aspect", "create", err)
+			}
+			return nil, NewCreateBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body CreateInvalidParameterResponseBody
@@ -534,6 +511,8 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("aspect", "create", err)
 			}
 			return nil, NewCreateNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewCreateNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewCreateNotAuthorized()
 		default:
@@ -594,11 +573,12 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // update endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeUpdateResponse may return the following errors:
-//   - "bad-request" (type *aspect.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *aspect.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *aspect.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *aspect.BadRequestT): http.StatusFailedDependency
+//   - "not-unique" (type *aspect.NotUniqueResourceT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *aspect.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *aspect.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *aspect.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *aspect.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *aspect.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -631,7 +611,7 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewUpdateAspectIDRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
+		case http.StatusFailedDependency:
 			en := resp.Header.Get("goa-error")
 			switch en {
 			case "bad-request":
@@ -648,8 +628,20 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 					return nil, goahttp.ErrValidationError("aspect", "update", err)
 				}
 				return nil, NewUpdateBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewUpdateInvalidCredential()
+			case "not-unique":
+				var (
+					body UpdateNotUniqueResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("aspect", "update", err)
+				}
+				err = ValidateUpdateNotUniqueResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("aspect", "update", err)
+				}
+				return nil, NewUpdateNotUnique(&body)
 			default:
 				body, _ := io.ReadAll(resp.Body)
 				return nil, goahttp.ErrInvalidResponse("aspect", "update", resp.StatusCode, string(body))
@@ -696,6 +688,8 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("aspect", "update", err)
 			}
 			return nil, NewUpdateNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewUpdateNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewUpdateNotAuthorized()
 		default:
@@ -754,11 +748,11 @@ func EncodeRetractRequest(encoder func(*http.Request) goahttp.Encoder) func(*htt
 // retract endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeRetractResponse may return the following errors:
-//   - "bad-request" (type *aspect.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *aspect.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *aspect.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *aspect.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *aspect.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *aspect.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *aspect.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *aspect.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *aspect.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeRetractResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
@@ -778,29 +772,20 @@ func DecodeRetractResponse(decoder func(*http.Response) goahttp.Decoder, restore
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			return nil, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body RetractBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("aspect", "retract", err)
-				}
-				err = ValidateRetractBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("aspect", "retract", err)
-				}
-				return nil, NewRetractBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewRetractInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("aspect", "retract", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body RetractBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("aspect", "retract", err)
 			}
+			err = ValidateRetractBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("aspect", "retract", err)
+			}
+			return nil, NewRetractBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body RetractInvalidParameterResponseBody
@@ -843,6 +828,8 @@ func DecodeRetractResponse(decoder func(*http.Response) goahttp.Decoder, restore
 				return nil, goahttp.ErrValidationError("aspect", "retract", err)
 			}
 			return nil, NewRetractNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewRetractNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewRetractNotAuthorized()
 		default:

@@ -189,6 +189,13 @@ type UpdateBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// UpdateNotUniqueResponseBody is the type of the "aspect" service "update"
+// endpoint HTTP response body for the "not-unique" error.
+type UpdateNotUniqueResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // UpdateInvalidParameterResponseBody is the type of the "aspect" service
 // "update" endpoint HTTP response body for the "invalid-parameter" error.
 type UpdateInvalidParameterResponseBody struct {
@@ -309,14 +316,6 @@ func NewReadBadRequest(body *ReadBadRequestResponseBody) *aspect.BadRequestT {
 	return v
 }
 
-// NewReadInvalidCredential builds a aspect service read endpoint
-// invalid-credential error.
-func NewReadInvalidCredential() *aspect.InvalidCredentialsT {
-	v := &aspect.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewReadInvalidScopes builds a aspect service read endpoint invalid-scopes
 // error.
 func NewReadInvalidScopes(body *ReadInvalidScopesResponseBody) *aspect.InvalidScopesT {
@@ -344,6 +343,14 @@ func NewReadNotFound(body *ReadNotFoundResponseBody) *aspect.ResourceNotFoundT {
 		ID:      *body.ID,
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewReadNotAvailable builds a aspect service read endpoint not-available
+// error.
+func NewReadNotAvailable() *aspect.ServiceNotAvailableT {
+	v := &aspect.ServiceNotAvailableT{}
 
 	return v
 }
@@ -386,18 +393,10 @@ func NewListBadRequest(body *ListBadRequestResponseBody) *aspect.BadRequestT {
 	return v
 }
 
-// NewListInvalidCredential builds a aspect service list endpoint
-// invalid-credential error.
-func NewListInvalidCredential() *aspect.InvalidCredentialsT {
-	v := &aspect.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewListInvalidParameter builds a aspect service list endpoint
 // invalid-parameter error.
-func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *aspect.InvalidParameterValue {
-	v := &aspect.InvalidParameterValue{
+func NewListInvalidParameter(body *ListInvalidParameterResponseBody) *aspect.InvalidParameterT {
+	v := &aspect.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -427,6 +426,14 @@ func NewListNotImplemented(body *ListNotImplementedResponseBody) *aspect.NotImpl
 	return v
 }
 
+// NewListNotAvailable builds a aspect service list endpoint not-available
+// error.
+func NewListNotAvailable() *aspect.ServiceNotAvailableT {
+	v := &aspect.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewListNotAuthorized builds a aspect service list endpoint not-authorized
 // error.
 func NewListNotAuthorized() *aspect.UnauthorizedT {
@@ -437,8 +444,8 @@ func NewListNotAuthorized() *aspect.UnauthorizedT {
 
 // NewListUnsupportedContentType builds a aspect service list endpoint
 // unsupported-content-type error.
-func NewListUnsupportedContentType(body *ListUnsupportedContentTypeResponseBody) *aspect.UnsupportedContentType {
-	v := &aspect.UnsupportedContentType{
+func NewListUnsupportedContentType(body *ListUnsupportedContentTypeResponseBody) *aspect.UnsupportedContentTypeT {
+	v := &aspect.UnsupportedContentTypeT{
 		Message: *body.Message,
 	}
 
@@ -465,18 +472,10 @@ func NewCreateBadRequest(body *CreateBadRequestResponseBody) *aspect.BadRequestT
 	return v
 }
 
-// NewCreateInvalidCredential builds a aspect service create endpoint
-// invalid-credential error.
-func NewCreateInvalidCredential() *aspect.InvalidCredentialsT {
-	v := &aspect.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewCreateInvalidParameter builds a aspect service create endpoint
 // invalid-parameter error.
-func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *aspect.InvalidParameterValue {
-	v := &aspect.InvalidParameterValue{
+func NewCreateInvalidParameter(body *CreateInvalidParameterResponseBody) *aspect.InvalidParameterT {
+	v := &aspect.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -502,6 +501,14 @@ func NewCreateNotImplemented(body *CreateNotImplementedResponseBody) *aspect.Not
 	v := &aspect.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewCreateNotAvailable builds a aspect service create endpoint not-available
+// error.
+func NewCreateNotAvailable() *aspect.ServiceNotAvailableT {
+	v := &aspect.ServiceNotAvailableT{}
 
 	return v
 }
@@ -534,18 +541,19 @@ func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *aspect.BadRequestT
 	return v
 }
 
-// NewUpdateInvalidCredential builds a aspect service update endpoint
-// invalid-credential error.
-func NewUpdateInvalidCredential() *aspect.InvalidCredentialsT {
-	v := &aspect.InvalidCredentialsT{}
+// NewUpdateNotUnique builds a aspect service update endpoint not-unique error.
+func NewUpdateNotUnique(body *UpdateNotUniqueResponseBody) *aspect.NotUniqueResourceT {
+	v := &aspect.NotUniqueResourceT{
+		Message: *body.Message,
+	}
 
 	return v
 }
 
 // NewUpdateInvalidParameter builds a aspect service update endpoint
 // invalid-parameter error.
-func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *aspect.InvalidParameterValue {
-	v := &aspect.InvalidParameterValue{
+func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *aspect.InvalidParameterT {
+	v := &aspect.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -575,6 +583,14 @@ func NewUpdateNotImplemented(body *UpdateNotImplementedResponseBody) *aspect.Not
 	return v
 }
 
+// NewUpdateNotAvailable builds a aspect service update endpoint not-available
+// error.
+func NewUpdateNotAvailable() *aspect.ServiceNotAvailableT {
+	v := &aspect.ServiceNotAvailableT{}
+
+	return v
+}
+
 // NewUpdateNotAuthorized builds a aspect service update endpoint
 // not-authorized error.
 func NewUpdateNotAuthorized() *aspect.UnauthorizedT {
@@ -593,18 +609,10 @@ func NewRetractBadRequest(body *RetractBadRequestResponseBody) *aspect.BadReques
 	return v
 }
 
-// NewRetractInvalidCredential builds a aspect service retract endpoint
-// invalid-credential error.
-func NewRetractInvalidCredential() *aspect.InvalidCredentialsT {
-	v := &aspect.InvalidCredentialsT{}
-
-	return v
-}
-
 // NewRetractInvalidParameter builds a aspect service retract endpoint
 // invalid-parameter error.
-func NewRetractInvalidParameter(body *RetractInvalidParameterResponseBody) *aspect.InvalidParameterValue {
-	v := &aspect.InvalidParameterValue{
+func NewRetractInvalidParameter(body *RetractInvalidParameterResponseBody) *aspect.InvalidParameterT {
+	v := &aspect.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
 		Value:   body.Value,
@@ -630,6 +638,14 @@ func NewRetractNotImplemented(body *RetractNotImplementedResponseBody) *aspect.N
 	v := &aspect.NotImplementedT{
 		Message: *body.Message,
 	}
+
+	return v
+}
+
+// NewRetractNotAvailable builds a aspect service retract endpoint
+// not-available error.
+func NewRetractNotAvailable() *aspect.ServiceNotAvailableT {
+	v := &aspect.ServiceNotAvailableT{}
 
 	return v
 }
@@ -899,6 +915,15 @@ func ValidateCreateNotImplementedResponseBody(body *CreateNotImplementedResponse
 // ValidateUpdateBadRequestResponseBody runs the validations defined on
 // update_bad-request_response_body
 func ValidateUpdateBadRequestResponseBody(body *UpdateBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateNotUniqueResponseBody runs the validations defined on
+// update_not-unique_response_body
+func ValidateUpdateNotUniqueResponseBody(body *UpdateNotUniqueResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

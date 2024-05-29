@@ -85,13 +85,13 @@ func EncodeSearchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // search endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeSearchResponse may return the following errors:
-//   - "bad-request" (type *search.BadRequestT): http.StatusBadRequest
-//   - "invalid-credential" (type *search.InvalidCredentialsT): http.StatusBadRequest
-//   - "invalid-parameter" (type *search.InvalidParameterValue): http.StatusUnprocessableEntity
+//   - "bad-request" (type *search.BadRequestT): http.StatusFailedDependency
+//   - "invalid-parameter" (type *search.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *search.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *search.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *search.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *search.UnauthorizedT): http.StatusUnauthorized
-//   - "unsupported-content-type" (type *search.UnsupportedContentType): http.StatusUnsupportedMediaType
+//   - "unsupported-content-type" (type *search.UnsupportedContentTypeT): http.StatusUnsupportedMediaType
 //   - error: internal error
 func DecodeSearchResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -123,29 +123,20 @@ func DecodeSearchResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewSearchListRTOK(&body)
 			return res, nil
-		case http.StatusBadRequest:
-			en := resp.Header.Get("goa-error")
-			switch en {
-			case "bad-request":
-				var (
-					body SearchBadRequestResponseBody
-					err  error
-				)
-				err = decoder(resp).Decode(&body)
-				if err != nil {
-					return nil, goahttp.ErrDecodingError("search", "search", err)
-				}
-				err = ValidateSearchBadRequestResponseBody(&body)
-				if err != nil {
-					return nil, goahttp.ErrValidationError("search", "search", err)
-				}
-				return nil, NewSearchBadRequest(&body)
-			case "invalid-credential":
-				return nil, NewSearchInvalidCredential()
-			default:
-				body, _ := io.ReadAll(resp.Body)
-				return nil, goahttp.ErrInvalidResponse("search", "search", resp.StatusCode, string(body))
+		case http.StatusFailedDependency:
+			var (
+				body SearchBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("search", "search", err)
 			}
+			err = ValidateSearchBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("search", "search", err)
+			}
+			return nil, NewSearchBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
 				body SearchInvalidParameterResponseBody
@@ -188,6 +179,8 @@ func DecodeSearchResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 				return nil, goahttp.ErrValidationError("search", "search", err)
 			}
 			return nil, NewSearchNotImplemented(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewSearchNotAvailable()
 		case http.StatusUnauthorized:
 			return nil, NewSearchNotAuthorized()
 		case http.StatusUnsupportedMediaType:
