@@ -406,10 +406,10 @@ type ResourceMemoryTRequestBodyRequestBody struct {
 
 // ParameterDefT is used to define fields on request body types.
 type ParameterDefT struct {
-	Name        *string          `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Name        string           `form:"name" json:"name" xml:"name"`
 	Label       *string          `form:"label,omitempty" json:"label,omitempty" xml:"label,omitempty"`
-	Type        *string          `form:"type,omitempty" json:"type,omitempty" xml:"type,omitempty"`
-	Description *string          `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+	Type        string           `form:"type" json:"type" xml:"type"`
+	Description string           `form:"description" json:"description" xml:"description"`
 	Unit        *string          `form:"unit,omitempty" json:"unit,omitempty" xml:"unit,omitempty"`
 	Constant    *bool            `form:"constant,omitempty" json:"constant,omitempty" xml:"constant,omitempty"`
 	Optional    *bool            `form:"optional,omitempty" json:"optional,omitempty" xml:"optional,omitempty"`
@@ -963,6 +963,13 @@ func ValidateCreateServiceResponseBody(body *CreateServiceResponseBody) (err err
 			}
 		}
 	}
+	for _, e := range body.Parameters {
+		if e != nil {
+			if err2 := ValidateParameterDefTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
 	return
 }
 
@@ -1001,6 +1008,13 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 			}
 		}
 	}
+	for _, e := range body.Parameters {
+		if e != nil {
+			if err2 := ValidateParameterDefTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
 	return
 }
 
@@ -1035,6 +1049,13 @@ func ValidateUpdateResponseBody(body *UpdateResponseBody) (err error) {
 	for _, e := range body.Links {
 		if e != nil {
 			if err2 := ValidateLinkTResponseBody(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	for _, e := range body.Parameters {
+		if e != nil {
+			if err2 := ValidateParameterDefTResponseBody(e); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
@@ -1354,6 +1375,21 @@ func ValidateWorkflowTRequestBodyRequestBody(body *WorkflowTRequestBodyRequestBo
 func ValidateBasicWorkflowOptsTRequestBodyRequestBody(body *BasicWorkflowOptsTRequestBodyRequestBody) (err error) {
 	if body.Command == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("command", "body"))
+	}
+	return
+}
+
+// ValidateParameterDefTResponseBody runs the validations defined on
+// ParameterDefTResponseBody
+func ValidateParameterDefTResponseBody(body *ParameterDefTResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Description == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("description", "body"))
+	}
+	if body.Type == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("type", "body"))
 	}
 	return
 }

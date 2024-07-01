@@ -171,10 +171,10 @@ type NotImplementedT struct {
 }
 
 type ParameterDefT struct {
-	Name        *string
+	Name        string
 	Label       *string
-	Type        *string
-	Description *string
+	Type        string
+	Description string
 	Unit        *string
 	Constant    *bool
 	Optional    *bool

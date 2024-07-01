@@ -1119,10 +1119,10 @@ func unmarshalLinkTResponseBodyToServiceLinkT(v *LinkTResponseBody) *service.Lin
 // type *service.ParameterDefT from a value of type *ParameterDefTResponseBody.
 func unmarshalParameterDefTResponseBodyToServiceParameterDefT(v *ParameterDefTResponseBody) *service.ParameterDefT {
 	res := &service.ParameterDefT{
-		Name:        v.Name,
+		Name:        *v.Name,
 		Label:       v.Label,
-		Type:        v.Type,
-		Description: v.Description,
+		Type:        *v.Type,
+		Description: *v.Description,
 		Unit:        v.Unit,
 		Constant:    v.Constant,
 		Optional:    v.Optional,
