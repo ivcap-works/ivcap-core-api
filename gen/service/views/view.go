@@ -45,6 +45,12 @@ type ServiceListItemView struct {
 	Name *string
 	// Optional description of the service
 	Description *string
+	// Optional banner image for this service
+	Banner *string
+	// time this service was published
+	PublishedAt *string
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Reference to billable account
 	Account *string `json:"account"`
 	Href    *string `json:"href,omitempty"`
@@ -130,6 +136,12 @@ func ValidateServiceListItemView(result *ServiceListItemView) (err error) {
 	}
 	if result.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+	}
+	if result.PublishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.published-at", *result.PublishedAt, goa.FormatDateTime))
+	}
+	if result.Policy != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.policy", *result.Policy, goa.FormatURI))
 	}
 	if result.Account != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.account", *result.Account, goa.FormatURI))

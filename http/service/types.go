@@ -327,6 +327,12 @@ type ServiceListItemResponseBody struct {
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional description of the service
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
+	// Optional banner image for this service
+	Banner *string `form:"banner,omitempty" json:"banner,omitempty" xml:"banner,omitempty"`
+	// time this service was published
+	PublishedAt *string `form:"published-at,omitempty" json:"published-at,omitempty" xml:"published-at,omitempty"`
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Reference to billable account
 	Account *string `json:"account"`
 	Href    *string `json:"href,omitempty"`
@@ -1296,6 +1302,12 @@ func ValidateServiceListItemResponseBody(body *ServiceListItemResponseBody) (err
 	}
 	if body.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	if body.PublishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.published-at", *body.PublishedAt, goa.FormatDateTime))
+	}
+	if body.Policy != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
 	}
 	if body.Account != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))

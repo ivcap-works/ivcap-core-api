@@ -85,7 +85,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
@@ -124,7 +124,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := service.NewServiceListRT(vres)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ListBadRequestResponseBody
 				err  error
@@ -234,7 +234,7 @@ func EncodeCreateServiceRequest(encoder func(*http.Request) goahttp.Encoder) fun
 // service create_service endpoint. restoreBody controls whether the response
 // body should be restored after having been read.
 // DecodeCreateServiceResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
@@ -273,7 +273,7 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			}
 			res := NewCreateServiceServiceStatusRTCreated(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body CreateServiceBadRequestResponseBody
 				err  error
@@ -417,7 +417,7 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
@@ -454,7 +454,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadServiceStatusRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ReadBadRequestResponseBody
 				err  error
@@ -581,7 +581,7 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // update endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeUpdateResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
@@ -619,7 +619,7 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewUpdateServiceStatusRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body UpdateBadRequestResponseBody
 				err  error
@@ -749,7 +749,7 @@ func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // delete endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeDeleteResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
 //   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
@@ -772,7 +772,7 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			return nil, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body DeleteBadRequestResponseBody
 				err  error
@@ -833,6 +833,9 @@ func unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(v *Se
 		ID:          v.ID,
 		Name:        v.Name,
 		Description: v.Description,
+		Banner:      v.Banner,
+		PublishedAt: v.PublishedAt,
+		Policy:      v.Policy,
 		Account:     v.Account,
 		Href:        v.Href,
 	}

@@ -313,7 +313,7 @@ type DequeueNotImplementedResponseBody struct {
 
 // QueueListItemResponseBody is used to define fields on response body types.
 type QueueListItemResponseBody struct {
-	// service
+	// queue
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Name of the created queue.
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`

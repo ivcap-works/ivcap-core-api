@@ -73,7 +73,7 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeCreateResponse may return the following errors:
-//   - "bad-request" (type *queue.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *queue.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *queue.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *queue.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *queue.NotImplementedT): http.StatusNotImplemented
@@ -114,7 +114,7 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := queue.NewCreatequeueresponse(vres)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body CreateBadRequestResponseBody
 				err  error
@@ -258,7 +258,7 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *queue.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *queue.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *queue.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *queue.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *queue.ResourceNotFoundT): http.StatusNotFound
@@ -297,7 +297,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := queue.NewReadqueueresponse(vres)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ReadBadRequestResponseBody
 				err  error
@@ -413,7 +413,7 @@ func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // delete endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeDeleteResponse may return the following errors:
-//   - "bad-request" (type *queue.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *queue.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *queue.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *queue.NotImplementedT): http.StatusNotImplemented
 //   - "not-available" (type *queue.ServiceNotAvailableT): http.StatusServiceUnavailable
@@ -436,7 +436,7 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 		switch resp.StatusCode {
 		case http.StatusNoContent:
 			return nil, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body DeleteBadRequestResponseBody
 				err  error
@@ -544,7 +544,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *queue.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *queue.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *queue.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *queue.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *queue.NotImplementedT): http.StatusNotImplemented
@@ -581,7 +581,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewListQueueListResultOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ListBadRequestResponseBody
 				err  error
@@ -710,7 +710,7 @@ func EncodeEnqueueRequest(encoder func(*http.Request) goahttp.Encoder) func(*htt
 // enqueue endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeEnqueueResponse may return the following errors:
-//   - "bad-request" (type *queue.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *queue.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *queue.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *queue.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *queue.NotImplementedT): http.StatusNotImplemented
@@ -749,7 +749,7 @@ func DecodeEnqueueResponse(decoder func(*http.Response) goahttp.Decoder, restore
 			}
 			res := queue.NewMessagestatus(vres)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body EnqueueBadRequestResponseBody
 				err  error
@@ -870,7 +870,7 @@ func EncodeDequeueRequest(encoder func(*http.Request) goahttp.Encoder) func(*htt
 // dequeue endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeDequeueResponse may return the following errors:
-//   - "bad-request" (type *queue.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *queue.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *queue.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *queue.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *queue.NotImplementedT): http.StatusNotImplemented
@@ -907,7 +907,7 @@ func DecodeDequeueResponse(decoder func(*http.Response) goahttp.Decoder, restore
 			}
 			res := NewDequeueMessageListOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body DequeueBadRequestResponseBody
 				err  error

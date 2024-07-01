@@ -47,7 +47,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.39"
+const APIVersion = "0.40"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -257,6 +257,12 @@ type ServiceListItem struct {
 	Name *string
 	// Optional description of the service
 	Description *string
+	// Optional banner image for this service
+	Banner *string
+	// time this service was published
+	PublishedAt *string
+	// Reference to policy used
+	Policy *string `json:"policy"`
 	// Reference to billable account
 	Account string `json:"account"`
 	Href    string `json:"href,omitempty"`
@@ -531,6 +537,9 @@ func transformServiceviewsServiceListItemViewToServiceListItem(v *serviceviews.S
 		ID:          *v.ID,
 		Name:        v.Name,
 		Description: v.Description,
+		Banner:      v.Banner,
+		PublishedAt: v.PublishedAt,
+		Policy:      v.Policy,
 		Account:     *v.Account,
 		Href:        *v.Href,
 	}
@@ -560,6 +569,9 @@ func transformServiceListItemToServiceviewsServiceListItemView(v *ServiceListIte
 		ID:          &v.ID,
 		Name:        v.Name,
 		Description: v.Description,
+		Banner:      v.Banner,
+		PublishedAt: v.PublishedAt,
+		Policy:      v.Policy,
 		Account:     &v.Account,
 		Href:        &v.Href,
 	}

@@ -60,8 +60,8 @@ func EncodeSearchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 				req.Header.Set("Authorization", head)
 			}
 		}
-		if p.ContentType != nil {
-			head := *p.ContentType
+		{
+			head := p.ContentType
 			req.Header.Set("Content-Type", head)
 		}
 		values := req.URL.Query()
@@ -69,9 +69,7 @@ func EncodeSearchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 			values.Add("at-time", *p.AtTime)
 		}
 		values.Add("limit", fmt.Sprintf("%v", p.Limit))
-		if p.Page != nil {
-			values.Add("page", *p.Page)
-		}
+		values.Add("page", fmt.Sprintf("%v", p.Page))
 		req.URL.RawQuery = values.Encode()
 		body := p.Query
 		if err := encoder(req).Encode(&body); err != nil {
@@ -85,7 +83,7 @@ func EncodeSearchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // search endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeSearchResponse may return the following errors:
-//   - "bad-request" (type *search.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *search.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *search.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *search.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *search.NotImplementedT): http.StatusNotImplemented
@@ -123,7 +121,7 @@ func DecodeSearchResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewSearchListRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body SearchBadRequestResponseBody
 				err  error

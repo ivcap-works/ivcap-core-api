@@ -38,7 +38,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.39"
+const APIVersion = "0.40"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -101,9 +101,9 @@ type SearchListRT struct {
 // SearchPayload is the payload type of the search service search method.
 type SearchPayload struct {
 	// Query
-	Query *string
+	Query []byte
 	// Content-Type header, MUST be of application/json.
-	ContentType *string `json:"content-type"`
+	ContentType string `json:"content-type"`
 	// Return search which where valid at that time [now]
 	AtTime *string `json:"at-time,omitempty"`
 	// The 'limit' system query option requests the number of items in the queried
@@ -112,7 +112,7 @@ type SearchPayload struct {
 	// The content of '$page' is returned in the 'links' part of a previous query
 	// and
 	// will when set, ALL other parameters, except for 'limit' are ignored.
-	Page *string
+	Page any
 	// JWT used for authentication
 	JWT string
 }

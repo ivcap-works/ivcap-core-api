@@ -87,7 +87,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *artifact.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
@@ -124,7 +124,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewListArtifactListRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ListBadRequestResponseBody
 				err  error
@@ -240,7 +240,7 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *artifact.ResourceNotFoundT): http.StatusNotFound
@@ -277,7 +277,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadArtifactStatusRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ReadBadRequestResponseBody
 				err  error
@@ -435,7 +435,7 @@ func EncodeUploadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // artifact upload endpoint. restoreBody controls whether the response body
 // should be restored after having been read.
 // DecodeUploadResponse may return the following errors:
-//   - "bad-request" (type *artifact.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *artifact.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *artifact.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *artifact.NotImplementedT): http.StatusNotImplemented
 //   - "not-available" (type *artifact.ServiceNotAvailableT): http.StatusServiceUnavailable
@@ -498,7 +498,7 @@ func DecodeUploadResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewUploadArtifactUploadRTCreated(&body, location, tusResumable, tusOffset)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body UploadBadRequestResponseBody
 				err  error
@@ -569,12 +569,13 @@ func BuildUploadStreamPayload(payload any, fpath string) (*artifact.UploadReques
 // *ArtifactListItemResponseBody.
 func unmarshalArtifactListItemResponseBodyToArtifactArtifactListItem(v *ArtifactListItemResponseBody) *artifact.ArtifactListItem {
 	res := &artifact.ArtifactListItem{
-		ID:       *v.ID,
-		Name:     v.Name,
-		Status:   *v.Status,
-		Size:     v.Size,
-		MimeType: v.MimeType,
-		Href:     *v.Href,
+		ID:        *v.ID,
+		Name:      v.Name,
+		Status:    *v.Status,
+		Size:      v.Size,
+		MimeType:  v.MimeType,
+		CreatedAt: *v.CreatedAt,
+		Href:      *v.Href,
 	}
 
 	return res

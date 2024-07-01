@@ -85,7 +85,7 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
@@ -124,7 +124,7 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := order.NewOrderListRT(vres)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ListBadRequestResponseBody
 				err  error
@@ -240,7 +240,7 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
 //   - "not-found" (type *order.ResourceNotFoundT): http.StatusNotFound
@@ -277,7 +277,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			}
 			res := NewReadOrderStatusRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ReadBadRequestResponseBody
 				err  error
@@ -403,7 +403,7 @@ func EncodeProductsRequest(encoder func(*http.Request) goahttp.Encoder) func(*ht
 // products endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeProductsResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
@@ -441,7 +441,7 @@ func DecodeProductsResponse(decoder func(*http.Response) goahttp.Decoder, restor
 			}
 			res := NewProductsPartialProductListTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body ProductsBadRequestResponseBody
 				err  error
@@ -581,7 +581,7 @@ func EncodeMetadataRequest(encoder func(*http.Request) goahttp.Encoder) func(*ht
 // metadata endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeMetadataResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
@@ -619,7 +619,7 @@ func DecodeMetadataResponse(decoder func(*http.Response) goahttp.Decoder, restor
 			}
 			res := NewMetadataPartialMetaListTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body MetadataBadRequestResponseBody
 				err  error
@@ -743,7 +743,7 @@ func EncodeCreateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 // create endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeCreateResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
@@ -781,7 +781,7 @@ func DecodeCreateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			}
 			res := NewCreateOrderStatusRTOK(&body)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body CreateBadRequestResponseBody
 				err  error
@@ -919,7 +919,7 @@ func EncodeLogsRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 // logs endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeLogsResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
@@ -942,7 +942,7 @@ func DecodeLogsResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 		switch resp.StatusCode {
 		case http.StatusOK:
 			return nil, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body LogsBadRequestResponseBody
 				err  error
@@ -1072,7 +1072,7 @@ func EncodeTopRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Re
 // endpoint. restoreBody controls whether the response body should be restored
 // after having been read.
 // DecodeTopResponse may return the following errors:
-//   - "bad-request" (type *order.BadRequestT): http.StatusFailedDependency
+//   - "bad-request" (type *order.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *order.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *order.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *order.NotImplementedT): http.StatusNotImplemented
@@ -1112,7 +1112,7 @@ func DecodeTopResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody
 			}
 			res := order.NewOrderTopResultItemCollection(vres)
 			return res, nil
-		case http.StatusFailedDependency:
+		case http.StatusBadRequest:
 			var (
 				body TopBadRequestResponseBody
 				err  error

@@ -189,13 +189,6 @@ type UpdateBadRequestResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// UpdateNotUniqueResponseBody is the type of the "aspect" service "update"
-// endpoint HTTP response body for the "not-unique" error.
-type UpdateNotUniqueResponseBody struct {
-	// message describing expected type or pattern.
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
-}
-
 // UpdateInvalidParameterResponseBody is the type of the "aspect" service
 // "update" endpoint HTTP response body for the "invalid-parameter" error.
 type UpdateInvalidParameterResponseBody struct {
@@ -220,6 +213,13 @@ type UpdateInvalidScopesResponseBody struct {
 // "update" endpoint HTTP response body for the "not-implemented" error.
 type UpdateNotImplementedResponseBody struct {
 	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// UpdateNotUniqueResponseBody is the type of the "aspect" service "update"
+// endpoint HTTP response body for the "not-unique" error.
+type UpdateNotUniqueResponseBody struct {
+	// message describing expected type or pattern.
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -541,15 +541,6 @@ func NewUpdateBadRequest(body *UpdateBadRequestResponseBody) *aspect.BadRequestT
 	return v
 }
 
-// NewUpdateNotUnique builds a aspect service update endpoint not-unique error.
-func NewUpdateNotUnique(body *UpdateNotUniqueResponseBody) *aspect.NotUniqueResourceT {
-	v := &aspect.NotUniqueResourceT{
-		Message: *body.Message,
-	}
-
-	return v
-}
-
 // NewUpdateInvalidParameter builds a aspect service update endpoint
 // invalid-parameter error.
 func NewUpdateInvalidParameter(body *UpdateInvalidParameterResponseBody) *aspect.InvalidParameterT {
@@ -577,6 +568,15 @@ func NewUpdateInvalidScopes(body *UpdateInvalidScopesResponseBody) *aspect.Inval
 // not-implemented error.
 func NewUpdateNotImplemented(body *UpdateNotImplementedResponseBody) *aspect.NotImplementedT {
 	v := &aspect.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewUpdateNotUnique builds a aspect service update endpoint not-unique error.
+func NewUpdateNotUnique(body *UpdateNotUniqueResponseBody) *aspect.NotUniqueResourceT {
+	v := &aspect.NotUniqueResourceT{
 		Message: *body.Message,
 	}
 
@@ -921,15 +921,6 @@ func ValidateUpdateBadRequestResponseBody(body *UpdateBadRequestResponseBody) (e
 	return
 }
 
-// ValidateUpdateNotUniqueResponseBody runs the validations defined on
-// update_not-unique_response_body
-func ValidateUpdateNotUniqueResponseBody(body *UpdateNotUniqueResponseBody) (err error) {
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
-	}
-	return
-}
-
 // ValidateUpdateInvalidParameterResponseBody runs the validations defined on
 // update_invalid-parameter_response_body
 func ValidateUpdateInvalidParameterResponseBody(body *UpdateInvalidParameterResponseBody) (err error) {
@@ -957,6 +948,15 @@ func ValidateUpdateInvalidScopesResponseBody(body *UpdateInvalidScopesResponseBo
 // ValidateUpdateNotImplementedResponseBody runs the validations defined on
 // update_not-implemented_response_body
 func ValidateUpdateNotImplementedResponseBody(body *UpdateNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateUpdateNotUniqueResponseBody runs the validations defined on
+// update_not-unique_response_body
+func ValidateUpdateNotUniqueResponseBody(body *UpdateNotUniqueResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

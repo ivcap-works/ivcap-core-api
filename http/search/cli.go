@@ -17,6 +17,7 @@
 package client
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 
@@ -28,9 +29,9 @@ import (
 // CLI flags.
 func BuildSearchPayload(searchSearchBody string, searchSearchAtTime string, searchSearchLimit string, searchSearchPage string, searchSearchJWT string, searchSearchContentType string) (*search.SearchPayload, error) {
 	var err error
-	var body string
+	var body []byte
 	{
-		body = searchSearchBody
+		body = []byte(searchSearchBody)
 	}
 	var atTime *string
 	{
@@ -62,25 +63,26 @@ func BuildSearchPayload(searchSearchBody string, searchSearchAtTime string, sear
 			}
 		}
 	}
-	var page *string
+	var page any
 	{
 		if searchSearchPage != "" {
-			page = &searchSearchPage
+			err = json.Unmarshal([]byte(searchSearchPage), &page)
+			if err != nil {
+				return nil, fmt.Errorf("invalid JSON for page, \nerror: %s, \nexample of valid JSON:\n%s", err, "\"gdsgQwhdgd\"")
+			}
 		}
 	}
 	var jwt string
 	{
 		jwt = searchSearchJWT
 	}
-	var contentType *string
+	var contentType string
 	{
-		if searchSearchContentType != "" {
-			contentType = &searchSearchContentType
-		}
+		contentType = searchSearchContentType
 	}
 	v := body
 	res := &search.SearchPayload{
-		Query: &v,
+		Query: v,
 	}
 	res.AtTime = atTime
 	res.Limit = limit

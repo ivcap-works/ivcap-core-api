@@ -43,7 +43,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.39"
+const APIVersion = "0.40"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -66,7 +66,9 @@ type ArtifactListItem struct {
 	Size *int64
 	// Mime (content) type of artifact
 	MimeType *string
-	Href     string `json:"href,omitempty"`
+	// time this artifact was created
+	CreatedAt string
+	Href      string `json:"href,omitempty"`
 }
 
 // ArtifactListRT is the result type of the artifact service list method.

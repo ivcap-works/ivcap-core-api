@@ -190,7 +190,9 @@ type ArtifactListItemResponseBody struct {
 	Size *int64 `form:"size,omitempty" json:"size,omitempty" xml:"size,omitempty"`
 	// Mime (content) type of artifact
 	MimeType *string `form:"mime-type,omitempty" json:"mime-type,omitempty" xml:"mime-type,omitempty"`
-	Href     *string `json:"href,omitempty"`
+	// time this artifact was created
+	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
+	Href      *string `json:"href,omitempty"`
 }
 
 // LinkTResponseBody is used to define fields on response body types.
@@ -671,6 +673,9 @@ func ValidateArtifactListItemResponseBody(body *ArtifactListItemResponseBody) (e
 	if body.Status == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
 	}
+	if body.CreatedAt == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("created-at", "body"))
+	}
 	if body.Href == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
@@ -681,6 +686,9 @@ func ValidateArtifactListItemResponseBody(body *ArtifactListItemResponseBody) (e
 		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {
 			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"pending", "partial", "ready", "error", "unknown"}))
 		}
+	}
+	if body.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.created-at", *body.CreatedAt, goa.FormatDateTime))
 	}
 	return
 }

@@ -49,7 +49,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.39"
+const APIVersion = "0.40"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -220,7 +220,7 @@ type Publishedmessage struct {
 }
 
 type QueueListItem struct {
-	// service
+	// queue
 	ID string
 	// Name of the created queue.
 	Name *string
