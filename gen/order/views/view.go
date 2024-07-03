@@ -61,9 +61,9 @@ type OrderListItemView struct {
 	// DateTime order processing finished
 	FinishedAt *string
 	// Reference to service requested
-	Service *string `json:"service"`
+	Service *string
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string
 	Href    *string `json:"href,omitempty"`
 }
 

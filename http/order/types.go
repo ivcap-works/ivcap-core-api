@@ -26,9 +26,9 @@ import (
 // request body.
 type CreateRequestBody struct {
 	// Reference to service requested
-	Service string `json:"service"`
+	Service string `form:"service" json:"service" xml:"service"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional customer provided tags
@@ -62,9 +62,9 @@ type ReadResponseBody struct {
 	FinishedAt *string                          `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
 	Products   *PartialProductListTResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
 	// Reference to service requested
-	Service *string `json:"service"`
+	Service *string `form:"service,omitempty" json:"service,omitempty" xml:"service,omitempty"`
 	// Reference to billable account
-	Account *string              `json:"account"`
+	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -107,9 +107,9 @@ type CreateResponseBody struct {
 	FinishedAt *string                          `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
 	Products   *PartialProductListTResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
 	// Reference to service requested
-	Service *string `json:"service"`
+	Service *string `form:"service,omitempty" json:"service,omitempty" xml:"service,omitempty"`
 	// Reference to billable account
-	Account *string              `json:"account"`
+	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional customer provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -419,9 +419,9 @@ type OrderListItemResponseBody struct {
 	// DateTime order processing finished
 	FinishedAt *string `form:"finished-at,omitempty" json:"finished-at,omitempty" xml:"finished-at,omitempty"`
 	// Reference to service requested
-	Service *string `json:"service"`
+	Service *string `form:"service,omitempty" json:"service,omitempty" xml:"service,omitempty"`
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Href    *string `json:"href,omitempty"`
 }
 

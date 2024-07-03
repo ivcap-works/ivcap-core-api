@@ -34,7 +34,7 @@ type CreateServiceRequestBody struct {
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -55,7 +55,7 @@ type UpdateRequestBody struct {
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowTRequestBodyRequestBody `form:"workflow" json:"workflow" xml:"workflow"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Optional provider provided tags
@@ -84,7 +84,7 @@ type CreateServiceResponseBody struct {
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Reference to billable account
-	Account *string              `json:"account"`
+	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -104,7 +104,7 @@ type ReadResponseBody struct {
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Reference to billable account
-	Account *string              `json:"account"`
+	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -124,7 +124,7 @@ type UpdateResponseBody struct {
 	// Service status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// Reference to billable account
-	Account *string              `json:"account"`
+	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 	// Optional provider provided name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
@@ -332,9 +332,9 @@ type ServiceListItemResponseBody struct {
 	// time this service was published
 	PublishedAt *string `form:"published-at,omitempty" json:"published-at,omitempty" xml:"published-at,omitempty"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Href    *string `json:"href,omitempty"`
 }
 

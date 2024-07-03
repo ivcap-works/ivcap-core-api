@@ -241,7 +241,7 @@ type ServiceDefinitionT struct {
 	// Definition of the workflow to use for executing this service
 	Workflow *WorkflowT
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 	// Optional provider provided name
 	Name *string
 	// Optional provider provided tags
@@ -262,9 +262,9 @@ type ServiceListItem struct {
 	// time this service was published
 	PublishedAt *string
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 	// Reference to billable account
-	Account string `json:"account"`
+	Account string
 	Href    string `json:"href,omitempty"`
 }
 
@@ -291,7 +291,7 @@ type ServiceStatusRT struct {
 	// Service status
 	Status string
 	// Reference to billable account
-	Account string `json:"account"`
+	Account string
 	Links   []*LinkT
 	// Optional provider provided name
 	Name *string

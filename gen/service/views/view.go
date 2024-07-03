@@ -50,9 +50,9 @@ type ServiceListItemView struct {
 	// time this service was published
 	PublishedAt *string
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string
 	Href    *string `json:"href,omitempty"`
 }
 

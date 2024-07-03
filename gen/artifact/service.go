@@ -95,16 +95,16 @@ type ArtifactStatusRT struct {
 	// URL of object this artifact is caching
 	CacheOf *string
 	// ETAG of artifact
-	Etag *string `json:"etag,omitempty"`
+	Etag *string
 	// DateTime artifact was created
 	CreatedAt *string
 	// DateTime artifact was last modified
 	LastModifiedAt *string
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 	// Reference to billable account
-	Account  *string `json:"account"`
-	DataHref *string `json:"dataRef,omitempty"`
+	Account  *string
+	DataHref *string
 	Links    []*LinkT
 }
 
@@ -129,16 +129,16 @@ type ArtifactUploadRT struct {
 	// URL of object this artifact is caching
 	CacheOf *string
 	// ETAG of artifact
-	Etag *string `json:"etag,omitempty"`
+	Etag *string
 	// DateTime artifact was created
 	CreatedAt *string
 	// DateTime artifact was last modified
 	LastModifiedAt *string
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 	// Reference to billable account
-	Account  *string `json:"account"`
-	DataHref *string `json:"dataRef,omitempty"`
+	Account  *string
+	DataHref *string
 	Links    []*LinkT
 }
 

@@ -86,7 +86,7 @@ type Createqueueresponse struct {
 	// Timestamp when the queue was created
 	CreatedAt string
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string
 }
 
 // DeletePayload is the payload type of the queue service delete method.
@@ -205,7 +205,7 @@ type PayloadForCreateEndpoint struct {
 	// More detailed description of the queue.
 	Description *string
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 }
 
 type Publishedmessage struct {
@@ -227,7 +227,7 @@ type QueueListItem struct {
 	// Description of the created queue.
 	Description *string
 	// Reference to billable account
-	Account string `json:"account"`
+	Account string
 	Href    string
 }
 

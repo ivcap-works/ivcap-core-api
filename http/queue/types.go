@@ -31,7 +31,7 @@ type CreateRequestBody struct {
 	// More detailed description of the queue.
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 }
 
 // CreateResponseBody is the type of the "queue" service "create" endpoint HTTP
@@ -46,7 +46,7 @@ type CreateResponseBody struct {
 	// Timestamp when the queue was created
 	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 }
 
 // ReadResponseBody is the type of the "queue" service "read" endpoint HTTP
@@ -320,7 +320,7 @@ type QueueListItemResponseBody struct {
 	// Description of the created queue.
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	Href    *string `form:"href,omitempty" json:"href,omitempty" xml:"href,omitempty"`
 }
 

@@ -57,7 +57,7 @@ type CreatequeueresponseView struct {
 	// Timestamp when the queue was created
 	CreatedAt *string
 	// Reference to billable account
-	Account *string `json:"account"`
+	Account *string
 }
 
 // ReadqueueresponseView is a type that runs validations on a projected type.

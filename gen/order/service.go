@@ -190,9 +190,9 @@ type OrderListItem struct {
 	// DateTime order processing finished
 	FinishedAt *string
 	// Reference to service requested
-	Service string `json:"service"`
+	Service string
 	// Reference to billable account
-	Account string `json:"account"`
+	Account string
 	Href    string `json:"href,omitempty"`
 }
 
@@ -218,9 +218,9 @@ type OrderMetadataListItemRT struct {
 
 type OrderRequestT struct {
 	// Reference to service requested
-	Service string `json:"service"`
+	Service string
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string
 	// Optional customer provided name
 	Name *string
 	// Optional customer provided tags
@@ -243,9 +243,9 @@ type OrderStatusRT struct {
 	FinishedAt *string
 	Products   *PartialProductListT
 	// Reference to service requested
-	Service string `json:"service"`
+	Service string
 	// Reference to billable account
-	Account string `json:"account"`
+	Account string
 	Links   []*LinkT
 	// Optional customer provided name
 	Name *string

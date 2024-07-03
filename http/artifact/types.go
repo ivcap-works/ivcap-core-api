@@ -47,16 +47,16 @@ type ReadResponseBody struct {
 	// URL of object this artifact is caching
 	CacheOf *string `form:"cache-of,omitempty" json:"cache-of,omitempty" xml:"cache-of,omitempty"`
 	// ETAG of artifact
-	Etag *string `json:"etag,omitempty"`
+	Etag *string `form:"etag,omitempty" json:"etag,omitempty" xml:"etag,omitempty"`
 	// DateTime artifact was created
 	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
 	// DateTime artifact was last modified
 	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Reference to billable account
-	Account  *string              `json:"account"`
-	DataHref *string              `json:"dataRef,omitempty"`
+	Account  *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	DataHref *string              `form:"data-href,omitempty" json:"data-href,omitempty" xml:"data-href,omitempty"`
 	Links    []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
@@ -76,16 +76,16 @@ type UploadResponseBody struct {
 	// URL of object this artifact is caching
 	CacheOf *string `form:"cache-of,omitempty" json:"cache-of,omitempty" xml:"cache-of,omitempty"`
 	// ETAG of artifact
-	Etag *string `json:"etag,omitempty"`
+	Etag *string `form:"etag,omitempty" json:"etag,omitempty" xml:"etag,omitempty"`
 	// DateTime artifact was created
 	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
 	// DateTime artifact was last modified
 	LastModifiedAt *string `form:"last-modified-at,omitempty" json:"last-modified-at,omitempty" xml:"last-modified-at,omitempty"`
 	// Reference to policy used
-	Policy *string `json:"policy"`
+	Policy *string `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
 	// Reference to billable account
-	Account  *string              `json:"account"`
-	DataHref *string              `json:"dataRef,omitempty"`
+	Account  *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	DataHref *string              `form:"data-href,omitempty" json:"data-href,omitempty" xml:"data-href,omitempty"`
 	Links    []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
