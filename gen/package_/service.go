@@ -14,18 +14,27 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package search
+package package_
 
 import (
 	"context"
+	"io"
 
 	"goa.design/goa/v3/security"
 )
 
-// Provides a search capability across the entire system.
+// Manage the life cycle of a service package.
 type Service interface {
-	// Execute query provided in body and return a list of search result.
-	Search(context.Context, *SearchPayload) (res *SearchListRT, err error)
+	// list ivcap service's docker images under account
+	List(context.Context, *ListPayload) (res *ListResult, err error)
+	// pull ivcap service's docker image
+	Pull(context.Context, *PullPayload) (res *PullResultT, body io.ReadCloser, err error)
+	// upload service's docker image to container registry
+	Push(context.Context, *PushPayload, io.ReadCloser) (res *PushResult, err error)
+	// check push status of a layer
+	Status(context.Context, *StatusPayload) (res *PushStatusT, err error)
+	// remove ivcap service's docker image
+	Remove(context.Context, *RemovePayload) (err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -43,12 +52,12 @@ const APIVersion = "0.40"
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
-const ServiceName = "search"
+const ServiceName = "package"
 
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"search"}
+var MethodNames = [5]string{"list", "pull", "push", "status", "remove"}
 
 // Something wasn't right with this request
 type BadRequestT struct {
@@ -83,53 +92,118 @@ type LinkT struct {
 	Href string
 }
 
+// ListPayload is the payload type of the package service list method.
+type ListPayload struct {
+	// docker image tag
+	Tag *string
+	// maximum number of repository items, which can have multiple tags
+	Limit *int
+	// page url to list
+	Page *string
+	// JWT used for authentication
+	JWT string
+}
+
+// ListResult is the result type of the package service list method.
+type ListResult struct {
+	// docker image tags
+	Items []string
+	Links []*LinkT
+}
+
 // Method is not yet implemented.
 type NotImplementedT struct {
 	// Information message
 	Message string
 }
 
-// SearchListRT is the result type of the search service search method.
-type SearchListRT struct {
-	// List of search result
-	Items []any
-	// Time at which this list was valid
-	AtTime string
-	Links  []*LinkT
-}
-
-// SearchPayload is the payload type of the search service search method.
-type SearchPayload struct {
-	// Query
-	Query *string
-	// Content-Type header, MUST be of application/json.
-	ContentType *string `json:"content-type"`
-	// Return search which where valid at that time [now]
-	AtTime *string `json:"at-time,omitempty"`
-	// The 'limit' system query option requests the number of items in the queried
-	// collection to be included in the result.
-	Limit int
-	// The content of '$page' is returned in the 'links' part of a previous query
-	// and
-	// will when set, ALL other parameters, except for 'limit' are ignored.
-	Page *string
+// PullPayload is the payload type of the package service pull method.
+type PullPayload struct {
+	// docker image tag or layer digest
+	Ref string
+	// pull type, either be manifest, config or layer
+	Type string
+	// offset of the layer chunk
+	Offset *int
 	// JWT used for authentication
 	JWT string
+}
+
+// PullResultT is the result type of the package service pull method.
+type PullResultT struct {
+	// total size in bytes of layer
+	Total int
+	// available size in bytes of layer to read
+	Available int
+}
+
+// PushPayload is the payload type of the package service push method.
+type PushPayload struct {
+	// docker image tag
+	Tag string
+	// force to override
+	Force *bool
+	// push type, either be manifest, config or layer
+	Type string
+	// digest of the push
+	Digest string
+	// start of the layer chunk
+	Start *int
+	// end of the layer chunk
+	End *int
+	// total size of the layer
+	Total *int
+	// JWT used for authentication
+	JWT string
+}
+
+// PushResult is the result type of the package service push method.
+type PushResult struct {
+	// uploaded image digest or tag
+	Digest *string
+}
+
+// PushStatusT is the result type of the package service status method.
+type PushStatusT struct {
+	// Push status
+	Status string
+	// Message
+	Message string
+}
+
+// RemovePayload is the payload type of the package service remove method.
+type RemovePayload struct {
+	// docker image tag
+	Tag string
+	// JWT used for authentication
+	JWT string
+}
+
+// Will be returned when receiving a request to create and already existing
+// resource.
+type ResourceAlreadyCreatedT struct {
+	// ID of already existing resource
+	ID string
+	// Message of error
+	Message string
 }
 
 // Service necessary to fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
 }
 
-// Unauthorized access to resource
-type UnauthorizedT struct {
+// StatusPayload is the payload type of the package service status method.
+type StatusPayload struct {
+	// docker image tag
+	Tag string
+	// docker image layer digest
+	Digest string
+	// JWT used for authentication
+	JWT string
 }
 
-// UnsupportedContentType is the error returned when the provided content type
-// is not supported.
-type UnsupportedContentTypeT struct {
-	// message describing expected type or pattern.
-	Message string
+// Unauthorized access to resource
+type UnauthorizedT struct {
 }
 
 // Error returns an error description.
@@ -201,6 +275,23 @@ func (e *NotImplementedT) GoaErrorName() string {
 }
 
 // Error returns an error description.
+func (e *ResourceAlreadyCreatedT) Error() string {
+	return "Will be returned when receiving a request to create and already existing resource."
+}
+
+// ErrorName returns "ResourceAlreadyCreatedT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ResourceAlreadyCreatedT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ResourceAlreadyCreatedT".
+func (e *ResourceAlreadyCreatedT) GoaErrorName() string {
+	return "already-created"
+}
+
+// Error returns an error description.
 func (e *ServiceNotAvailableT) Error() string {
 	return "Service necessary to fulfil the request is currently not available."
 }
@@ -232,21 +323,4 @@ func (e *UnauthorizedT) ErrorName() string {
 // GoaErrorName returns "UnauthorizedT".
 func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
-}
-
-// Error returns an error description.
-func (e *UnsupportedContentTypeT) Error() string {
-	return "UnsupportedContentType is the error returned when the provided content type is not supported."
-}
-
-// ErrorName returns "UnsupportedContentTypeT".
-//
-// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *UnsupportedContentTypeT) ErrorName() string {
-	return e.GoaErrorName()
-}
-
-// GoaErrorName returns "UnsupportedContentTypeT".
-func (e *UnsupportedContentTypeT) GoaErrorName() string {
-	return "unsupported-content-type"
 }

@@ -16,21 +16,27 @@
 
 package client
 
-import (
-	"fmt"
-)
-
-// ListArtifactPath returns the URL path to the artifact service list HTTP endpoint.
-func ListArtifactPath() string {
-	return "/1/artifacts"
+// ListPackagePath returns the URL path to the package service list HTTP endpoint.
+func ListPackagePath() string {
+	return "/1/packages/list"
 }
 
-// ReadArtifactPath returns the URL path to the artifact service read HTTP endpoint.
-func ReadArtifactPath(id string) string {
-	return fmt.Sprintf("/1/artifacts/%v", id)
+// PullPackagePath returns the URL path to the package service pull HTTP endpoint.
+func PullPackagePath() string {
+	return "/1/packages/pull"
 }
 
-// UploadArtifactPath returns the URL path to the artifact service upload HTTP endpoint.
-func UploadArtifactPath() string {
-	return "/1/artifacts"
+// PushPackagePath returns the URL path to the package service push HTTP endpoint.
+func PushPackagePath() string {
+	return "/1/packages/push"
+}
+
+// StatusPackagePath returns the URL path to the package service status HTTP endpoint.
+func StatusPackagePath() string {
+	return "/1/packages/status"
+}
+
+// RemovePackagePath returns the URL path to the package service remove HTTP endpoint.
+func RemovePackagePath() string {
+	return "/1/packages/remove"
 }

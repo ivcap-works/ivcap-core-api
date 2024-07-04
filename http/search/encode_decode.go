@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -60,8 +60,8 @@ func EncodeSearchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 				req.Header.Set("Authorization", head)
 			}
 		}
-		{
-			head := p.ContentType
+		if p.ContentType != nil {
+			head := *p.ContentType
 			req.Header.Set("Content-Type", head)
 		}
 		values := req.URL.Query()
@@ -69,7 +69,9 @@ func EncodeSearchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 			values.Add("at-time", *p.AtTime)
 		}
 		values.Add("limit", fmt.Sprintf("%v", p.Limit))
-		values.Add("page", fmt.Sprintf("%v", p.Page))
+		if p.Page != nil {
+			values.Add("page", *p.Page)
+		}
 		req.URL.RawQuery = values.Encode()
 		body := p.Query
 		if err := encoder(req).Encode(&body); err != nil {
