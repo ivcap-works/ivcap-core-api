@@ -560,6 +560,9 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 		values := req.URL.Query()
 		values.Add("entity", p.Entity)
 		values.Add("schema", p.Schema)
+		if p.Policy != nil {
+			values.Add("policy", *p.Policy)
+		}
 		req.URL.RawQuery = values.Encode()
 		body := p.Content
 		if err := encoder(req).Encode(&body); err != nil {

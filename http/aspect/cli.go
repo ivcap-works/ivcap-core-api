@@ -202,7 +202,7 @@ func BuildCreatePayload(aspectCreateBody string, aspectCreateEntity string, aspe
 
 // BuildUpdatePayload builds the payload for the aspect update endpoint from
 // CLI flags.
-func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateEntity string, aspectUpdateSchema string, aspectUpdateJWT string, aspectUpdateContentType string) (*aspect.UpdatePayload, error) {
+func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateEntity string, aspectUpdateSchema string, aspectUpdatePolicy string, aspectUpdateJWT string, aspectUpdateContentType string) (*aspect.UpdatePayload, error) {
 	var err error
 	var body any
 	{
@@ -223,6 +223,12 @@ func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateEntity string, aspe
 			return nil, err
 		}
 	}
+	var policy *string
+	{
+		if aspectUpdatePolicy != "" {
+			policy = &aspectUpdatePolicy
+		}
+	}
 	var jwt string
 	{
 		jwt = aspectUpdateJWT
@@ -237,6 +243,7 @@ func BuildUpdatePayload(aspectUpdateBody string, aspectUpdateEntity string, aspe
 	}
 	res.Entity = entity
 	res.Schema = schema
+	res.Policy = policy
 	res.JWT = jwt
 	res.ContentType = contentType
 
