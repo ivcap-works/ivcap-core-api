@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -110,7 +110,7 @@ func BuildPullPayload(package_PullRef string, package_PullType string, package_P
 
 // BuildPushPayload builds the payload for the package push endpoint from CLI
 // flags.
-func BuildPushPayload(package_PushTag string, package_PushForce string, package_PushType string, package_PushDigest string, package_PushTotal string, package_PushStart string, package_PushEnd string, package_PushJWT string) (*package_.PushPayload, error) {
+func BuildPushPayload(package_PushTag string, package_PushForce string, package_PushType string, package_PushDigest string, package_PushJWT string) (*package_.PushPayload, error) {
 	var err error
 	var tag string
 	{
@@ -141,42 +141,6 @@ func BuildPushPayload(package_PushTag string, package_PushForce string, package_
 	{
 		digest = package_PushDigest
 	}
-	var total *int
-	{
-		if package_PushTotal != "" {
-			var v int64
-			v, err = strconv.ParseInt(package_PushTotal, 10, strconv.IntSize)
-			val := int(v)
-			total = &val
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for total, must be INT")
-			}
-		}
-	}
-	var start *int
-	{
-		if package_PushStart != "" {
-			var v int64
-			v, err = strconv.ParseInt(package_PushStart, 10, strconv.IntSize)
-			val := int(v)
-			start = &val
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for start, must be INT")
-			}
-		}
-	}
-	var end *int
-	{
-		if package_PushEnd != "" {
-			var v int64
-			v, err = strconv.ParseInt(package_PushEnd, 10, strconv.IntSize)
-			val := int(v)
-			end = &val
-			if err != nil {
-				return nil, fmt.Errorf("invalid value for end, must be INT")
-			}
-		}
-	}
 	var jwt string
 	{
 		jwt = package_PushJWT
@@ -186,32 +150,93 @@ func BuildPushPayload(package_PushTag string, package_PushForce string, package_
 	v.Force = force
 	v.Type = type_
 	v.Digest = digest
-	v.Total = total
-	v.Start = start
-	v.End = end
 	v.JWT = jwt
 
 	return v, nil
 }
 
-// BuildStatusPayload builds the payload for the package status endpoint from
-// CLI flags.
-func BuildStatusPayload(package_StatusTag string, package_StatusDigest string, package_StatusJWT string) (*package_.StatusPayload, error) {
+// BuildPatchPayload builds the payload for the package patch endpoint from CLI
+// flags.
+func BuildPatchPayload(package_PatchTag string, package_PatchDigest string, package_PatchTotal string, package_PatchStart string, package_PatchEnd string, package_PatchLocation string, package_PatchJWT string) (*package_.PatchPayload, error) {
+	var err error
 	var tag string
 	{
-		tag = package_StatusTag
+		tag = package_PatchTag
 	}
 	var digest string
 	{
-		digest = package_StatusDigest
+		digest = package_PatchDigest
+	}
+	var total int
+	{
+		var v int64
+		v, err = strconv.ParseInt(package_PatchTotal, 10, strconv.IntSize)
+		total = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for total, must be INT")
+		}
+	}
+	var start int
+	{
+		var v int64
+		v, err = strconv.ParseInt(package_PatchStart, 10, strconv.IntSize)
+		start = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for start, must be INT")
+		}
+	}
+	var end int
+	{
+		var v int64
+		v, err = strconv.ParseInt(package_PatchEnd, 10, strconv.IntSize)
+		end = int(v)
+		if err != nil {
+			return nil, fmt.Errorf("invalid value for end, must be INT")
+		}
+	}
+	var location string
+	{
+		location = package_PatchLocation
 	}
 	var jwt string
 	{
-		jwt = package_StatusJWT
+		jwt = package_PatchJWT
 	}
-	v := &package_.StatusPayload{}
+	v := &package_.PatchPayload{}
 	v.Tag = tag
 	v.Digest = digest
+	v.Total = total
+	v.Start = start
+	v.End = end
+	v.Location = location
+	v.JWT = jwt
+
+	return v, nil
+}
+
+// BuildPutPayload builds the payload for the package put endpoint from CLI
+// flags.
+func BuildPutPayload(package_PutTag string, package_PutDigest string, package_PutLocation string, package_PutJWT string) (*package_.PutPayload, error) {
+	var tag string
+	{
+		tag = package_PutTag
+	}
+	var digest string
+	{
+		digest = package_PutDigest
+	}
+	var location string
+	{
+		location = package_PutLocation
+	}
+	var jwt string
+	{
+		jwt = package_PutJWT
+	}
+	v := &package_.PutPayload{}
+	v.Tag = tag
+	v.Digest = digest
+	v.Location = location
 	v.JWT = jwt
 
 	return v, nil

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -31,9 +31,14 @@ func PushPackagePath() string {
 	return "/1/packages/push"
 }
 
-// StatusPackagePath returns the URL path to the package service status HTTP endpoint.
-func StatusPackagePath() string {
-	return "/1/packages/status"
+// PatchPackagePath returns the URL path to the package service patch HTTP endpoint.
+func PatchPackagePath() string {
+	return "/1/packages/blob"
+}
+
+// PutPackagePath returns the URL path to the package service put HTTP endpoint.
+func PutPackagePath() string {
+	return "/1/packages/blob"
 }
 
 // RemovePackagePath returns the URL path to the package service remove HTTP endpoint.

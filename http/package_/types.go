@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -32,17 +32,26 @@ type ListResponseBody struct {
 // PushResponseBody is the type of the "package" service "push" endpoint HTTP
 // response body.
 type PushResponseBody struct {
-	// uploaded image digest or tag
+	// digest or tag of image or layer
 	Digest *string `form:"digest,omitempty" json:"digest,omitempty" xml:"digest,omitempty"`
+	// location url for patch
+	Location *string `form:"location,omitempty" json:"location,omitempty" xml:"location,omitempty"`
+	// layer mounted or not
+	Mounted *bool `form:"mounted,omitempty" json:"mounted,omitempty" xml:"mounted,omitempty"`
 }
 
-// StatusResponseBody is the type of the "package" service "status" endpoint
-// HTTP response body.
-type StatusResponseBody struct {
-	// Push status
-	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
-	// Message
-	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+// PatchResponseBody is the type of the "package" service "patch" endpoint HTTP
+// response body.
+type PatchResponseBody struct {
+	// location url for patch
+	Location *string `form:"location,omitempty" json:"location,omitempty" xml:"location,omitempty"`
+}
+
+// PutResponseBody is the type of the "package" service "put" endpoint HTTP
+// response body.
+type PutResponseBody struct {
+	// uploaded image digest or tag
+	Digest *string `form:"digest,omitempty" json:"digest,omitempty" xml:"digest,omitempty"`
 }
 
 // ListBadRequestResponseBody is the type of the "package" service "list"
@@ -156,16 +165,16 @@ type PushAlreadyCreatedResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// StatusBadRequestResponseBody is the type of the "package" service "status"
+// PatchBadRequestResponseBody is the type of the "package" service "patch"
 // endpoint HTTP response body for the "bad-request" error.
-type StatusBadRequestResponseBody struct {
+type PatchBadRequestResponseBody struct {
 	// Information message
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// StatusInvalidParameterResponseBody is the type of the "package" service
-// "status" endpoint HTTP response body for the "invalid-parameter" error.
-type StatusInvalidParameterResponseBody struct {
+// PatchInvalidParameterResponseBody is the type of the "package" service
+// "patch" endpoint HTTP response body for the "invalid-parameter" error.
+type PatchInvalidParameterResponseBody struct {
 	// message describing expected type or pattern.
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 	// name of parameter.
@@ -174,19 +183,71 @@ type StatusInvalidParameterResponseBody struct {
 	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
 }
 
-// StatusInvalidScopesResponseBody is the type of the "package" service
-// "status" endpoint HTTP response body for the "invalid-scopes" error.
-type StatusInvalidScopesResponseBody struct {
+// PatchInvalidScopesResponseBody is the type of the "package" service "patch"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type PatchInvalidScopesResponseBody struct {
 	// ID of involved resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
-// StatusNotImplementedResponseBody is the type of the "package" service
-// "status" endpoint HTTP response body for the "not-implemented" error.
-type StatusNotImplementedResponseBody struct {
+// PatchNotImplementedResponseBody is the type of the "package" service "patch"
+// endpoint HTTP response body for the "not-implemented" error.
+type PatchNotImplementedResponseBody struct {
 	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PatchAlreadyCreatedResponseBody is the type of the "package" service "patch"
+// endpoint HTTP response body for the "already-created" error.
+type PatchAlreadyCreatedResponseBody struct {
+	// ID of already existing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PutBadRequestResponseBody is the type of the "package" service "put"
+// endpoint HTTP response body for the "bad-request" error.
+type PutBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PutInvalidParameterResponseBody is the type of the "package" service "put"
+// endpoint HTTP response body for the "invalid-parameter" error.
+type PutInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// PutInvalidScopesResponseBody is the type of the "package" service "put"
+// endpoint HTTP response body for the "invalid-scopes" error.
+type PutInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PutNotImplementedResponseBody is the type of the "package" service "put"
+// endpoint HTTP response body for the "not-implemented" error.
+type PutNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// PutAlreadyCreatedResponseBody is the type of the "package" service "put"
+// endpoint HTTP response body for the "already-created" error.
+type PutAlreadyCreatedResponseBody struct {
+	// ID of already existing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
@@ -380,7 +441,9 @@ func NewPullNotAuthorized() *package_.UnauthorizedT {
 // a HTTP "Created" response.
 func NewPushResultCreated(body *PushResponseBody) *package_.PushResult {
 	v := &package_.PushResult{
-		Digest: body.Digest,
+		Digest:   *body.Digest,
+		Location: *body.Location,
+		Mounted:  *body.Mounted,
 	}
 
 	return v
@@ -455,20 +518,18 @@ func NewPushNotAuthorized() *package_.UnauthorizedT {
 	return v
 }
 
-// NewStatusPushStatusTOK builds a "package" service "status" endpoint result
-// from a HTTP "OK" response.
-func NewStatusPushStatusTOK(body *StatusResponseBody) *package_.PushStatusT {
-	v := &package_.PushStatusT{
-		Status:  *body.Status,
-		Message: *body.Message,
+// NewPatchResultCreated builds a "package" service "patch" endpoint result
+// from a HTTP "Created" response.
+func NewPatchResultCreated(body *PatchResponseBody) *package_.PatchResult {
+	v := &package_.PatchResult{
+		Location: *body.Location,
 	}
 
 	return v
 }
 
-// NewStatusBadRequest builds a package service status endpoint bad-request
-// error.
-func NewStatusBadRequest(body *StatusBadRequestResponseBody) *package_.BadRequestT {
+// NewPatchBadRequest builds a package service patch endpoint bad-request error.
+func NewPatchBadRequest(body *PatchBadRequestResponseBody) *package_.BadRequestT {
 	v := &package_.BadRequestT{
 		Message: *body.Message,
 	}
@@ -476,9 +537,9 @@ func NewStatusBadRequest(body *StatusBadRequestResponseBody) *package_.BadReques
 	return v
 }
 
-// NewStatusInvalidParameter builds a package service status endpoint
+// NewPatchInvalidParameter builds a package service patch endpoint
 // invalid-parameter error.
-func NewStatusInvalidParameter(body *StatusInvalidParameterResponseBody) *package_.InvalidParameterT {
+func NewPatchInvalidParameter(body *PatchInvalidParameterResponseBody) *package_.InvalidParameterT {
 	v := &package_.InvalidParameterT{
 		Message: *body.Message,
 		Name:    *body.Name,
@@ -488,9 +549,9 @@ func NewStatusInvalidParameter(body *StatusInvalidParameterResponseBody) *packag
 	return v
 }
 
-// NewStatusInvalidScopes builds a package service status endpoint
-// invalid-scopes error.
-func NewStatusInvalidScopes(body *StatusInvalidScopesResponseBody) *package_.InvalidScopesT {
+// NewPatchInvalidScopes builds a package service patch endpoint invalid-scopes
+// error.
+func NewPatchInvalidScopes(body *PatchInvalidScopesResponseBody) *package_.InvalidScopesT {
 	v := &package_.InvalidScopesT{
 		ID:      body.ID,
 		Message: *body.Message,
@@ -499,9 +560,9 @@ func NewStatusInvalidScopes(body *StatusInvalidScopesResponseBody) *package_.Inv
 	return v
 }
 
-// NewStatusNotImplemented builds a package service status endpoint
+// NewPatchNotImplemented builds a package service patch endpoint
 // not-implemented error.
-func NewStatusNotImplemented(body *StatusNotImplementedResponseBody) *package_.NotImplementedT {
+func NewPatchNotImplemented(body *PatchNotImplementedResponseBody) *package_.NotImplementedT {
 	v := &package_.NotImplementedT{
 		Message: *body.Message,
 	}
@@ -509,17 +570,106 @@ func NewStatusNotImplemented(body *StatusNotImplementedResponseBody) *package_.N
 	return v
 }
 
-// NewStatusNotAvailable builds a package service status endpoint not-available
+// NewPatchAlreadyCreated builds a package service patch endpoint
+// already-created error.
+func NewPatchAlreadyCreated(body *PatchAlreadyCreatedResponseBody) *package_.ResourceAlreadyCreatedT {
+	v := &package_.ResourceAlreadyCreatedT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPatchNotAvailable builds a package service patch endpoint not-available
 // error.
-func NewStatusNotAvailable() *package_.ServiceNotAvailableT {
+func NewPatchNotAvailable() *package_.ServiceNotAvailableT {
 	v := &package_.ServiceNotAvailableT{}
 
 	return v
 }
 
-// NewStatusNotAuthorized builds a package service status endpoint
-// not-authorized error.
-func NewStatusNotAuthorized() *package_.UnauthorizedT {
+// NewPatchNotAuthorized builds a package service patch endpoint not-authorized
+// error.
+func NewPatchNotAuthorized() *package_.UnauthorizedT {
+	v := &package_.UnauthorizedT{}
+
+	return v
+}
+
+// NewPutResultCreated builds a "package" service "put" endpoint result from a
+// HTTP "Created" response.
+func NewPutResultCreated(body *PutResponseBody) *package_.PutResult {
+	v := &package_.PutResult{
+		Digest: *body.Digest,
+	}
+
+	return v
+}
+
+// NewPutBadRequest builds a package service put endpoint bad-request error.
+func NewPutBadRequest(body *PutBadRequestResponseBody) *package_.BadRequestT {
+	v := &package_.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPutInvalidParameter builds a package service put endpoint
+// invalid-parameter error.
+func NewPutInvalidParameter(body *PutInvalidParameterResponseBody) *package_.InvalidParameterT {
+	v := &package_.InvalidParameterT{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewPutInvalidScopes builds a package service put endpoint invalid-scopes
+// error.
+func NewPutInvalidScopes(body *PutInvalidScopesResponseBody) *package_.InvalidScopesT {
+	v := &package_.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPutNotImplemented builds a package service put endpoint not-implemented
+// error.
+func NewPutNotImplemented(body *PutNotImplementedResponseBody) *package_.NotImplementedT {
+	v := &package_.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPutAlreadyCreated builds a package service put endpoint already-created
+// error.
+func NewPutAlreadyCreated(body *PutAlreadyCreatedResponseBody) *package_.ResourceAlreadyCreatedT {
+	v := &package_.ResourceAlreadyCreatedT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewPutNotAvailable builds a package service put endpoint not-available error.
+func NewPutNotAvailable() *package_.ServiceNotAvailableT {
+	v := &package_.ServiceNotAvailableT{}
+
+	return v
+}
+
+// NewPutNotAuthorized builds a package service put endpoint not-authorized
+// error.
+func NewPutNotAuthorized() *package_.UnauthorizedT {
 	v := &package_.UnauthorizedT{}
 
 	return v
@@ -602,13 +752,32 @@ func ValidateListResponseBody(body *ListResponseBody) (err error) {
 	return
 }
 
-// ValidateStatusResponseBody runs the validations defined on StatusResponseBody
-func ValidateStatusResponseBody(body *StatusResponseBody) (err error) {
-	if body.Status == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("status", "body"))
+// ValidatePushResponseBody runs the validations defined on PushResponseBody
+func ValidatePushResponseBody(body *PushResponseBody) (err error) {
+	if body.Digest == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("digest", "body"))
 	}
-	if body.Message == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	if body.Location == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("location", "body"))
+	}
+	if body.Mounted == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("mounted", "body"))
+	}
+	return
+}
+
+// ValidatePatchResponseBody runs the validations defined on PatchResponseBody
+func ValidatePatchResponseBody(body *PatchResponseBody) (err error) {
+	if body.Location == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("location", "body"))
+	}
+	return
+}
+
+// ValidatePutResponseBody runs the validations defined on PutResponseBody
+func ValidatePutResponseBody(body *PutResponseBody) (err error) {
+	if body.Digest == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("digest", "body"))
 	}
 	return
 }
@@ -754,18 +923,18 @@ func ValidatePushAlreadyCreatedResponseBody(body *PushAlreadyCreatedResponseBody
 	return
 }
 
-// ValidateStatusBadRequestResponseBody runs the validations defined on
-// status_bad-request_response_body
-func ValidateStatusBadRequestResponseBody(body *StatusBadRequestResponseBody) (err error) {
+// ValidatePatchBadRequestResponseBody runs the validations defined on
+// patch_bad-request_response_body
+func ValidatePatchBadRequestResponseBody(body *PatchBadRequestResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
 	return
 }
 
-// ValidateStatusInvalidParameterResponseBody runs the validations defined on
-// status_invalid-parameter_response_body
-func ValidateStatusInvalidParameterResponseBody(body *StatusInvalidParameterResponseBody) (err error) {
+// ValidatePatchInvalidParameterResponseBody runs the validations defined on
+// patch_invalid-parameter_response_body
+func ValidatePatchInvalidParameterResponseBody(body *PatchInvalidParameterResponseBody) (err error) {
 	if body.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
 	}
@@ -775,9 +944,9 @@ func ValidateStatusInvalidParameterResponseBody(body *StatusInvalidParameterResp
 	return
 }
 
-// ValidateStatusInvalidScopesResponseBody runs the validations defined on
-// status_invalid-scopes_response_body
-func ValidateStatusInvalidScopesResponseBody(body *StatusInvalidScopesResponseBody) (err error) {
+// ValidatePatchInvalidScopesResponseBody runs the validations defined on
+// patch_invalid-scopes_response_body
+func ValidatePatchInvalidScopesResponseBody(body *PatchInvalidScopesResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}
@@ -787,11 +956,83 @@ func ValidateStatusInvalidScopesResponseBody(body *StatusInvalidScopesResponseBo
 	return
 }
 
-// ValidateStatusNotImplementedResponseBody runs the validations defined on
-// status_not-implemented_response_body
-func ValidateStatusNotImplementedResponseBody(body *StatusNotImplementedResponseBody) (err error) {
+// ValidatePatchNotImplementedResponseBody runs the validations defined on
+// patch_not-implemented_response_body
+func ValidatePatchNotImplementedResponseBody(body *PatchNotImplementedResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePatchAlreadyCreatedResponseBody runs the validations defined on
+// patch_already-created_response_body
+func ValidatePatchAlreadyCreatedResponseBody(body *PatchAlreadyCreatedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidatePutBadRequestResponseBody runs the validations defined on
+// put_bad-request_response_body
+func ValidatePutBadRequestResponseBody(body *PutBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePutInvalidParameterResponseBody runs the validations defined on
+// put_invalid-parameter_response_body
+func ValidatePutInvalidParameterResponseBody(body *PutInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePutInvalidScopesResponseBody runs the validations defined on
+// put_invalid-scopes_response_body
+func ValidatePutInvalidScopesResponseBody(body *PutInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidatePutNotImplementedResponseBody runs the validations defined on
+// put_not-implemented_response_body
+func ValidatePutNotImplementedResponseBody(body *PutNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidatePutAlreadyCreatedResponseBody runs the validations defined on
+// put_already-created_response_body
+func ValidatePutAlreadyCreatedResponseBody(body *PutAlreadyCreatedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	return
 }

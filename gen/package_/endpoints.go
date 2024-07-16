@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -29,7 +29,8 @@ type Endpoints struct {
 	List   goa.Endpoint
 	Pull   goa.Endpoint
 	Push   goa.Endpoint
-	Status goa.Endpoint
+	Patch  goa.Endpoint
+	Put    goa.Endpoint
 	Remove goa.Endpoint
 }
 
@@ -51,6 +52,15 @@ type PushRequestData struct {
 	Body io.ReadCloser
 }
 
+// PatchRequestData holds both the payload and the HTTP request body reader of
+// the "patch" method.
+type PatchRequestData struct {
+	// Payload is the method payload.
+	Payload *PatchPayload
+	// Body streams the HTTP request body.
+	Body io.ReadCloser
+}
+
 // NewEndpoints wraps the methods of the "package" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
@@ -59,7 +69,8 @@ func NewEndpoints(s Service) *Endpoints {
 		List:   NewListEndpoint(s, a.JWTAuth),
 		Pull:   NewPullEndpoint(s, a.JWTAuth),
 		Push:   NewPushEndpoint(s, a.JWTAuth),
-		Status: NewStatusEndpoint(s, a.JWTAuth),
+		Patch:  NewPatchEndpoint(s, a.JWTAuth),
+		Put:    NewPutEndpoint(s, a.JWTAuth),
 		Remove: NewRemoveEndpoint(s, a.JWTAuth),
 	}
 }
@@ -69,7 +80,8 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.List = m(e.List)
 	e.Pull = m(e.Pull)
 	e.Push = m(e.Push)
-	e.Status = m(e.Status)
+	e.Patch = m(e.Patch)
+	e.Put = m(e.Put)
 	e.Remove = m(e.Remove)
 }
 
@@ -134,22 +146,41 @@ func NewPushEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	}
 }
 
-// NewStatusEndpoint returns an endpoint function that calls the method
-// "status" of service "package".
-func NewStatusEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+// NewPatchEndpoint returns an endpoint function that calls the method "patch"
+// of service "package".
+func NewPatchEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
-		p := req.(*StatusPayload)
+		ep := req.(*PatchRequestData)
 		var err error
 		sc := security.JWTScheme{
 			Name:           "jwt",
 			Scopes:         []string{"consumer:read", "consumer:write"},
-			RequiredScopes: []string{"consumer:read"},
+			RequiredScopes: []string{"consumer:write"},
+		}
+		ctx, err = authJWTFn(ctx, ep.Payload.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		return s.Patch(ctx, ep.Payload, ep.Body)
+	}
+}
+
+// NewPutEndpoint returns an endpoint function that calls the method "put" of
+// service "package".
+func NewPutEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*PutPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:write"},
 		}
 		ctx, err = authJWTFn(ctx, p.JWT, &sc)
 		if err != nil {
 			return nil, err
 		}
-		return s.Status(ctx, p)
+		return s.Put(ctx, p)
 	}
 }
 
