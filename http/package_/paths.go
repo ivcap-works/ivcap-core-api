@@ -31,14 +31,9 @@ func PushPackagePath() string {
 	return "/1/packages/push"
 }
 
-// PatchPackagePath returns the URL path to the package service patch HTTP endpoint.
-func PatchPackagePath() string {
-	return "/1/packages/blob"
-}
-
-// PutPackagePath returns the URL path to the package service put HTTP endpoint.
-func PutPackagePath() string {
-	return "/1/packages/blob"
+// StatusPackagePath returns the URL path to the package service status HTTP endpoint.
+func StatusPackagePath() string {
+	return "/1/packages/status"
 }
 
 // RemovePackagePath returns the URL path to the package service remove HTTP endpoint.

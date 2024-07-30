@@ -399,6 +399,15 @@ func EncodePushRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 		}
 		values.Add("type", p.Type)
 		values.Add("digest", p.Digest)
+		if p.Total != nil {
+			values.Add("total", fmt.Sprintf("%v", *p.Total))
+		}
+		if p.Start != nil {
+			values.Add("start", fmt.Sprintf("%v", *p.Start))
+		}
+		if p.End != nil {
+			values.Add("end", fmt.Sprintf("%v", *p.End))
+		}
 		req.URL.RawQuery = values.Encode()
 		return nil
 	}
@@ -540,21 +549,13 @@ func BuildPushStreamPayload(payload any, fpath string) (*package_.PushRequestDat
 	}, nil
 }
 
-// BuildPatchRequest instantiates a HTTP request object with method and path
-// set to call the "package" service "patch" endpoint
-func (c *Client) BuildPatchRequest(ctx context.Context, v any) (*http.Request, error) {
-	var (
-		body io.Reader
-	)
-	rd, ok := v.(*package_.PatchRequestData)
-	if !ok {
-		return nil, goahttp.ErrInvalidType("package", "patch", "package_.PatchRequestData", v)
-	}
-	body = rd.Body
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PatchPackagePath()}
-	req, err := http.NewRequest("PATCH", u.String(), body)
+// BuildStatusRequest instantiates a HTTP request object with method and path
+// set to call the "package" service "status" endpoint
+func (c *Client) BuildStatusRequest(ctx context.Context, v any) (*http.Request, error) {
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: StatusPackagePath()}
+	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("package", "patch", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("package", "status", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -563,15 +564,14 @@ func (c *Client) BuildPatchRequest(ctx context.Context, v any) (*http.Request, e
 	return req, nil
 }
 
-// EncodePatchRequest returns an encoder for requests sent to the package patch
-// server.
-func EncodePatchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+// EncodeStatusRequest returns an encoder for requests sent to the package
+// status server.
+func EncodeStatusRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		data, ok := v.(*package_.PatchRequestData)
+		p, ok := v.(*package_.StatusPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("package", "patch", "*package_.PatchRequestData", v)
+			return goahttp.ErrInvalidType("package", "status", "*package_.StatusPayload", v)
 		}
-		p := data.Payload
 		{
 			head := p.JWT
 			if !strings.Contains(head, " ") {
@@ -583,28 +583,23 @@ func EncodePatchRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.
 		values := req.URL.Query()
 		values.Add("tag", p.Tag)
 		values.Add("digest", p.Digest)
-		values.Add("total", fmt.Sprintf("%v", p.Total))
-		values.Add("start", fmt.Sprintf("%v", p.Start))
-		values.Add("end", fmt.Sprintf("%v", p.End))
-		values.Add("location", p.Location)
 		req.URL.RawQuery = values.Encode()
 		return nil
 	}
 }
 
-// DecodePatchResponse returns a decoder for responses returned by the package
-// patch endpoint. restoreBody controls whether the response body should be
+// DecodeStatusResponse returns a decoder for responses returned by the package
+// status endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
-// DecodePatchResponse may return the following errors:
+// DecodeStatusResponse may return the following errors:
 //   - "bad-request" (type *package_.BadRequestT): http.StatusBadRequest
 //   - "invalid-parameter" (type *package_.InvalidParameterT): http.StatusUnprocessableEntity
 //   - "invalid-scopes" (type *package_.InvalidScopesT): http.StatusForbidden
 //   - "not-implemented" (type *package_.NotImplementedT): http.StatusNotImplemented
-//   - "already-created" (type *package_.ResourceAlreadyCreatedT): http.StatusConflict
 //   - "not-available" (type *package_.ServiceNotAvailableT): http.StatusServiceUnavailable
 //   - "not-authorized" (type *package_.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
-func DecodePatchResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+func DecodeStatusResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
 		if restoreBody {
 			b, err := io.ReadAll(resp.Body)
@@ -619,274 +614,84 @@ func DecodePatchResponse(decoder func(*http.Response) goahttp.Decoder, restoreBo
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusCreated:
+		case http.StatusOK:
 			var (
-				body PatchResponseBody
+				body StatusResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "patch", err)
+				return nil, goahttp.ErrDecodingError("package", "status", err)
 			}
-			err = ValidatePatchResponseBody(&body)
+			err = ValidateStatusResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "patch", err)
+				return nil, goahttp.ErrValidationError("package", "status", err)
 			}
-			res := NewPatchResultCreated(&body)
+			res := NewStatusPushStatusTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
-				body PatchBadRequestResponseBody
+				body StatusBadRequestResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "patch", err)
+				return nil, goahttp.ErrDecodingError("package", "status", err)
 			}
-			err = ValidatePatchBadRequestResponseBody(&body)
+			err = ValidateStatusBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "patch", err)
+				return nil, goahttp.ErrValidationError("package", "status", err)
 			}
-			return nil, NewPatchBadRequest(&body)
+			return nil, NewStatusBadRequest(&body)
 		case http.StatusUnprocessableEntity:
 			var (
-				body PatchInvalidParameterResponseBody
+				body StatusInvalidParameterResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "patch", err)
+				return nil, goahttp.ErrDecodingError("package", "status", err)
 			}
-			err = ValidatePatchInvalidParameterResponseBody(&body)
+			err = ValidateStatusInvalidParameterResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "patch", err)
+				return nil, goahttp.ErrValidationError("package", "status", err)
 			}
-			return nil, NewPatchInvalidParameter(&body)
+			return nil, NewStatusInvalidParameter(&body)
 		case http.StatusForbidden:
 			var (
-				body PatchInvalidScopesResponseBody
+				body StatusInvalidScopesResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "patch", err)
+				return nil, goahttp.ErrDecodingError("package", "status", err)
 			}
-			err = ValidatePatchInvalidScopesResponseBody(&body)
+			err = ValidateStatusInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "patch", err)
+				return nil, goahttp.ErrValidationError("package", "status", err)
 			}
-			return nil, NewPatchInvalidScopes(&body)
+			return nil, NewStatusInvalidScopes(&body)
 		case http.StatusNotImplemented:
 			var (
-				body PatchNotImplementedResponseBody
+				body StatusNotImplementedResponseBody
 				err  error
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "patch", err)
+				return nil, goahttp.ErrDecodingError("package", "status", err)
 			}
-			err = ValidatePatchNotImplementedResponseBody(&body)
+			err = ValidateStatusNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "patch", err)
+				return nil, goahttp.ErrValidationError("package", "status", err)
 			}
-			return nil, NewPatchNotImplemented(&body)
-		case http.StatusConflict:
-			var (
-				body PatchAlreadyCreatedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "patch", err)
-			}
-			err = ValidatePatchAlreadyCreatedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "patch", err)
-			}
-			return nil, NewPatchAlreadyCreated(&body)
+			return nil, NewStatusNotImplemented(&body)
 		case http.StatusServiceUnavailable:
-			return nil, NewPatchNotAvailable()
+			return nil, NewStatusNotAvailable()
 		case http.StatusUnauthorized:
-			return nil, NewPatchNotAuthorized()
+			return nil, NewStatusNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("package", "patch", resp.StatusCode, string(body))
-		}
-	}
-}
-
-// // BuildPatchStreamPayload creates a streaming endpoint request payload from
-// the method payload and the path to the file to be streamed
-func BuildPatchStreamPayload(payload any, fpath string) (*package_.PatchRequestData, error) {
-	f, err := os.Open(fpath)
-	if err != nil {
-		return nil, err
-	}
-	return &package_.PatchRequestData{
-		Payload: payload.(*package_.PatchPayload),
-		Body:    f,
-	}, nil
-}
-
-// BuildPutRequest instantiates a HTTP request object with method and path set
-// to call the "package" service "put" endpoint
-func (c *Client) BuildPutRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: PutPackagePath()}
-	req, err := http.NewRequest("PUT", u.String(), nil)
-	if err != nil {
-		return nil, goahttp.ErrInvalidURL("package", "put", u.String(), err)
-	}
-	if ctx != nil {
-		req = req.WithContext(ctx)
-	}
-
-	return req, nil
-}
-
-// EncodePutRequest returns an encoder for requests sent to the package put
-// server.
-func EncodePutRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
-	return func(req *http.Request, v any) error {
-		p, ok := v.(*package_.PutPayload)
-		if !ok {
-			return goahttp.ErrInvalidType("package", "put", "*package_.PutPayload", v)
-		}
-		{
-			head := p.JWT
-			if !strings.Contains(head, " ") {
-				req.Header.Set("Authorization", "Bearer "+head)
-			} else {
-				req.Header.Set("Authorization", head)
-			}
-		}
-		values := req.URL.Query()
-		values.Add("tag", p.Tag)
-		values.Add("digest", p.Digest)
-		values.Add("location", p.Location)
-		req.URL.RawQuery = values.Encode()
-		return nil
-	}
-}
-
-// DecodePutResponse returns a decoder for responses returned by the package
-// put endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
-// DecodePutResponse may return the following errors:
-//   - "bad-request" (type *package_.BadRequestT): http.StatusBadRequest
-//   - "invalid-parameter" (type *package_.InvalidParameterT): http.StatusUnprocessableEntity
-//   - "invalid-scopes" (type *package_.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *package_.NotImplementedT): http.StatusNotImplemented
-//   - "already-created" (type *package_.ResourceAlreadyCreatedT): http.StatusConflict
-//   - "not-available" (type *package_.ServiceNotAvailableT): http.StatusServiceUnavailable
-//   - "not-authorized" (type *package_.UnauthorizedT): http.StatusUnauthorized
-//   - error: internal error
-func DecodePutResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
-	return func(resp *http.Response) (any, error) {
-		if restoreBody {
-			b, err := io.ReadAll(resp.Body)
-			if err != nil {
-				return nil, err
-			}
-			resp.Body = io.NopCloser(bytes.NewBuffer(b))
-			defer func() {
-				resp.Body = io.NopCloser(bytes.NewBuffer(b))
-			}()
-		} else {
-			defer resp.Body.Close()
-		}
-		switch resp.StatusCode {
-		case http.StatusCreated:
-			var (
-				body PutResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "put", err)
-			}
-			err = ValidatePutResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "put", err)
-			}
-			res := NewPutResultCreated(&body)
-			return res, nil
-		case http.StatusBadRequest:
-			var (
-				body PutBadRequestResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "put", err)
-			}
-			err = ValidatePutBadRequestResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "put", err)
-			}
-			return nil, NewPutBadRequest(&body)
-		case http.StatusUnprocessableEntity:
-			var (
-				body PutInvalidParameterResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "put", err)
-			}
-			err = ValidatePutInvalidParameterResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "put", err)
-			}
-			return nil, NewPutInvalidParameter(&body)
-		case http.StatusForbidden:
-			var (
-				body PutInvalidScopesResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "put", err)
-			}
-			err = ValidatePutInvalidScopesResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "put", err)
-			}
-			return nil, NewPutInvalidScopes(&body)
-		case http.StatusNotImplemented:
-			var (
-				body PutNotImplementedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "put", err)
-			}
-			err = ValidatePutNotImplementedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "put", err)
-			}
-			return nil, NewPutNotImplemented(&body)
-		case http.StatusConflict:
-			var (
-				body PutAlreadyCreatedResponseBody
-				err  error
-			)
-			err = decoder(resp).Decode(&body)
-			if err != nil {
-				return nil, goahttp.ErrDecodingError("package", "put", err)
-			}
-			err = ValidatePutAlreadyCreatedResponseBody(&body)
-			if err != nil {
-				return nil, goahttp.ErrValidationError("package", "put", err)
-			}
-			return nil, NewPutAlreadyCreated(&body)
-		case http.StatusServiceUnavailable:
-			return nil, NewPutNotAvailable()
-		case http.StatusUnauthorized:
-			return nil, NewPutNotAuthorized()
-		default:
-			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("package", "put", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("package", "status", resp.StatusCode, string(body))
 		}
 	}
 }

@@ -31,10 +31,8 @@ type Service interface {
 	Pull(context.Context, *PullPayload) (res *PullResultT, body io.ReadCloser, err error)
 	// upload service's docker image to container registry
 	Push(context.Context, *PushPayload, io.ReadCloser) (res *PushResult, err error)
-	// upload service's docker image layer to container registry
-	Patch(context.Context, *PatchPayload, io.ReadCloser) (res *PatchResult, err error)
-	// commit service's docker image layer to container registry
-	Put(context.Context, *PutPayload) (res *PutResult, err error)
+	// check push status of a layer
+	Status(context.Context, *StatusPayload) (res *PushStatusT, err error)
 	// remove ivcap service's docker image
 	Remove(context.Context, *RemovePayload) (err error)
 }
@@ -59,7 +57,7 @@ const ServiceName = "package"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [6]string{"list", "pull", "push", "patch", "put", "remove"}
+var MethodNames = [5]string{"list", "pull", "push", "status", "remove"}
 
 // Something wasn't right with this request
 type BadRequestT struct {
@@ -119,30 +117,6 @@ type NotImplementedT struct {
 	Message string
 }
 
-// PatchPayload is the payload type of the package service patch method.
-type PatchPayload struct {
-	// docker image tag
-	Tag string
-	// digest of the push
-	Digest string
-	// start of the layer chunk
-	Start int
-	// end of the layer chunk
-	End int
-	// total size of the layer
-	Total int
-	// location url of patch
-	Location string
-	// JWT used for authentication
-	JWT string
-}
-
-// PatchResult is the result type of the package service patch method.
-type PatchResult struct {
-	// location url for patch
-	Location string
-}
-
 // PullPayload is the payload type of the package service pull method.
 type PullPayload struct {
 	// docker image tag or layer digest
@@ -173,36 +147,30 @@ type PushPayload struct {
 	Type string
 	// digest of the push
 	Digest string
+	// start of the layer chunk
+	Start *int
+	// end of the layer chunk
+	End *int
+	// total size of the layer
+	Total *int
 	// JWT used for authentication
 	JWT string
 }
 
 // PushResult is the result type of the package service push method.
 type PushResult struct {
-	// digest or tag of image or layer
-	Digest string
-	// location url for patch
-	Location string
-	// layer mounted or not
-	Mounted bool
-}
-
-// PutPayload is the payload type of the package service put method.
-type PutPayload struct {
-	// docker image tag
-	Tag string
-	// digest of the push
-	Digest string
-	// location url of patch
-	Location string
-	// JWT used for authentication
-	JWT string
-}
-
-// PutResult is the result type of the package service put method.
-type PutResult struct {
 	// uploaded image digest or tag
 	Digest string
+	// layer exists or not
+	Exists bool
+}
+
+// PushStatusT is the result type of the package service status method.
+type PushStatusT struct {
+	// Push status
+	Status string
+	// Message
+	Message string
 }
 
 // RemovePayload is the payload type of the package service remove method.
@@ -224,6 +192,16 @@ type ResourceAlreadyCreatedT struct {
 
 // Service necessary to fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
+}
+
+// StatusPayload is the payload type of the package service status method.
+type StatusPayload struct {
+	// docker image tag
+	Tag string
+	// docker image layer digest
+	Digest string
+	// JWT used for authentication
+	JWT string
 }
 
 // Unauthorized access to resource
