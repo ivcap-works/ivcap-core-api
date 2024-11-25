@@ -260,12 +260,12 @@ type Readqueueresponse struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First identifier in the queue
-	FirstID *string
+	// First message in the queue
+	FirstMsg *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last identifier in the queue
-	LastID *string
+	// Last message in the queue
+	LastMsg *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
@@ -515,9 +515,9 @@ func newReadqueueresponse(vres *queueviews.ReadqueueresponseView) *Readqueueresp
 		Description:   vres.Description,
 		TotalMessages: vres.TotalMessages,
 		Bytes:         vres.Bytes,
-		FirstID:       vres.FirstID,
+		FirstMsg:      vres.FirstMsg,
 		FirstTime:     vres.FirstTime,
-		LastID:        vres.LastID,
+		LastMsg:       vres.LastMsg,
 		LastTime:      vres.LastTime,
 		ConsumerCount: vres.ConsumerCount,
 	}
@@ -542,9 +542,9 @@ func newReadqueueresponseView(res *Readqueueresponse) *queueviews.Readqueuerespo
 		Description:   res.Description,
 		TotalMessages: res.TotalMessages,
 		Bytes:         res.Bytes,
-		FirstID:       res.FirstID,
+		FirstMsg:      res.FirstMsg,
 		FirstTime:     res.FirstTime,
-		LastID:        res.LastID,
+		LastMsg:       res.LastMsg,
 		LastTime:      res.LastTime,
 		ConsumerCount: res.ConsumerCount,
 		CreatedAt:     &res.CreatedAt,

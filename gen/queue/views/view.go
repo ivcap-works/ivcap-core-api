@@ -72,12 +72,12 @@ type ReadqueueresponseView struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First identifier in the queue
-	FirstID *string
+	// First message in the queue
+	FirstMsg *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last identifier in the queue
-	LastID *string
+	// Last message in the queue
+	LastMsg *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
@@ -113,9 +113,9 @@ var (
 			"description",
 			"total-messages",
 			"bytes",
-			"first-id",
+			"first-msg",
 			"first-time",
-			"last-id",
+			"last-msg",
 			"last-time",
 			"consumer-count",
 			"created-at",
@@ -205,14 +205,14 @@ func ValidateReadqueueresponseView(result *ReadqueueresponseView) (err error) {
 	if result.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
 	}
-	if result.FirstID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-id", *result.FirstID, goa.FormatURI))
+	if result.FirstMsg != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-msg", *result.FirstMsg, goa.FormatURI))
 	}
 	if result.FirstTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-time", *result.FirstTime, goa.FormatDateTime))
 	}
-	if result.LastID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-id", *result.LastID, goa.FormatURI))
+	if result.LastMsg != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-msg", *result.LastMsg, goa.FormatURI))
 	}
 	if result.LastTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-time", *result.LastTime, goa.FormatDateTime))

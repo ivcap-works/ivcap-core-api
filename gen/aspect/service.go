@@ -118,7 +118,11 @@ type AspectRT struct {
 	Asserter string
 	// Entity retracting this record at 'valid-to'
 	Retracter *string
-	Links     []*LinkT
+	// Reference to retracted aspect record this record is replacing
+	Replaces *string
+	// Reference to billable account
+	Account string
+	Links   []*LinkT
 }
 
 // Something wasn't right with this request

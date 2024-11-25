@@ -41,8 +41,12 @@ type ReadResponseBody struct {
 	// Entity asserting this metadata record at 'valid-from'
 	Asserter *string `form:"asserter,omitempty" json:"asserter,omitempty" xml:"asserter,omitempty"`
 	// Entity retracting this record at 'valid-to'
-	Retracter *string              `form:"retracter,omitempty" json:"retracter,omitempty" xml:"retracter,omitempty"`
-	Links     []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Retracter *string `form:"retracter,omitempty" json:"retracter,omitempty" xml:"retracter,omitempty"`
+	// Reference to retracted aspect record this record is replacing
+	Replaces *string `form:"replaces,omitempty" json:"replaces,omitempty" xml:"replaces,omitempty"`
+	// Reference to billable account
+	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ListResponseBody is the type of the "aspect" service "list" endpoint HTTP
@@ -285,9 +289,9 @@ type AspectListItemRTResponseBody struct {
 	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
 }
 
-// NewReadAspectRTOK builds a "aspect" service "read" endpoint result from a
-// HTTP "OK" response.
-func NewReadAspectRTOK(body *ReadResponseBody) *aspect.AspectRT {
+// NewReadAspectRTCreated builds a "aspect" service "read" endpoint result from
+// a HTTP "Created" response.
+func NewReadAspectRTCreated(body *ReadResponseBody) *aspect.AspectRT {
 	v := &aspect.AspectRT{
 		ID:          *body.ID,
 		Entity:      *body.Entity,
@@ -298,6 +302,8 @@ func NewReadAspectRTOK(body *ReadResponseBody) *aspect.AspectRT {
 		ValidTo:     body.ValidTo,
 		Asserter:    *body.Asserter,
 		Retracter:   body.Retracter,
+		Replaces:    body.Replaces,
+		Account:     *body.Account,
 	}
 	v.Links = make([]*aspect.LinkT, len(body.Links))
 	for i, val := range body.Links {
@@ -684,8 +690,11 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 	if body.Asserter == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("asserter", "body"))
 	}
+	if body.Account == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
+	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
@@ -704,6 +713,12 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 	}
 	if body.Retracter != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.retracter", *body.Retracter, goa.FormatURI))
+	}
+	if body.Replaces != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.replaces", *body.Replaces, goa.FormatURI))
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
 	}
 	for _, e := range body.Links {
 		if e != nil {
@@ -758,7 +773,7 @@ func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	return
 }
@@ -769,7 +784,7 @@ func ValidateUpdateResponseBody(body *UpdateResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	return
 }
@@ -1035,7 +1050,7 @@ func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (e
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))

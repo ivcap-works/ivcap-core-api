@@ -100,7 +100,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusOK:
+		case http.StatusCreated:
 			var (
 				body ReadResponseBody
 				err  error
@@ -113,7 +113,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrValidationError("aspect", "read", err)
 			}
-			res := NewReadAspectRTOK(&body)
+			res := NewReadAspectRTCreated(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (

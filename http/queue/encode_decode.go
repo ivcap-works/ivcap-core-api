@@ -280,7 +280,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusOK:
+		case http.StatusCreated:
 			var (
 				body ReadResponseBody
 				err  error
@@ -289,7 +289,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("queue", "read", err)
 			}
-			p := NewReadqueueresponseViewOK(&body)
+			p := NewReadqueueresponseViewCreated(&body)
 			view := "default"
 			vres := &queueviews.Readqueueresponse{Projected: p, View: view}
 			if err = queueviews.ValidateReadqueueresponse(vres); err != nil {

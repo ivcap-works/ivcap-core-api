@@ -62,12 +62,12 @@ type ReadResponseBody struct {
 	TotalMessages *uint64 `form:"total-messages,omitempty" json:"total-messages,omitempty" xml:"total-messages,omitempty"`
 	// Number of bytes in the queue
 	Bytes *uint64 `form:"bytes,omitempty" json:"bytes,omitempty" xml:"bytes,omitempty"`
-	// First identifier in the queue
-	FirstID *string `form:"first-id,omitempty" json:"first-id,omitempty" xml:"first-id,omitempty"`
+	// First message in the queue
+	FirstMsg *string `form:"first-msg,omitempty" json:"first-msg,omitempty" xml:"first-msg,omitempty"`
 	// Timestamp of the first message in the queue
 	FirstTime *string `form:"first-time,omitempty" json:"first-time,omitempty" xml:"first-time,omitempty"`
-	// Last identifier in the queue
-	LastID *string `form:"last-id,omitempty" json:"last-id,omitempty" xml:"last-id,omitempty"`
+	// Last message in the queue
+	LastMsg *string `form:"last-msg,omitempty" json:"last-msg,omitempty" xml:"last-msg,omitempty"`
 	// Timestamp of the last message in the queue
 	LastTime *string `form:"last-time,omitempty" json:"last-time,omitempty" xml:"last-time,omitempty"`
 	// Number of consumers
@@ -450,18 +450,18 @@ func NewCreateNotAuthorized() *queue.UnauthorizedT {
 	return v
 }
 
-// NewReadqueueresponseViewOK builds a "queue" service "read" endpoint result
-// from a HTTP "OK" response.
-func NewReadqueueresponseViewOK(body *ReadResponseBody) *queueviews.ReadqueueresponseView {
+// NewReadqueueresponseViewCreated builds a "queue" service "read" endpoint
+// result from a HTTP "Created" response.
+func NewReadqueueresponseViewCreated(body *ReadResponseBody) *queueviews.ReadqueueresponseView {
 	v := &queueviews.ReadqueueresponseView{
 		ID:            body.ID,
 		Name:          body.Name,
 		Description:   body.Description,
 		TotalMessages: body.TotalMessages,
 		Bytes:         body.Bytes,
-		FirstID:       body.FirstID,
+		FirstMsg:      body.FirstMsg,
 		FirstTime:     body.FirstTime,
-		LastID:        body.LastID,
+		LastMsg:       body.LastMsg,
 		LastTime:      body.LastTime,
 		ConsumerCount: body.ConsumerCount,
 		CreatedAt:     body.CreatedAt,

@@ -281,9 +281,9 @@ func NewListNotAuthorized() *artifact.UnauthorizedT {
 	return v
 }
 
-// NewReadArtifactStatusRTOK builds a "artifact" service "read" endpoint result
-// from a HTTP "OK" response.
-func NewReadArtifactStatusRTOK(body *ReadResponseBody) *artifact.ArtifactStatusRT {
+// NewReadArtifactStatusRTCreated builds a "artifact" service "read" endpoint
+// result from a HTTP "Created" response.
+func NewReadArtifactStatusRTCreated(body *ReadResponseBody) *artifact.ArtifactStatusRT {
 	v := &artifact.ArtifactStatusRT{
 		ID:             *body.ID,
 		Name:           body.Name,

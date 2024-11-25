@@ -699,9 +699,9 @@ func NewCreateServiceNotAuthorized() *service.UnauthorizedT {
 	return v
 }
 
-// NewReadServiceStatusRTOK builds a "service" service "read" endpoint result
-// from a HTTP "OK" response.
-func NewReadServiceStatusRTOK(body *ReadResponseBody) *service.ServiceStatusRT {
+// NewReadServiceStatusRTCreated builds a "service" service "read" endpoint
+// result from a HTTP "Created" response.
+func NewReadServiceStatusRTCreated(body *ReadResponseBody) *service.ServiceStatusRT {
 	v := &service.ServiceStatusRT{
 		ID:          *body.ID,
 		Description: body.Description,
