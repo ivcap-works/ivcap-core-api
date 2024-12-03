@@ -449,6 +449,10 @@ func DecodePushResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrDecodingError("package", "push", err)
 			}
+			err = ValidatePushResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("package", "push", err)
+			}
 			res := NewPushResultCreated(&body)
 			return res, nil
 		case http.StatusBadRequest:

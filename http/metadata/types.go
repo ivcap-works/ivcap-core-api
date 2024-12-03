@@ -267,9 +267,9 @@ type MetadataListItemRTResponseBody struct {
 	AspectContext *string `form:"aspect-context,omitempty" json:"aspect-context,omitempty" xml:"aspect-context,omitempty"`
 }
 
-// NewReadMetadataRecordRTOK builds a "metadata" service "read" endpoint result
-// from a HTTP "OK" response.
-func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadata.MetadataRecordRT {
+// NewReadMetadataRecordRTCreated builds a "metadata" service "read" endpoint
+// result from a HTTP "Created" response.
+func NewReadMetadataRecordRTCreated(body *ReadResponseBody) *metadata.MetadataRecordRT {
 	v := &metadata.MetadataRecordRT{
 		ID:        *body.ID,
 		Entity:    *body.Entity,

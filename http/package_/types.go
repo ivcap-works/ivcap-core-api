@@ -34,6 +34,8 @@ type ListResponseBody struct {
 type PushResponseBody struct {
 	// uploaded image digest or tag
 	Digest *string `form:"digest,omitempty" json:"digest,omitempty" xml:"digest,omitempty"`
+	// layer exists or not
+	Exists *bool `form:"exists,omitempty" json:"exists,omitempty" xml:"exists,omitempty"`
 }
 
 // StatusResponseBody is the type of the "package" service "status" endpoint
@@ -380,7 +382,8 @@ func NewPullNotAuthorized() *package_.UnauthorizedT {
 // a HTTP "Created" response.
 func NewPushResultCreated(body *PushResponseBody) *package_.PushResult {
 	v := &package_.PushResult{
-		Digest: body.Digest,
+		Digest: *body.Digest,
+		Exists: *body.Exists,
 	}
 
 	return v
@@ -598,6 +601,17 @@ func ValidateListResponseBody(body *ListResponseBody) (err error) {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
+	}
+	return
+}
+
+// ValidatePushResponseBody runs the validations defined on PushResponseBody
+func ValidatePushResponseBody(body *PushResponseBody) (err error) {
+	if body.Digest == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("digest", "body"))
+	}
+	if body.Exists == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("exists", "body"))
 	}
 	return
 }

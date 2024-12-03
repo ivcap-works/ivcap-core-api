@@ -450,9 +450,9 @@ func NewCreateNotAuthorized() *queue.UnauthorizedT {
 	return v
 }
 
-// NewReadqueueresponseViewOK builds a "queue" service "read" endpoint result
-// from a HTTP "OK" response.
-func NewReadqueueresponseViewOK(body *ReadResponseBody) *queueviews.ReadqueueresponseView {
+// NewReadqueueresponseViewCreated builds a "queue" service "read" endpoint
+// result from a HTTP "Created" response.
+func NewReadqueueresponseViewCreated(body *ReadResponseBody) *queueviews.ReadqueueresponseView {
 	v := &queueviews.ReadqueueresponseView{
 		ID:            body.ID,
 		Name:          body.Name,

@@ -594,9 +594,9 @@ func NewListNotAuthorized() *order.UnauthorizedT {
 	return v
 }
 
-// NewReadOrderStatusRTOK builds a "order" service "read" endpoint result from
-// a HTTP "OK" response.
-func NewReadOrderStatusRTOK(body *ReadResponseBody) *order.OrderStatusRT {
+// NewReadOrderStatusRTCreated builds a "order" service "read" endpoint result
+// from a HTTP "Created" response.
+func NewReadOrderStatusRTCreated(body *ReadResponseBody) *order.OrderStatusRT {
 	v := &order.OrderStatusRT{
 		ID:         *body.ID,
 		Status:     *body.Status,
