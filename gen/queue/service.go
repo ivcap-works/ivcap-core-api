@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -49,7 +49,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.41"
+const APIVersion = "0.43"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -260,12 +260,12 @@ type Readqueueresponse struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First message in the queue
-	FirstMsg *string
+	// First identifier in the queue
+	FirstID *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last message in the queue
-	LastMsg *string
+	// Last identifier in the queue
+	LastID *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
@@ -515,9 +515,9 @@ func newReadqueueresponse(vres *queueviews.ReadqueueresponseView) *Readqueueresp
 		Description:   vres.Description,
 		TotalMessages: vres.TotalMessages,
 		Bytes:         vres.Bytes,
-		FirstMsg:      vres.FirstMsg,
+		FirstID:       vres.FirstID,
 		FirstTime:     vres.FirstTime,
-		LastMsg:       vres.LastMsg,
+		LastID:        vres.LastID,
 		LastTime:      vres.LastTime,
 		ConsumerCount: vres.ConsumerCount,
 	}
@@ -542,9 +542,9 @@ func newReadqueueresponseView(res *Readqueueresponse) *queueviews.Readqueuerespo
 		Description:   res.Description,
 		TotalMessages: res.TotalMessages,
 		Bytes:         res.Bytes,
-		FirstMsg:      res.FirstMsg,
+		FirstID:       res.FirstID,
 		FirstTime:     res.FirstTime,
-		LastMsg:       res.LastMsg,
+		LastID:        res.LastID,
 		LastTime:      res.LastTime,
 		ConsumerCount: res.ConsumerCount,
 		CreatedAt:     &res.CreatedAt,

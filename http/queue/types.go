@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -62,12 +62,12 @@ type ReadResponseBody struct {
 	TotalMessages *uint64 `form:"total-messages,omitempty" json:"total-messages,omitempty" xml:"total-messages,omitempty"`
 	// Number of bytes in the queue
 	Bytes *uint64 `form:"bytes,omitempty" json:"bytes,omitempty" xml:"bytes,omitempty"`
-	// First message in the queue
-	FirstMsg *string `form:"first-msg,omitempty" json:"first-msg,omitempty" xml:"first-msg,omitempty"`
+	// First identifier in the queue
+	FirstID *string `form:"first-id,omitempty" json:"first-id,omitempty" xml:"first-id,omitempty"`
 	// Timestamp of the first message in the queue
 	FirstTime *string `form:"first-time,omitempty" json:"first-time,omitempty" xml:"first-time,omitempty"`
-	// Last message in the queue
-	LastMsg *string `form:"last-msg,omitempty" json:"last-msg,omitempty" xml:"last-msg,omitempty"`
+	// Last identifier in the queue
+	LastID *string `form:"last-id,omitempty" json:"last-id,omitempty" xml:"last-id,omitempty"`
 	// Timestamp of the last message in the queue
 	LastTime *string `form:"last-time,omitempty" json:"last-time,omitempty" xml:"last-time,omitempty"`
 	// Number of consumers
@@ -459,9 +459,9 @@ func NewReadqueueresponseViewCreated(body *ReadResponseBody) *queueviews.Readque
 		Description:   body.Description,
 		TotalMessages: body.TotalMessages,
 		Bytes:         body.Bytes,
-		FirstMsg:      body.FirstMsg,
+		FirstID:       body.FirstID,
 		FirstTime:     body.FirstTime,
-		LastMsg:       body.LastMsg,
+		LastID:        body.LastID,
 		LastTime:      body.LastTime,
 		ConsumerCount: body.ConsumerCount,
 		CreatedAt:     body.CreatedAt,
