@@ -43,8 +43,6 @@ type CreateResponseBody struct {
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Description of the created queue.
 	Description *string `form:"description,omitempty" json:"description,omitempty" xml:"description,omitempty"`
-	// Timestamp when the queue was created
-	CreatedAt *string `form:"created-at,omitempty" json:"created-at,omitempty" xml:"created-at,omitempty"`
 	// Reference to billable account
 	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 }
@@ -62,12 +60,8 @@ type ReadResponseBody struct {
 	TotalMessages *uint64 `form:"total-messages,omitempty" json:"total-messages,omitempty" xml:"total-messages,omitempty"`
 	// Number of bytes in the queue
 	Bytes *uint64 `form:"bytes,omitempty" json:"bytes,omitempty" xml:"bytes,omitempty"`
-	// First identifier in the queue
-	FirstID *string `form:"first-id,omitempty" json:"first-id,omitempty" xml:"first-id,omitempty"`
 	// Timestamp of the first message in the queue
 	FirstTime *string `form:"first-time,omitempty" json:"first-time,omitempty" xml:"first-time,omitempty"`
-	// Last identifier in the queue
-	LastID *string `form:"last-id,omitempty" json:"last-id,omitempty" xml:"last-id,omitempty"`
 	// Timestamp of the last message in the queue
 	LastTime *string `form:"last-time,omitempty" json:"last-time,omitempty" xml:"last-time,omitempty"`
 	// Number of consumers
@@ -364,7 +358,6 @@ func NewCreatequeueresponseViewCreated(body *CreateResponseBody) *queueviews.Cre
 		ID:          body.ID,
 		Name:        body.Name,
 		Description: body.Description,
-		CreatedAt:   body.CreatedAt,
 		Account:     body.Account,
 	}
 
@@ -459,9 +452,7 @@ func NewReadqueueresponseViewCreated(body *ReadResponseBody) *queueviews.Readque
 		Description:   body.Description,
 		TotalMessages: body.TotalMessages,
 		Bytes:         body.Bytes,
-		FirstID:       body.FirstID,
 		FirstTime:     body.FirstTime,
-		LastID:        body.LastID,
 		LastTime:      body.LastTime,
 		ConsumerCount: body.ConsumerCount,
 		CreatedAt:     body.CreatedAt,

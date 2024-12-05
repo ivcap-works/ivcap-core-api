@@ -54,8 +54,6 @@ type CreatequeueresponseView struct {
 	Name *string
 	// Description of the created queue.
 	Description *string
-	// Timestamp when the queue was created
-	CreatedAt *string
 	// Reference to billable account
 	Account *string
 }
@@ -72,12 +70,8 @@ type ReadqueueresponseView struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First identifier in the queue
-	FirstID *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last identifier in the queue
-	LastID *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
@@ -100,7 +94,6 @@ var (
 			"id",
 			"name",
 			"description",
-			"created-at",
 			"account",
 		},
 	}
@@ -113,9 +106,7 @@ var (
 			"description",
 			"total-messages",
 			"bytes",
-			"first-id",
 			"first-time",
-			"last-id",
 			"last-time",
 			"consumer-count",
 			"created-at",
@@ -175,14 +166,8 @@ func ValidateCreatequeueresponseView(result *CreatequeueresponseView) (err error
 	if result.Name == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("name", "result"))
 	}
-	if result.CreatedAt == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("created-at", "result"))
-	}
 	if result.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
-	}
-	if result.CreatedAt != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.created-at", *result.CreatedAt, goa.FormatDateTime))
 	}
 	if result.Account != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.account", *result.Account, goa.FormatURI))
@@ -205,14 +190,8 @@ func ValidateReadqueueresponseView(result *ReadqueueresponseView) (err error) {
 	if result.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
 	}
-	if result.FirstID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-id", *result.FirstID, goa.FormatURI))
-	}
 	if result.FirstTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-time", *result.FirstTime, goa.FormatDateTime))
-	}
-	if result.LastID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-id", *result.LastID, goa.FormatURI))
 	}
 	if result.LastTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.last-time", *result.LastTime, goa.FormatDateTime))

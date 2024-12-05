@@ -83,8 +83,6 @@ type Createqueueresponse struct {
 	Name string
 	// Description of the created queue.
 	Description *string
-	// Timestamp when the queue was created
-	CreatedAt string
 	// Reference to billable account
 	Account *string
 }
@@ -260,12 +258,8 @@ type Readqueueresponse struct {
 	TotalMessages *uint64
 	// Number of bytes in the queue
 	Bytes *uint64
-	// First identifier in the queue
-	FirstID *string
 	// Timestamp of the first message in the queue
 	FirstTime *string
-	// Last identifier in the queue
-	LastID *string
 	// Timestamp of the last message in the queue
 	LastTime *string
 	// Number of consumers
@@ -489,9 +483,6 @@ func newCreatequeueresponse(vres *queueviews.CreatequeueresponseView) *Createque
 	if vres.Name != nil {
 		res.Name = *vres.Name
 	}
-	if vres.CreatedAt != nil {
-		res.CreatedAt = *vres.CreatedAt
-	}
 	return res
 }
 
@@ -502,7 +493,6 @@ func newCreatequeueresponseView(res *Createqueueresponse) *queueviews.Createqueu
 		ID:          &res.ID,
 		Name:        &res.Name,
 		Description: res.Description,
-		CreatedAt:   &res.CreatedAt,
 		Account:     res.Account,
 	}
 	return vres
@@ -515,9 +505,7 @@ func newReadqueueresponse(vres *queueviews.ReadqueueresponseView) *Readqueueresp
 		Description:   vres.Description,
 		TotalMessages: vres.TotalMessages,
 		Bytes:         vres.Bytes,
-		FirstID:       vres.FirstID,
 		FirstTime:     vres.FirstTime,
-		LastID:        vres.LastID,
 		LastTime:      vres.LastTime,
 		ConsumerCount: vres.ConsumerCount,
 	}
@@ -542,9 +530,7 @@ func newReadqueueresponseView(res *Readqueueresponse) *queueviews.Readqueuerespo
 		Description:   res.Description,
 		TotalMessages: res.TotalMessages,
 		Bytes:         res.Bytes,
-		FirstID:       res.FirstID,
 		FirstTime:     res.FirstTime,
-		LastID:        res.LastID,
 		LastTime:      res.LastTime,
 		ConsumerCount: res.ConsumerCount,
 		CreatedAt:     &res.CreatedAt,
