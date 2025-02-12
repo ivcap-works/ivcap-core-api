@@ -1,4 +1,4 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -122,7 +122,9 @@ type AspectRT struct {
 	Replaces *string
 	// Reference to billable account
 	Account string
-	Links   []*LinkT
+	// Reference to policy used
+	Policy string
+	Links  []*LinkT
 }
 
 // Something wasn't right with this request

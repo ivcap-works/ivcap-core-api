@@ -1,4 +1,4 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -45,8 +45,10 @@ type ReadResponseBody struct {
 	// Reference to retracted aspect record this record is replacing
 	Replaces *string `form:"replaces,omitempty" json:"replaces,omitempty" xml:"replaces,omitempty"`
 	// Reference to billable account
-	Account *string              `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
-	Links   []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Reference to policy used
+	Policy *string              `form:"policy,omitempty" json:"policy,omitempty" xml:"policy,omitempty"`
+	Links  []*LinkTResponseBody `form:"links,omitempty" json:"links,omitempty" xml:"links,omitempty"`
 }
 
 // ListResponseBody is the type of the "aspect" service "list" endpoint HTTP
@@ -289,9 +291,9 @@ type AspectListItemRTResponseBody struct {
 	ValidTo *string `form:"valid-to,omitempty" json:"valid-to,omitempty" xml:"valid-to,omitempty"`
 }
 
-// NewReadAspectRTCreated builds a "aspect" service "read" endpoint result from
-// a HTTP "Created" response.
-func NewReadAspectRTCreated(body *ReadResponseBody) *aspect.AspectRT {
+// NewReadAspectRTOK builds a "aspect" service "read" endpoint result from a
+// HTTP "OK" response.
+func NewReadAspectRTOK(body *ReadResponseBody) *aspect.AspectRT {
 	v := &aspect.AspectRT{
 		ID:          *body.ID,
 		Entity:      *body.Entity,
@@ -304,6 +306,7 @@ func NewReadAspectRTCreated(body *ReadResponseBody) *aspect.AspectRT {
 		Retracter:   body.Retracter,
 		Replaces:    body.Replaces,
 		Account:     *body.Account,
+		Policy:      *body.Policy,
 	}
 	v.Links = make([]*aspect.LinkT, len(body.Links))
 	for i, val := range body.Links {
@@ -693,6 +696,9 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 	if body.Account == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("account", "body"))
 	}
+	if body.Policy == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("policy", "body"))
+	}
 	if body.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
@@ -719,6 +725,9 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 	}
 	if body.Account != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	if body.Policy != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.policy", *body.Policy, goa.FormatURI))
 	}
 	for _, e := range body.Links {
 		if e != nil {

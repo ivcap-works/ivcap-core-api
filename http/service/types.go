@@ -1,4 +1,4 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -699,9 +699,9 @@ func NewCreateServiceNotAuthorized() *service.UnauthorizedT {
 	return v
 }
 
-// NewReadServiceStatusRTCreated builds a "service" service "read" endpoint
-// result from a HTTP "Created" response.
-func NewReadServiceStatusRTCreated(body *ReadResponseBody) *service.ServiceStatusRT {
+// NewReadServiceStatusRTOK builds a "service" service "read" endpoint result
+// from a HTTP "OK" response.
+func NewReadServiceStatusRTOK(body *ReadResponseBody) *service.ServiceStatusRT {
 	v := &service.ServiceStatusRT{
 		ID:          *body.ID,
 		Description: body.Description,
