@@ -105,7 +105,7 @@ func BuildSetPayload(secretSetBody string, secretSetJWT string) (*secret.SetPayl
 	{
 		err = json.Unmarshal([]byte(secretSetBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"expiry-time\": 6701991492767279116,\n      \"secret-name\": \"Voluptatem explicabo aut adipisci.\",\n      \"secret-type\": \"Alias aut voluptas molestiae.\",\n      \"secret-value\": \"Officiis consequatur corporis autem.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"expiry-time\": 7369192019744636425,\n      \"secret-name\": \"Fugiat non qui nihil voluptatem ea.\",\n      \"secret-type\": \"At quis sit aliquam vel molestias.\",\n      \"secret-value\": \"Aut ut tempora assumenda dicta iste sit.\"\n   }'")
 		}
 	}
 	var jwt string
