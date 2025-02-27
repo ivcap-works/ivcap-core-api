@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,7 +105,7 @@ func BuildSetPayload(secretSetBody string, secretSetJWT string) (*secret.SetPayl
 	{
 		err = json.Unmarshal([]byte(secretSetBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"expiry-time\": 7369192019744636425,\n      \"secret-name\": \"Fugiat non qui nihil voluptatem ea.\",\n      \"secret-type\": \"At quis sit aliquam vel molestias.\",\n      \"secret-value\": \"Aut ut tempora assumenda dicta iste sit.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"expiry-time\": 6206531581567892711,\n      \"secret-name\": \"Sit aliquam vel molestias inventore aut ut.\",\n      \"secret-type\": \"Assumenda dicta iste sit sint minima est.\",\n      \"secret-value\": \"Aut et.\"\n   }'")
 		}
 	}
 	var jwt string

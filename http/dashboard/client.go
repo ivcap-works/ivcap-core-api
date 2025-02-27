@@ -17,13 +17,18 @@
 package client
 
 import (
+	"context"
 	"net/http"
 
 	goahttp "goa.design/goa/v3/http"
+	goa "goa.design/goa/v3/pkg"
 )
 
-// Client lists the openapi service endpoint HTTP clients.
+// Client lists the dashboard service endpoint HTTP clients.
 type Client struct {
+	// List Doer is the HTTP client used to make requests to the list endpoint.
+	ListDoer goahttp.Doer
+
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
 
@@ -37,7 +42,7 @@ type Client struct {
 	decoder func(*http.Response) goahttp.Decoder
 }
 
-// NewClient instantiates HTTP clients for all the openapi service servers.
+// NewClient instantiates HTTP clients for all the dashboard service servers.
 func NewClient(
 	scheme string,
 	host string,
@@ -47,11 +52,36 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
+		ListDoer:            doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
 		host:                host,
 		decoder:             dec,
 		encoder:             enc,
+	}
+}
+
+// List returns an endpoint that makes HTTP requests to the dashboard service
+// list server.
+func (c *Client) List() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeListRequest(c.encoder)
+		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildListRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.ListDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("dashboard", "list", err)
+		}
+		return decodeResponse(resp)
 	}
 }

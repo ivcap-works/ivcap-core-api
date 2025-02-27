@@ -14,27 +14,19 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package metadata
+package dashboard
 
 import (
 	"context"
 
+	dashboardviews "github.com/ivcap-works/ivcap-core-api/gen/dashboard/views"
 	"goa.design/goa/v3/security"
 )
 
-// Manages the life cycle of metadata attached to an entity.
+// list dashboards
 type Service interface {
-	// Show metadata by ID
-	Read(context.Context, *ReadPayload) (res *MetadataRecordRT, err error)
-	// Return a list of metadata records.
-	List(context.Context, *ListPayload) (res *ListMetaRT, err error)
-	// Attach new metadata to an entity.
-	Add(context.Context, *AddPayload) (res *AddMetaRT, err error)
-	// Revoke this record and create a new one with the information provided.
-	// For any field not provided, the value from the current record is used.
-	UpdateRecord(context.Context, *UpdateRecordPayload) (res *AddMetaRT, err error)
-	// Retract a previously created statement.
-	Revoke(context.Context, *RevokePayload) (err error)
+	// list dashboards
+	List(context.Context, *ListPayload) (res *DashboardListRT, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -52,39 +44,34 @@ const APIVersion = "0.43"
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
-const ServiceName = "metadata"
+const ServiceName = "dashboard"
 
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [5]string{"read", "list", "add", "update_record", "revoke"}
-
-// AddMetaRT is the result type of the metadata service add method.
-type AddMetaRT struct {
-	// Reference to record created
-	RecordID string
-}
-
-// AddPayload is the payload type of the metadata service add method.
-type AddPayload struct {
-	// Entity to which attach metadata
-	EntityID string `json:"entity-id,omitempty"`
-	// Schema of metadata
-	Schema string
-	// Aspect content
-	Aspect any
-	// Content-Type header, MUST be of application/json.
-	ContentType string `json:"content-type,omitempty"`
-	// Policy guiding visibility and actions performed
-	PolicyID *string `json:"policy-id,omitempty"`
-	// JWT used for authentication
-	JWT string
-}
+var MethodNames = [1]string{"list"}
 
 // Something wasn't right with this request
 type BadRequestT struct {
 	// Information message
 	Message string
+}
+
+type DashboardListItem struct {
+	// dashboard id
+	ID int
+	// dashboard uid
+	UID string
+	// Dashboard title
+	Title string
+	// Dashboard url
+	URL string
+}
+
+// DashboardListRT is the result type of the dashboard service list method.
+type DashboardListRT struct {
+	// Dashboards
+	Items []*DashboardListItem
 }
 
 // InvalidParameterT is the error returned when a parameter has the wrong value.
@@ -105,43 +92,10 @@ type InvalidScopesT struct {
 	Message string
 }
 
-type LinkT struct {
-	// relation type
-	Rel string
-	// mime type
-	Type string
-	// web link
-	Href string
-}
-
-// ListMetaRT is the result type of the metadata service list method.
-type ListMetaRT struct {
-	// List of metadata records
-	Items []*MetadataListItemRT
-	// Entity for which to request metadata
-	Entity *string
-	// Optional schema to filter on
-	Schema *string
-	// Optional json path to further filter on returned list
-	AspectPath *string
-	// Time at which this list was valid
-	AtTime *string
-	Links  []*LinkT
-}
-
-// ListPayload is the payload type of the metadata service list method.
+// ListPayload is the payload type of the dashboard service list method.
 type ListPayload struct {
-	// Entity for which to request metadata
-	EntityID *string `json:"entity-id,omitempty"`
-	// Schema prefix using '%' as wildcard indicator
-	Schema *string
-	// To learn more about the supported format, see
-	// https://www.postgresql.org/docs/current/datatype-json.html#DATATYPE-JSONPATH
-	AspectPath *string `json:"aspect-path,omitempty"`
-	// Return metadata which where valid at that time [now]
-	AtTime *string `json:"at-time,omitempty"`
-	// The 'limit' system query option requests the number of items in the queried
-	// collection to be included in the result.
+	// The 'limit' query option sets the maximum number of items
+	// to be included in the result.
 	Limit int
 	// The 'filter' system query option allows clients to filter a collection of
 	// resources that are addressed by a request URL. The expression specified with
@@ -149,58 +103,23 @@ type ListPayload struct {
 	// is evaluated for each resource in the collection, and only items where the
 	// expression
 	// evaluates to true are included in the response.
-	Filter string
+	Filter *string
 	// The 'orderby' query option allows clients to request resources in either
 	// ascending order using asc or descending order using desc. If asc or desc not
 	// specified,
 	// then the resources will be ordered in ascending order. The request below
 	// orders Trips on
 	// property EndsAt in descending order.
-	OrderBy string `json:"order-by,omitempty"`
-	// When set order result in descending order. Ascending order is the default.
-	OrderDesc *bool `json:"order-desc,omitempty"`
-	// When set, also include aspect content in list.
-	IncludeContent bool `json:"include-content,omitempty"`
-	// The content of '$page' is returned in the 'links' part of a previous query
-	// and
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the lt.
+	OrderDesc bool
+	// Return the state of the respective resources at that time [now]
+	AtTime *string
+	// The content of 'page' is returned in the 'links' part of a previous query and
 	// will when set, ALL other parameters, except for 'limit' are ignored.
 	Page *string
 	// JWT used for authentication
 	JWT string
-}
-
-type MetadataListItemRT struct {
-	// ID
-	ID string
-	// Entity ID
-	Entity string
-	// Schema ID
-	Schema string
-	// Attached metadata aspect
-	Aspect any
-	// If aspectPath was defined, this is what matched the query
-	AspectContext *string
-}
-
-// MetadataRecordRT is the result type of the metadata service read method.
-type MetadataRecordRT struct {
-	// ID
-	ID string
-	// Entity ID
-	Entity string
-	// Schema ID
-	Schema string
-	// Attached metadata aspect
-	Aspect any
-	// Time this record was asserted
-	ValidFrom string
-	// Time this record was retracted
-	ValidTo *string
-	// Entity asserting this metadata record at 'valid-from'
-	Asserter string
-	// Entity revoking this record at 'valid-to'
-	Revoker *string
-	Links   []*LinkT
 }
 
 // Method is not yet implemented.
@@ -209,56 +128,12 @@ type NotImplementedT struct {
 	Message string
 }
 
-// ReadPayload is the payload type of the metadata service read method.
-type ReadPayload struct {
-	// ID of metadata to show
-	ID string
-	// JWT used for authentication
-	JWT string
-}
-
-// NotFound is the type returned when attempting to manage a resource that does
-// not exist.
-type ResourceNotFoundT struct {
-	// ID of missing resource
-	ID string
-	// Message of error
-	Message string
-}
-
-// RevokePayload is the payload type of the metadata service revoke method.
-type RevokePayload struct {
-	// Record ID to restract
-	ID *string
-	// JWT used for authentication
-	JWT string
-}
-
 // Service necessary to fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
 }
 
 // Unauthorized access to resource
 type UnauthorizedT struct {
-}
-
-// UpdateRecordPayload is the payload type of the metadata service
-// update_record method.
-type UpdateRecordPayload struct {
-	// Record ID to update
-	ID string
-	// Entity to which attach metadata
-	EntityID *string `json:"entity-id,omitempty"`
-	// Schema of metadata
-	Schema *string
-	// Aspect content
-	Aspect any
-	// Content-Type header, MUST be of application/json.
-	ContentType *string `json:"content-type,omitempty"`
-	// Policy guiding visibility and actions performed
-	PolicyID *string `json:"policy-id,omitempty"`
-	// JWT used for authentication
-	JWT string
 }
 
 // Error returns an error description.
@@ -330,23 +205,6 @@ func (e *NotImplementedT) GoaErrorName() string {
 }
 
 // Error returns an error description.
-func (e *ResourceNotFoundT) Error() string {
-	return "NotFound is the type returned when attempting to manage a resource that does not exist."
-}
-
-// ErrorName returns "ResourceNotFoundT".
-//
-// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *ResourceNotFoundT) ErrorName() string {
-	return e.GoaErrorName()
-}
-
-// GoaErrorName returns "ResourceNotFoundT".
-func (e *ResourceNotFoundT) GoaErrorName() string {
-	return "not-found"
-}
-
-// Error returns an error description.
 func (e *ServiceNotAvailableT) Error() string {
 	return "Service necessary to fulfil the request is currently not available."
 }
@@ -378,4 +236,76 @@ func (e *UnauthorizedT) ErrorName() string {
 // GoaErrorName returns "UnauthorizedT".
 func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
+}
+
+// NewDashboardListRT initializes result type DashboardListRT from viewed
+// result type DashboardListRT.
+func NewDashboardListRT(vres *dashboardviews.DashboardListRT) *DashboardListRT {
+	return newDashboardListRT(vres.Projected)
+}
+
+// NewViewedDashboardListRT initializes viewed result type DashboardListRT from
+// result type DashboardListRT using the given view.
+func NewViewedDashboardListRT(res *DashboardListRT, view string) *dashboardviews.DashboardListRT {
+	p := newDashboardListRTView(res)
+	return &dashboardviews.DashboardListRT{Projected: p, View: "default"}
+}
+
+// newDashboardListRT converts projected type DashboardListRT to service type
+// DashboardListRT.
+func newDashboardListRT(vres *dashboardviews.DashboardListRTView) *DashboardListRT {
+	res := &DashboardListRT{}
+	if vres.Items != nil {
+		res.Items = make([]*DashboardListItem, len(vres.Items))
+		for i, val := range vres.Items {
+			res.Items[i] = transformDashboardviewsDashboardListItemViewToDashboardListItem(val)
+		}
+	}
+	return res
+}
+
+// newDashboardListRTView projects result type DashboardListRT to projected
+// type DashboardListRTView using the "default" view.
+func newDashboardListRTView(res *DashboardListRT) *dashboardviews.DashboardListRTView {
+	vres := &dashboardviews.DashboardListRTView{}
+	if res.Items != nil {
+		vres.Items = make([]*dashboardviews.DashboardListItemView, len(res.Items))
+		for i, val := range res.Items {
+			vres.Items[i] = transformDashboardListItemToDashboardviewsDashboardListItemView(val)
+		}
+	} else {
+		vres.Items = []*dashboardviews.DashboardListItemView{}
+	}
+	return vres
+}
+
+// transformDashboardviewsDashboardListItemViewToDashboardListItem builds a
+// value of type *DashboardListItem from a value of type
+// *dashboardviews.DashboardListItemView.
+func transformDashboardviewsDashboardListItemViewToDashboardListItem(v *dashboardviews.DashboardListItemView) *DashboardListItem {
+	if v == nil {
+		return nil
+	}
+	res := &DashboardListItem{
+		ID:    *v.ID,
+		UID:   *v.UID,
+		Title: *v.Title,
+		URL:   *v.URL,
+	}
+
+	return res
+}
+
+// transformDashboardListItemToDashboardviewsDashboardListItemView builds a
+// value of type *dashboardviews.DashboardListItemView from a value of type
+// *DashboardListItem.
+func transformDashboardListItemToDashboardviewsDashboardListItemView(v *DashboardListItem) *dashboardviews.DashboardListItemView {
+	res := &dashboardviews.DashboardListItemView{
+		ID:    &v.ID,
+		UID:   &v.UID,
+		Title: &v.Title,
+		URL:   &v.URL,
+	}
+
+	return res
 }
