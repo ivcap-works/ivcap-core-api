@@ -643,7 +643,7 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("asserter", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
@@ -970,7 +970,7 @@ func ValidateMetadataListItemRTResponseBody(body *MetadataListItemRTResponseBody
 		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))

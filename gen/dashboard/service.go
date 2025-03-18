@@ -14,18 +14,19 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package search
+package dashboard
 
 import (
 	"context"
 
+	dashboardviews "github.com/ivcap-works/ivcap-core-api/gen/dashboard/views"
 	"goa.design/goa/v3/security"
 )
 
-// Provides a search capability across the entire system.
+// list dashboards
 type Service interface {
-	// Execute query provided in body and return a list of search result.
-	Search(context.Context, *SearchPayload) (res *SearchListRT, err error)
+	// list dashboards
+	List(context.Context, *ListPayload) (res *DashboardListRT, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -43,17 +44,34 @@ const APIVersion = "0.44"
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
-const ServiceName = "search"
+const ServiceName = "dashboard"
 
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [1]string{"search"}
+var MethodNames = [1]string{"list"}
 
 // Something wasn't right with this request
 type BadRequestT struct {
 	// Information message
 	Message string
+}
+
+type DashboardListItem struct {
+	// dashboard id
+	ID int
+	// dashboard uid
+	UID string
+	// Dashboard title
+	Title string
+	// Dashboard url
+	URL string
+}
+
+// DashboardListRT is the result type of the dashboard service list method.
+type DashboardListRT struct {
+	// Dashboards
+	Items []*DashboardListItem
 }
 
 // InvalidParameterT is the error returned when a parameter has the wrong value.
@@ -74,13 +92,34 @@ type InvalidScopesT struct {
 	Message string
 }
 
-type LinkT struct {
-	// relation type
-	Rel string
-	// mime type
-	Type string
-	// web link
-	Href string
+// ListPayload is the payload type of the dashboard service list method.
+type ListPayload struct {
+	// The 'limit' query option sets the maximum number of items
+	// to be included in the result.
+	Limit int
+	// The 'filter' system query option allows clients to filter a collection of
+	// resources that are addressed by a request URL. The expression specified with
+	// 'filter'
+	// is evaluated for each resource in the collection, and only items where the
+	// expression
+	// evaluates to true are included in the response.
+	Filter *string
+	// The 'orderby' query option allows clients to request resources in either
+	// ascending order using asc or descending order using desc. If asc or desc not
+	// specified,
+	// then the resources will be ordered in ascending order. The request below
+	// orders Trips on
+	// property EndsAt in descending order.
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the lt.
+	OrderDesc bool
+	// Return the state of the respective resources at that time [now]
+	AtTime *string
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
+	// JWT used for authentication
+	JWT string
 }
 
 // Method is not yet implemented.
@@ -89,47 +128,12 @@ type NotImplementedT struct {
 	Message string
 }
 
-// SearchListRT is the result type of the search service search method.
-type SearchListRT struct {
-	// List of search result
-	Items []any
-	// Time at which this list was valid
-	AtTime string
-	Links  []*LinkT
-}
-
-// SearchPayload is the payload type of the search service search method.
-type SearchPayload struct {
-	// Query
-	Query []byte
-	// Content-Type header, MUST be of application/json.
-	ContentType string `json:"content-type"`
-	// Return search which where valid at that time [now]
-	AtTime *string `json:"at-time,omitempty"`
-	// The 'limit' system query option requests the number of items in the queried
-	// collection to be included in the result.
-	Limit int
-	// The content of '$page' is returned in the 'links' part of a previous query
-	// and
-	// will when set, ALL other parameters, except for 'limit' are ignored.
-	Page any
-	// JWT used for authentication
-	JWT string
-}
-
 // Service necessary to fulfil the request is currently not available.
 type ServiceNotAvailableT struct {
 }
 
 // Unauthorized access to resource
 type UnauthorizedT struct {
-}
-
-// UnsupportedContentType is the error returned when the provided content type
-// is not supported.
-type UnsupportedContentTypeT struct {
-	// message describing expected type or pattern.
-	Message string
 }
 
 // Error returns an error description.
@@ -234,19 +238,74 @@ func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
 }
 
-// Error returns an error description.
-func (e *UnsupportedContentTypeT) Error() string {
-	return "UnsupportedContentType is the error returned when the provided content type is not supported."
+// NewDashboardListRT initializes result type DashboardListRT from viewed
+// result type DashboardListRT.
+func NewDashboardListRT(vres *dashboardviews.DashboardListRT) *DashboardListRT {
+	return newDashboardListRT(vres.Projected)
 }
 
-// ErrorName returns "UnsupportedContentTypeT".
-//
-// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
-func (e *UnsupportedContentTypeT) ErrorName() string {
-	return e.GoaErrorName()
+// NewViewedDashboardListRT initializes viewed result type DashboardListRT from
+// result type DashboardListRT using the given view.
+func NewViewedDashboardListRT(res *DashboardListRT, view string) *dashboardviews.DashboardListRT {
+	p := newDashboardListRTView(res)
+	return &dashboardviews.DashboardListRT{Projected: p, View: "default"}
 }
 
-// GoaErrorName returns "UnsupportedContentTypeT".
-func (e *UnsupportedContentTypeT) GoaErrorName() string {
-	return "unsupported-content-type"
+// newDashboardListRT converts projected type DashboardListRT to service type
+// DashboardListRT.
+func newDashboardListRT(vres *dashboardviews.DashboardListRTView) *DashboardListRT {
+	res := &DashboardListRT{}
+	if vres.Items != nil {
+		res.Items = make([]*DashboardListItem, len(vres.Items))
+		for i, val := range vres.Items {
+			res.Items[i] = transformDashboardviewsDashboardListItemViewToDashboardListItem(val)
+		}
+	}
+	return res
+}
+
+// newDashboardListRTView projects result type DashboardListRT to projected
+// type DashboardListRTView using the "default" view.
+func newDashboardListRTView(res *DashboardListRT) *dashboardviews.DashboardListRTView {
+	vres := &dashboardviews.DashboardListRTView{}
+	if res.Items != nil {
+		vres.Items = make([]*dashboardviews.DashboardListItemView, len(res.Items))
+		for i, val := range res.Items {
+			vres.Items[i] = transformDashboardListItemToDashboardviewsDashboardListItemView(val)
+		}
+	} else {
+		vres.Items = []*dashboardviews.DashboardListItemView{}
+	}
+	return vres
+}
+
+// transformDashboardviewsDashboardListItemViewToDashboardListItem builds a
+// value of type *DashboardListItem from a value of type
+// *dashboardviews.DashboardListItemView.
+func transformDashboardviewsDashboardListItemViewToDashboardListItem(v *dashboardviews.DashboardListItemView) *DashboardListItem {
+	if v == nil {
+		return nil
+	}
+	res := &DashboardListItem{
+		ID:    *v.ID,
+		UID:   *v.UID,
+		Title: *v.Title,
+		URL:   *v.URL,
+	}
+
+	return res
+}
+
+// transformDashboardListItemToDashboardviewsDashboardListItemView builds a
+// value of type *dashboardviews.DashboardListItemView from a value of type
+// *DashboardListItem.
+func transformDashboardListItemToDashboardviewsDashboardListItemView(v *DashboardListItem) *dashboardviews.DashboardListItemView {
+	res := &dashboardviews.DashboardListItemView{
+		ID:    &v.ID,
+		UID:   &v.UID,
+		Title: &v.Title,
+		URL:   &v.URL,
+	}
+
+	return res
 }

@@ -1118,7 +1118,7 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
@@ -1231,7 +1231,7 @@ func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
@@ -1659,7 +1659,7 @@ func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err err
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
@@ -1755,7 +1755,7 @@ func ValidateOrderMetadataListItemRTResponseBody(body *OrderMetadataListItemRTRe
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))

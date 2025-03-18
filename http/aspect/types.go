@@ -1058,6 +1058,9 @@ func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (e
 	if body.ContentType == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
 	}
+	if body.ValidFrom == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("valid-from", "body"))
+	}
 	if body.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}

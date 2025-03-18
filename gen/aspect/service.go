@@ -48,7 +48,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.43"
+const APIVersion = "0.44"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -78,7 +78,7 @@ type AspectListItemRT struct {
 	// Content-Type header, MUST be of application/json.
 	ContentType string `json:"content-type,omitempty"`
 	// Time this assertion became valid
-	ValidFrom *string
+	ValidFrom string
 	// Time this assertion became valid
 	ValidTo *string
 }

@@ -203,7 +203,7 @@ func ValidateOrderListItemView(result *OrderListItemView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
 	}
 	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
 	if result.Status != nil {
 		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {

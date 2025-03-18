@@ -680,7 +680,7 @@ func ValidateArtifactListItemResponseBody(body *ArtifactListItemResponseBody) (e
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "pending" || *body.Status == "partial" || *body.Status == "ready" || *body.Status == "error" || *body.Status == "unknown") {

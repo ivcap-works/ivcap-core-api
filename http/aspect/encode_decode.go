@@ -857,7 +857,7 @@ func unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(v *AspectList
 		Schema:      *v.Schema,
 		Content:     v.Content,
 		ContentType: *v.ContentType,
-		ValidFrom:   v.ValidFrom,
+		ValidFrom:   *v.ValidFrom,
 		ValidTo:     v.ValidTo,
 	}
 

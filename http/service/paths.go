@@ -20,27 +20,42 @@ import (
 	"fmt"
 )
 
-// ListServicePath returns the URL path to the service service list HTTP endpoint.
-func ListServicePath() string {
-	return "/1/services"
+// ServiceListServicePath returns the URL path to the service service service-list HTTP endpoint.
+func ServiceListServicePath() string {
+	return "/1/services2"
 }
 
-// CreateServiceServicePath returns the URL path to the service service create_service HTTP endpoint.
-func CreateServiceServicePath() string {
-	return "/1/services"
+// ServiceCreateServicePath returns the URL path to the service service service-create HTTP endpoint.
+func ServiceCreateServicePath() string {
+	return "/1/services2"
 }
 
-// ReadServicePath returns the URL path to the service service read HTTP endpoint.
-func ReadServicePath(id string) string {
-	return fmt.Sprintf("/1/services/%v", id)
+// ServiceReadServicePath returns the URL path to the service service service-read HTTP endpoint.
+func ServiceReadServicePath(id string) string {
+	return fmt.Sprintf("/1/services2/%v", id)
 }
 
-// UpdateServicePath returns the URL path to the service service update HTTP endpoint.
-func UpdateServicePath(id string) string {
-	return fmt.Sprintf("/1/services/%v", id)
+// ServiceUpdateServicePath returns the URL path to the service service service-update HTTP endpoint.
+func ServiceUpdateServicePath(id string) string {
+	return fmt.Sprintf("/1/services2/%v", id)
 }
 
-// DeleteServicePath returns the URL path to the service service delete HTTP endpoint.
-func DeleteServicePath(id string) string {
-	return fmt.Sprintf("/1/services/%v", id)
+// ServiceDeleteServicePath returns the URL path to the service service service-delete HTTP endpoint.
+func ServiceDeleteServicePath(id string) string {
+	return fmt.Sprintf("/1/services2/%v", id)
+}
+
+// JobListServicePath returns the URL path to the service service job-list HTTP endpoint.
+func JobListServicePath(serviceID string) string {
+	return fmt.Sprintf("/1/services2/%v/jobs", serviceID)
+}
+
+// JobCreateServicePath returns the URL path to the service service job-create HTTP endpoint.
+func JobCreateServicePath(serviceID string) string {
+	return fmt.Sprintf("/1/services2/%v/jobs", serviceID)
+}
+
+// JobReadServicePath returns the URL path to the service service job-read HTTP endpoint.
+func JobReadServicePath(serviceID string, id string) string {
+	return fmt.Sprintf("/1/services2/%v/jobs/%v", serviceID, id)
 }

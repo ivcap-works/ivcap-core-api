@@ -188,7 +188,7 @@ func ValidateReadqueueresponseView(result *ReadqueueresponseView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("created-at", "result"))
 	}
 	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
 	if result.FirstTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-time", *result.FirstTime, goa.FormatDateTime))

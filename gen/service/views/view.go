@@ -28,31 +28,39 @@ type ServiceListRT struct {
 	View string
 }
 
+// JobListRT is the viewed result type that is projected based on a view.
+type JobListRT struct {
+	// Type to project
+	Projected *JobListRTView
+	// View to render
+	View string
+}
+
 // ServiceListRTView is a type that runs validations on a projected type.
 type ServiceListRTView struct {
 	// Services
-	Items []*ServiceListItemView
+	Items []*ServiceListItemTView
 	// Time at which this list was valid
 	AtTime *string
 	Links  []*LinkTView
 }
 
-// ServiceListItemView is a type that runs validations on a projected type.
-type ServiceListItemView struct {
+// ServiceListItemTView is a type that runs validations on a projected type.
+type ServiceListItemTView struct {
 	// ID
 	ID *string
 	// Optional customer provided name
 	Name *string
 	// Optional description of the service
 	Description *string
-	// Optional banner image for this service
-	Banner *string
-	// time this service was published
-	PublishedAt *string
-	// Reference to policy used
-	Policy *string
-	// Reference to billable account
-	Account *string
+	// Optional tags defined for service to help in categorising them
+	Tags []string
+	// type of controller used for this service
+	ControllerSchema *string
+	// time this service has been available from
+	ValidFrom *string
+	// time this service has been available to
+	ValidTo *string
 	Href    *string `json:"href,omitempty"`
 }
 
@@ -66,10 +74,46 @@ type LinkTView struct {
 	Href *string
 }
 
+// JobListRTView is a type that runs validations on a projected type.
+type JobListRTView struct {
+	// Jobs
+	Items []*JobListItemView
+	// Time at which this list was valid
+	AtTime *string
+	Links  []*LinkTView
+}
+
+// JobListItemView is a type that runs validations on a projected type.
+type JobListItemView struct {
+	// ID
+	ID *string
+	// Optional customer provided name
+	Name *string
+	// Job status
+	Status *string
+	// DateTime job processing started
+	StartedAt *string
+	// DateTime job processing finished
+	FinishedAt *string
+	// Reference to service requested
+	Service *string
+	// Reference to order
+	Order *string
+	Href  *string `json:"href,omitempty"`
+}
+
 var (
 	// ServiceListRTMap is a map indexing the attribute names of ServiceListRT by
 	// view name.
 	ServiceListRTMap = map[string][]string{
+		"default": {
+			"items",
+			"at-time",
+			"links",
+		},
+	}
+	// JobListRTMap is a map indexing the attribute names of JobListRT by view name.
+	JobListRTMap = map[string][]string{
 		"default": {
 			"items",
 			"at-time",
@@ -90,6 +134,18 @@ func ValidateServiceListRT(result *ServiceListRT) (err error) {
 	return
 }
 
+// ValidateJobListRT runs the validations defined on the viewed result type
+// JobListRT.
+func ValidateJobListRT(result *JobListRT) (err error) {
+	switch result.View {
+	case "default", "":
+		err = ValidateJobListRTView(result.Projected)
+	default:
+		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
+	}
+	return
+}
+
 // ValidateServiceListRTView runs the validations defined on ServiceListRTView
 // using the "default" view.
 func ValidateServiceListRTView(result *ServiceListRTView) (err error) {
@@ -104,7 +160,7 @@ func ValidateServiceListRTView(result *ServiceListRTView) (err error) {
 	}
 	for _, e := range result.Items {
 		if e != nil {
-			if err2 := ValidateServiceListItemView(e); err2 != nil {
+			if err2 := ValidateServiceListItemTView(e); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
@@ -122,29 +178,26 @@ func ValidateServiceListRTView(result *ServiceListRTView) (err error) {
 	return
 }
 
-// ValidateServiceListItemView runs the validations defined on
-// ServiceListItemView.
-func ValidateServiceListItemView(result *ServiceListItemView) (err error) {
+// ValidateServiceListItemTView runs the validations defined on
+// ServiceListItemTView.
+func ValidateServiceListItemTView(result *ServiceListItemTView) (err error) {
 	if result.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
 	}
-	if result.Account == nil {
-		err = goa.MergeErrors(err, goa.MissingFieldError("account", "result"))
+	if result.ControllerSchema == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("controller-schema", "result"))
 	}
 	if result.Href == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
 	}
 	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
-	if result.PublishedAt != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.published-at", *result.PublishedAt, goa.FormatDateTime))
+	if result.ValidFrom != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-from", *result.ValidFrom, goa.FormatDateTime))
 	}
-	if result.Policy != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.policy", *result.Policy, goa.FormatURI))
-	}
-	if result.Account != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.account", *result.Account, goa.FormatURI))
+	if result.ValidTo != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.valid-to", *result.ValidTo, goa.FormatDateTime))
 	}
 	return
 }
@@ -159,6 +212,75 @@ func ValidateLinkTView(result *LinkTView) (err error) {
 	}
 	if result.Href == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
+	}
+	return
+}
+
+// ValidateJobListRTView runs the validations defined on JobListRTView using
+// the "default" view.
+func ValidateJobListRTView(result *JobListRTView) (err error) {
+	if result.Items == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("items", "result"))
+	}
+	if result.AtTime == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("at-time", "result"))
+	}
+	if result.Links == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("links", "result"))
+	}
+	for _, e := range result.Items {
+		if e != nil {
+			if err2 := ValidateJobListItemView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if result.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
+	}
+	for _, e := range result.Links {
+		if e != nil {
+			if err2 := ValidateLinkTView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	return
+}
+
+// ValidateJobListItemView runs the validations defined on JobListItemView.
+func ValidateJobListItemView(result *JobListItemView) (err error) {
+	if result.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
+	}
+	if result.Status == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("status", "result"))
+	}
+	if result.Service == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("service", "result"))
+	}
+	if result.Href == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
+	}
+	if result.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
+	}
+	if result.Status != nil {
+		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "pending", "scheduled", "executing", "succeeded", "failed", "error"}))
+		}
+	}
+	if result.StartedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.started-at", *result.StartedAt, goa.FormatDateTime))
+	}
+	if result.FinishedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.finished-at", *result.FinishedAt, goa.FormatDateTime))
+	}
+	if result.Service != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.service", *result.Service, goa.FormatURI))
+	}
+	if result.Order != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.order", *result.Order, goa.FormatURI))
 	}
 	return
 }
