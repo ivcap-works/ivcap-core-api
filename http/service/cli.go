@@ -456,3 +456,26 @@ func BuildJobReadPayload(serviceJobReadServiceID string, serviceJobReadID string
 
 	return v, nil
 }
+
+// BuildJobOutputPayload builds the payload for the service job-output endpoint
+// from CLI flags.
+func BuildJobOutputPayload(serviceJobOutputServiceID string, serviceJobOutputJobID string, serviceJobOutputJWT string) (*service.JobOutputPayload, error) {
+	var serviceID string
+	{
+		serviceID = serviceJobOutputServiceID
+	}
+	var jobID string
+	{
+		jobID = serviceJobOutputJobID
+	}
+	var jwt string
+	{
+		jwt = serviceJobOutputJWT
+	}
+	v := &service.JobOutputPayload{}
+	v.ServiceID = serviceID
+	v.JobID = jobID
+	v.JWT = jwt
+
+	return v, nil
+}

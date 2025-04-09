@@ -519,6 +519,72 @@ type JobReadNotFoundResponseBody struct {
 	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
 }
 
+// JobOutputBadRequestResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "bad-request" error.
+type JobOutputBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// JobOutputJobRequestErrorResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "job-request-error" error.
+type JobOutputJobRequestErrorResponseBody struct {
+	// more infomration about the error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// JobOutputInvalidParameterResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "invalid-parameter" error.
+type JobOutputInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// JobOutputInvalidScopesResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "invalid-scopes" error.
+type JobOutputInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// JobOutputJobInternalErrorResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "job-internal-error" error.
+type JobOutputJobInternalErrorResponseBody struct {
+	// more infomration about the error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// JobOutputNotReadyYetResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "not-ready-yet" error.
+type JobOutputNotReadyYetResponseBody struct {
+	// the ID of the job
+	JobID *string `form:"job-id,omitempty" json:"job-id,omitempty" xml:"job-id,omitempty"`
+	// The time in seconds after which an update may be available
+	RetryLater *int `form:"retry-later,omitempty" json:"retry-later,omitempty" xml:"retry-later,omitempty"`
+}
+
+// JobOutputNotImplementedResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "not-implemented" error.
+type JobOutputNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// JobOutputNotFoundResponseBody is the type of the "service" service
+// "job-output" endpoint HTTP response body for the "not-found" error.
+type JobOutputNotFoundResponseBody struct {
+	// ID of missing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
 // ServiceListItemTResponseBody is used to define fields on response body types.
 type ServiceListItemTResponseBody struct {
 	// ID
@@ -1391,6 +1457,128 @@ func NewJobReadNotAuthorized() *service.UnauthorizedT {
 	return v
 }
 
+// NewJobOutputResultOK builds a "service" service "job-output" endpoint result
+// from a HTTP "OK" response.
+func NewJobOutputResultOK(contentType string, orderID string, jobID string, jobURL string) *service.JobOutputResult {
+	v := &service.JobOutputResult{}
+	v.ContentType = contentType
+	v.OrderID = orderID
+	v.JobID = jobID
+	v.JobURL = jobURL
+
+	return v
+}
+
+// NewJobOutputBadRequest builds a service service job-output endpoint
+// bad-request error.
+func NewJobOutputBadRequest(body *JobOutputBadRequestResponseBody) *service.BadRequestT {
+	v := &service.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewJobOutputJobRequestError builds a service service job-output endpoint
+// job-request-error error.
+func NewJobOutputJobRequestError(body *JobOutputJobRequestErrorResponseBody) *service.JobRequestErrorT {
+	v := &service.JobRequestErrorT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewJobOutputInvalidParameter builds a service service job-output endpoint
+// invalid-parameter error.
+func NewJobOutputInvalidParameter(body *JobOutputInvalidParameterResponseBody) *service.InvalidParameterT {
+	v := &service.InvalidParameterT{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewJobOutputInvalidScopes builds a service service job-output endpoint
+// invalid-scopes error.
+func NewJobOutputInvalidScopes(body *JobOutputInvalidScopesResponseBody) *service.InvalidScopesT {
+	v := &service.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewJobOutputJobInternalError builds a service service job-output endpoint
+// job-internal-error error.
+func NewJobOutputJobInternalError(body *JobOutputJobInternalErrorResponseBody) *service.JobInternalErrorT {
+	v := &service.JobInternalErrorT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewJobOutputJobNoResult builds a service service job-output endpoint
+// job-no-result error.
+func NewJobOutputJobNoResult() *service.JobNoResultT {
+	v := &service.JobNoResultT{}
+
+	return v
+}
+
+// NewJobOutputNotReadyYet builds a service service job-output endpoint
+// not-ready-yet error.
+func NewJobOutputNotReadyYet(body *JobOutputNotReadyYetResponseBody, location string) *service.JobRetryLaterT {
+	v := &service.JobRetryLaterT{
+		JobID:      body.JobID,
+		RetryLater: *body.RetryLater,
+	}
+	v.Location = location
+
+	return v
+}
+
+// NewJobOutputNotImplemented builds a service service job-output endpoint
+// not-implemented error.
+func NewJobOutputNotImplemented(body *JobOutputNotImplementedResponseBody) *service.NotImplementedT {
+	v := &service.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewJobOutputNotFound builds a service service job-output endpoint not-found
+// error.
+func NewJobOutputNotFound(body *JobOutputNotFoundResponseBody) *service.ResourceNotFoundT {
+	v := &service.ResourceNotFoundT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewJobOutputNotAvailable builds a service service job-output endpoint
+// not-available error.
+func NewJobOutputNotAvailable() *service.ServiceNotAvailableT {
+	v := &service.ServiceNotAvailableT{}
+
+	return v
+}
+
+// NewJobOutputNotAuthorized builds a service service job-output endpoint
+// not-authorized error.
+func NewJobOutputNotAuthorized() *service.UnauthorizedT {
+	v := &service.UnauthorizedT{}
+
+	return v
+}
+
 // ValidateServiceCreateResponseBody runs the validations defined on
 // Service-CreateResponseBody
 func ValidateServiceCreateResponseBody(body *ServiceCreateResponseBody) (err error) {
@@ -2065,6 +2253,90 @@ func ValidateJobReadNotImplementedResponseBody(body *JobReadNotImplementedRespon
 // ValidateJobReadNotFoundResponseBody runs the validations defined on
 // job-read_not-found_response_body
 func ValidateJobReadNotFoundResponseBody(body *JobReadNotFoundResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateJobOutputBadRequestResponseBody runs the validations defined on
+// job-output_bad-request_response_body
+func ValidateJobOutputBadRequestResponseBody(body *JobOutputBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateJobOutputJobRequestErrorResponseBody runs the validations defined on
+// job-output_job-request-error_response_body
+func ValidateJobOutputJobRequestErrorResponseBody(body *JobOutputJobRequestErrorResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateJobOutputInvalidParameterResponseBody runs the validations defined
+// on job-output_invalid-parameter_response_body
+func ValidateJobOutputInvalidParameterResponseBody(body *JobOutputInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateJobOutputInvalidScopesResponseBody runs the validations defined on
+// job-output_invalid-scopes_response_body
+func ValidateJobOutputInvalidScopesResponseBody(body *JobOutputInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateJobOutputJobInternalErrorResponseBody runs the validations defined
+// on job-output_job-internal-error_response_body
+func ValidateJobOutputJobInternalErrorResponseBody(body *JobOutputJobInternalErrorResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateJobOutputNotReadyYetResponseBody runs the validations defined on
+// job-output_not-ready-yet_response_body
+func ValidateJobOutputNotReadyYetResponseBody(body *JobOutputNotReadyYetResponseBody) (err error) {
+	if body.RetryLater == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("retry-later", "body"))
+	}
+	return
+}
+
+// ValidateJobOutputNotImplementedResponseBody runs the validations defined on
+// job-output_not-implemented_response_body
+func ValidateJobOutputNotImplementedResponseBody(body *JobOutputNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateJobOutputNotFoundResponseBody runs the validations defined on
+// job-output_not-found_response_body
+func ValidateJobOutputNotFoundResponseBody(body *JobOutputNotFoundResponseBody) (err error) {
 	if body.Message == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
 	}

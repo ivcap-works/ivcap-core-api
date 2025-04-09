@@ -34,6 +34,7 @@ type Endpoints struct {
 	JobList       goa.Endpoint
 	JobCreate     goa.Endpoint
 	JobRead       goa.Endpoint
+	JobOutput     goa.Endpoint
 }
 
 // JobCreateRequestData holds both the payload and the HTTP request body reader
@@ -54,6 +55,15 @@ type JobCreateResponseData struct {
 	Body io.ReadCloser
 }
 
+// JobOutputResponseData holds both the result and the HTTP response body
+// reader of the "job-output" method.
+type JobOutputResponseData struct {
+	// Result is the method result.
+	Result *JobOutputResult
+	// Body streams the HTTP response body.
+	Body io.ReadCloser
+}
+
 // NewEndpoints wraps the methods of the "service" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
@@ -67,6 +77,7 @@ func NewEndpoints(s Service) *Endpoints {
 		JobList:       NewJobListEndpoint(s, a.JWTAuth),
 		JobCreate:     NewJobCreateEndpoint(s, a.JWTAuth),
 		JobRead:       NewJobReadEndpoint(s, a.JWTAuth),
+		JobOutput:     NewJobOutputEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -80,6 +91,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.JobList = m(e.JobList)
 	e.JobCreate = m(e.JobCreate)
 	e.JobRead = m(e.JobRead)
+	e.JobOutput = m(e.JobOutput)
 }
 
 // NewServiceListEndpoint returns an endpoint function that calls the method
@@ -245,5 +257,28 @@ func NewJobReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint 
 			return nil, err
 		}
 		return s.JobRead(ctx, p)
+	}
+}
+
+// NewJobOutputEndpoint returns an endpoint function that calls the method
+// "job-output" of service "service".
+func NewJobOutputEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*JobOutputPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:write"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, body, err := s.JobOutput(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		return &JobOutputResponseData{Result: res, Body: body}, nil
 	}
 }

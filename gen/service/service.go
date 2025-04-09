@@ -42,6 +42,8 @@ type Service interface {
 	JobCreate(context.Context, *JobCreatePayload, io.ReadCloser) (res *JobCreateResult, body io.ReadCloser, err error)
 	// show the status of a job within the context of a service
 	JobRead(context.Context, *JobReadPayload) (res *JobStatusRT, err error)
+	// Return the result of a job.
+	JobOutput(context.Context, *JobOutputPayload) (res *JobOutputResult, body io.ReadCloser, err error)
 }
 
 // Auther defines the authorization functions to be implemented by the service.
@@ -64,7 +66,7 @@ const ServiceName = "service"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [8]string{"service-list", "service-create", "service-read", "service-update", "service-delete", "job-list", "job-create", "job-read"}
+var MethodNames = [9]string{"service-list", "service-create", "service-read", "service-update", "service-delete", "job-list", "job-create", "job-read", "job-output"}
 
 // Something wasn't right with this request
 type BadRequestT struct {
@@ -110,6 +112,12 @@ type JobCreateResult struct {
 	OutOrderID     string
 	JobID          string
 	JobURL         *string
+}
+
+// Job failed due to an innternal error
+type JobInternalErrorT struct {
+	// more infomration about the error
+	Message string
 }
 
 type JobListItem struct {
@@ -171,6 +179,29 @@ type JobListRT struct {
 	Links  []*LinkT
 }
 
+// Job did not produce any result
+type JobNoResultT struct {
+}
+
+// JobOutputPayload is the payload type of the service service job-output
+// method.
+type JobOutputPayload struct {
+	// ID of service for which to show the list of jobs
+	ServiceID string
+	// ID of job for this service
+	JobID string
+	// JWT used for authentication
+	JWT string
+}
+
+// JobOutputResult is the result type of the service service job-output method.
+type JobOutputResult struct {
+	ContentType string
+	OrderID     string
+	JobID       string
+	JobURL      string
+}
+
 // JobReadPayload is the payload type of the service service job-read method.
 type JobReadPayload struct {
 	// ID of job to show
@@ -183,6 +214,12 @@ type JobReadPayload struct {
 	WithRequestContent *bool
 	// include result content if possible
 	WithResultContent *bool
+}
+
+// Job failed because the requested parameters were incorrect
+type JobRequestErrorT struct {
+	// more infomration about the error
+	Message string
 }
 
 // The information returned if the job hasn't finished yet
@@ -511,6 +548,57 @@ func (e *InvalidScopesT) ErrorName() string {
 // GoaErrorName returns "InvalidScopesT".
 func (e *InvalidScopesT) GoaErrorName() string {
 	return e.Message
+}
+
+// Error returns an error description.
+func (e *JobInternalErrorT) Error() string {
+	return "Job failed due to an innternal error"
+}
+
+// ErrorName returns "JobInternalErrorT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *JobInternalErrorT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "JobInternalErrorT".
+func (e *JobInternalErrorT) GoaErrorName() string {
+	return "job-internal-error"
+}
+
+// Error returns an error description.
+func (e *JobNoResultT) Error() string {
+	return "Job did not produce any result"
+}
+
+// ErrorName returns "JobNoResultT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *JobNoResultT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "JobNoResultT".
+func (e *JobNoResultT) GoaErrorName() string {
+	return "job-no-result"
+}
+
+// Error returns an error description.
+func (e *JobRequestErrorT) Error() string {
+	return "Job failed because the requested parameters were incorrect"
+}
+
+// ErrorName returns "JobRequestErrorT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *JobRequestErrorT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "JobRequestErrorT".
+func (e *JobRequestErrorT) GoaErrorName() string {
+	return "job-request-error"
 }
 
 // Error returns an error description.

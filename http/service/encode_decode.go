@@ -1413,6 +1413,265 @@ func DecodeJobReadResponse(decoder func(*http.Response) goahttp.Decoder, restore
 	}
 }
 
+// BuildJobOutputRequest instantiates a HTTP request object with method and
+// path set to call the "service" service "job-output" endpoint
+func (c *Client) BuildJobOutputRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		serviceID string
+		jobID     string
+	)
+	{
+		p, ok := v.(*service.JobOutputPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("service", "job-output", "*service.JobOutputPayload", v)
+		}
+		serviceID = p.ServiceID
+		jobID = p.JobID
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: JobOutputServicePath(serviceID, jobID)}
+	req, err := http.NewRequest("GET", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("service", "job-output", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeJobOutputRequest returns an encoder for requests sent to the service
+// job-output server.
+func EncodeJobOutputRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*service.JobOutputPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("service", "job-output", "*service.JobOutputPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		return nil
+	}
+}
+
+// DecodeJobOutputResponse returns a decoder for responses returned by the
+// service job-output endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
+// DecodeJobOutputResponse may return the following errors:
+//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
+//   - "job-request-error" (type *service.JobRequestErrorT): http.StatusBadRequest
+//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
+//   - "job-internal-error" (type *service.JobInternalErrorT): http.StatusInternalServerError
+//   - "job-no-result" (type *service.JobNoResultT): http.StatusNoContent
+//   - "not-ready-yet" (type *service.JobRetryLaterT): http.StatusNoContent
+//   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeJobOutputResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				contentType string
+				orderID     string
+				jobID       string
+				jobURL      string
+				err         error
+			)
+			contentTypeRaw := resp.Header.Get("Content-Type")
+			if contentTypeRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("contentType", "header"))
+			}
+			contentType = contentTypeRaw
+			orderIDRaw := resp.Header.Get("Ivcap-Order-Id")
+			if orderIDRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("orderID", "header"))
+			}
+			orderID = orderIDRaw
+			jobIDRaw := resp.Header.Get("Ivcap-Job-Id")
+			if jobIDRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("jobID", "header"))
+			}
+			jobID = jobIDRaw
+			jobURLRaw := resp.Header.Get("Ivcap-Job-Url")
+			if jobURLRaw == "" {
+				err = goa.MergeErrors(err, goa.MissingFieldError("jobURL", "header"))
+			}
+			jobURL = jobURLRaw
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "job-output", err)
+			}
+			res := NewJobOutputResultOK(contentType, orderID, jobID, jobURL)
+			return res, nil
+		case http.StatusBadRequest:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "bad-request":
+				var (
+					body JobOutputBadRequestResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("service", "job-output", err)
+				}
+				err = ValidateJobOutputBadRequestResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("service", "job-output", err)
+				}
+				return nil, NewJobOutputBadRequest(&body)
+			case "job-request-error":
+				var (
+					body JobOutputJobRequestErrorResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("service", "job-output", err)
+				}
+				err = ValidateJobOutputJobRequestErrorResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("service", "job-output", err)
+				}
+				return nil, NewJobOutputJobRequestError(&body)
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("service", "job-output", resp.StatusCode, string(body))
+			}
+		case http.StatusUnprocessableEntity:
+			var (
+				body JobOutputInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "job-output", err)
+			}
+			err = ValidateJobOutputInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "job-output", err)
+			}
+			return nil, NewJobOutputInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body JobOutputInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "job-output", err)
+			}
+			err = ValidateJobOutputInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "job-output", err)
+			}
+			return nil, NewJobOutputInvalidScopes(&body)
+		case http.StatusInternalServerError:
+			var (
+				body JobOutputJobInternalErrorResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "job-output", err)
+			}
+			err = ValidateJobOutputJobInternalErrorResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "job-output", err)
+			}
+			return nil, NewJobOutputJobInternalError(&body)
+		case http.StatusNoContent:
+			en := resp.Header.Get("goa-error")
+			switch en {
+			case "job-no-result":
+				return nil, NewJobOutputJobNoResult()
+			case "not-ready-yet":
+				var (
+					body JobOutputNotReadyYetResponseBody
+					err  error
+				)
+				err = decoder(resp).Decode(&body)
+				if err != nil {
+					return nil, goahttp.ErrDecodingError("service", "job-output", err)
+				}
+				err = ValidateJobOutputNotReadyYetResponseBody(&body)
+				if err != nil {
+					return nil, goahttp.ErrValidationError("service", "job-output", err)
+				}
+				var (
+					location string
+				)
+				locationRaw := resp.Header.Get("Location")
+				if locationRaw == "" {
+					err = goa.MergeErrors(err, goa.MissingFieldError("location", "header"))
+				}
+				location = locationRaw
+				if err != nil {
+					return nil, goahttp.ErrValidationError("service", "job-output", err)
+				}
+				return nil, NewJobOutputNotReadyYet(&body, location)
+			default:
+				body, _ := io.ReadAll(resp.Body)
+				return nil, goahttp.ErrInvalidResponse("service", "job-output", resp.StatusCode, string(body))
+			}
+		case http.StatusNotImplemented:
+			var (
+				body JobOutputNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "job-output", err)
+			}
+			err = ValidateJobOutputNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "job-output", err)
+			}
+			return nil, NewJobOutputNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body JobOutputNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("service", "job-output", err)
+			}
+			err = ValidateJobOutputNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("service", "job-output", err)
+			}
+			return nil, NewJobOutputNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewJobOutputNotAvailable()
+		case http.StatusUnauthorized:
+			return nil, NewJobOutputNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("service", "job-output", resp.StatusCode, string(body))
+		}
+	}
+}
+
 // unmarshalServiceListItemTResponseBodyToServiceviewsServiceListItemTView
 // builds a value of type *serviceviews.ServiceListItemTView from a value of
 // type *ServiceListItemTResponseBody.

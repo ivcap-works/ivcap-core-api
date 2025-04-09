@@ -59,3 +59,8 @@ func JobCreateServicePath(serviceID string) string {
 func JobReadServicePath(serviceID string, id string) string {
 	return fmt.Sprintf("/1/services2/%v/jobs/%v", serviceID, id)
 }
+
+// JobOutputServicePath returns the URL path to the service service job-output HTTP endpoint.
+func JobOutputServicePath(serviceID string, jobID string) string {
+	return fmt.Sprintf("/1/services2/%v/jobs/%v/output", serviceID, jobID)
+}

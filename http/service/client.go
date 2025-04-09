@@ -59,6 +59,10 @@ type Client struct {
 	// endpoint.
 	JobReadDoer goahttp.Doer
 
+	// JobOutput Doer is the HTTP client used to make requests to the job-output
+	// endpoint.
+	JobOutputDoer goahttp.Doer
+
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
 
@@ -90,6 +94,7 @@ func NewClient(
 		JobListDoer:         doer,
 		JobCreateDoer:       doer,
 		JobReadDoer:         doer,
+		JobOutputDoer:       doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -293,5 +298,34 @@ func (c *Client) JobRead() goa.Endpoint {
 			return nil, goahttp.ErrRequestError("service", "job-read", err)
 		}
 		return decodeResponse(resp)
+	}
+}
+
+// JobOutput returns an endpoint that makes HTTP requests to the service
+// service job-output server.
+func (c *Client) JobOutput() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeJobOutputRequest(c.encoder)
+		decodeResponse = DecodeJobOutputResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildJobOutputRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.JobOutputDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("service", "job-output", err)
+		}
+		res, err := decodeResponse(resp)
+		if err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		return &service.JobOutputResponseData{Result: res.(*service.JobOutputResult), Body: resp.Body}, nil
 	}
 }
