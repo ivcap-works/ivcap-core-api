@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -39,10 +39,18 @@ type Service interface {
 	// list jobs for a specific service
 	JobList(context.Context, *JobListPayload) (res *JobListRT, err error)
 	// Create a job in the context of a specific service.
+
+	// If body implements [io.WriterTo], that implementation will be used instead.
+	// Consider [goa.design/goa/v3/pkg.SkipResponseWriter] to adapt existing
+	// implementations.
 	JobCreate(context.Context, *JobCreatePayload, io.ReadCloser) (res *JobCreateResult, body io.ReadCloser, err error)
 	// show the status of a job within the context of a service
 	JobRead(context.Context, *JobReadPayload) (res *JobStatusRT, err error)
 	// Return the result of a job.
+
+	// If body implements [io.WriterTo], that implementation will be used instead.
+	// Consider [goa.design/goa/v3/pkg.SkipResponseWriter] to adapt existing
+	// implementations.
 	JobOutput(context.Context, *JobOutputPayload) (res *JobOutputResult, body io.ReadCloser, err error)
 }
 
@@ -213,7 +221,7 @@ type JobReadPayload struct {
 	// include request content if possible
 	WithRequestContent *bool
 	// include result content if possible
-	WithResultContent *bool
+	WithResultContent bool
 }
 
 // Job failed because the requested parameters were incorrect
@@ -254,7 +262,9 @@ type JobStatusRT struct {
 	ResultContentType *string
 	// Result content
 	ResultContent any
-	Products      *PartialProductList2T
+	// Result content URN
+	ResultContentUrn *string
+	Products         *PartialProductList2T
 	// Additional error message id status is 'Error' or 'Failed'
 	ErrorMessage *string
 	// Reference to billable account

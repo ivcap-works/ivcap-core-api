@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -196,8 +196,10 @@ type JobReadResponseBody struct {
 	// Mime type of result
 	ResultContentType *string `form:"result-content-type,omitempty" json:"result-content-type,omitempty" xml:"result-content-type,omitempty"`
 	// Result content
-	ResultContent any                               `form:"result-content,omitempty" json:"result-content,omitempty" xml:"result-content,omitempty"`
-	Products      *PartialProductList2TResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
+	ResultContent any `form:"result-content,omitempty" json:"result-content,omitempty" xml:"result-content,omitempty"`
+	// Result content URN
+	ResultContentUrn *string                           `form:"result-content-urn,omitempty" json:"result-content-urn,omitempty" xml:"result-content-urn,omitempty"`
+	Products         *PartialProductList2TResponseBody `form:"products,omitempty" json:"products,omitempty" xml:"products,omitempty"`
 	// Additional error message id status is 'Error' or 'Failed'
 	ErrorMessage *string `form:"error-message,omitempty" json:"error-message,omitempty" xml:"error-message,omitempty"`
 	// Reference to billable account
@@ -1375,6 +1377,7 @@ func NewJobReadJobStatusRTOK(body *JobReadResponseBody) *service.JobStatusRT {
 		RequestContent:     body.RequestContent,
 		ResultContentType:  body.ResultContentType,
 		ResultContent:      body.ResultContent,
+		ResultContentUrn:   body.ResultContentUrn,
 		ErrorMessage:       body.ErrorMessage,
 		Account:            *body.Account,
 		Policy:             *body.Policy,

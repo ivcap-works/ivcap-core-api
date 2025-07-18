@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -552,6 +552,30 @@ func newMessagestatus(vres *queueviews.MessagestatusView) *Messagestatus {
 func newMessagestatusView(res *Messagestatus) *queueviews.MessagestatusView {
 	vres := &queueviews.MessagestatusView{
 		ID: res.ID,
+	}
+	return vres
+}
+
+// newPublishedmessage converts projected type Publishedmessage to service type
+// Publishedmessage.
+func newPublishedmessage(vres *queueviews.PublishedmessageView) *Publishedmessage {
+	res := &Publishedmessage{
+		ID:          vres.ID,
+		Content:     vres.Content,
+		Schema:      vres.Schema,
+		ContentType: vres.ContentType,
+	}
+	return res
+}
+
+// newPublishedmessageView projects result type Publishedmessage to projected
+// type PublishedmessageView using the "default" view.
+func newPublishedmessageView(res *Publishedmessage) *queueviews.PublishedmessageView {
+	vres := &queueviews.PublishedmessageView{
+		ID:          res.ID,
+		Content:     res.Content,
+		Schema:      res.Schema,
+		ContentType: res.ContentType,
 	}
 	return vres
 }
