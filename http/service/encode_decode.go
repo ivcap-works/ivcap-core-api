@@ -1297,9 +1297,7 @@ func EncodeJobReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*htt
 		if p.WithRequestContent != nil {
 			values.Add("with-request-content", fmt.Sprintf("%v", *p.WithRequestContent))
 		}
-		if p.WithResultContent != nil {
-			values.Add("with-result-content", fmt.Sprintf("%v", *p.WithResultContent))
-		}
+		values.Add("with-result-content", fmt.Sprintf("%v", p.WithResultContent))
 		req.URL.RawQuery = values.Encode()
 		return nil
 	}

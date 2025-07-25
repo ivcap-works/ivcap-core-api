@@ -37,6 +37,10 @@ type Service interface {
 	// Create a new orders and return its status.
 	Create(context.Context, *CreatePayload) (res *OrderStatusRT, err error)
 	// download order logs
+
+	// If body implements [io.WriterTo], that implementation will be used instead.
+	// Consider [goa.design/goa/v3/pkg.SkipResponseWriter] to adapt existing
+	// implementations.
 	Logs(context.Context, *LogsPayload) (body io.ReadCloser, err error)
 	// top order resources
 	Top(context.Context, *TopPayload) (res OrderTopResultItemCollection, err error)

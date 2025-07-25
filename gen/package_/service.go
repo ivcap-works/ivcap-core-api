@@ -28,6 +28,10 @@ type Service interface {
 	// list ivcap service's docker images under account
 	List(context.Context, *ListPayload) (res *ListResult, err error)
 	// pull ivcap service's docker image
+
+	// If body implements [io.WriterTo], that implementation will be used instead.
+	// Consider [goa.design/goa/v3/pkg.SkipResponseWriter] to adapt existing
+	// implementations.
 	Pull(context.Context, *PullPayload) (res *PullResultT, body io.ReadCloser, err error)
 	// upload service's docker image to container registry
 	Push(context.Context, *PushPayload, io.ReadCloser) (res *PushResult, err error)

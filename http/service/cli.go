@@ -432,12 +432,10 @@ func BuildJobReadPayload(serviceJobReadServiceID string, serviceJobReadID string
 			}
 		}
 	}
-	var withResultContent *bool
+	var withResultContent bool
 	{
 		if serviceJobReadWithResultContent != "" {
-			var val bool
-			val, err = strconv.ParseBool(serviceJobReadWithResultContent)
-			withResultContent = &val
+			withResultContent, err = strconv.ParseBool(serviceJobReadWithResultContent)
 			if err != nil {
 				return nil, fmt.Errorf("invalid value for withResultContent, must be BOOL")
 			}
