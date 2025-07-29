@@ -1,10 +1,10 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -100,7 +100,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			defer resp.Body.Close()
 		}
 		switch resp.StatusCode {
-		case http.StatusCreated:
+		case http.StatusOK:
 			var (
 				body ReadResponseBody
 				err  error
@@ -113,7 +113,7 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			if err != nil {
 				return nil, goahttp.ErrValidationError("aspect", "read", err)
 			}
-			res := NewReadAspectRTCreated(&body)
+			res := NewReadAspectRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -857,7 +857,7 @@ func unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(v *AspectList
 		Schema:      *v.Schema,
 		Content:     v.Content,
 		ContentType: *v.ContentType,
-		ValidFrom:   v.ValidFrom,
+		ValidFrom:   *v.ValidFrom,
 		ValidTo:     v.ValidTo,
 	}
 

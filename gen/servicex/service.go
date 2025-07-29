@@ -1,0 +1,594 @@
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+// $ goa gen github.com/ivcap-works/ivcap-core-api/design
+
+package servicex
+
+import (
+	"context"
+
+	servicexviews "github.com/ivcap-works/ivcap-core-api/gen/servicex/views"
+	"goa.design/goa/v3/security"
+)
+
+// Manage the life cycle of a service offered on the CRE marketplace.
+type Service interface {
+	// list services
+	List(context.Context, *ListPayload) (res *XServiceListRT, err error)
+	// Create a new services and return its status.
+	CreateService(context.Context, *CreateServicePayload) (res *XServiceStatusRT, err error)
+	// Show services by ID
+	Read(context.Context, *ReadPayload) (res *XServiceStatusRT, err error)
+	// Update an existing services and return its status.
+	Update(context.Context, *UpdatePayload) (res *XServiceStatusRT, err error)
+	// Delete an existing services.
+	Delete(context.Context, *DeletePayload) (err error)
+}
+
+// Auther defines the authorization functions to be implemented by the service.
+type Auther interface {
+	// JWTAuth implements the authorization logic for the JWT security scheme.
+	JWTAuth(ctx context.Context, token string, schema *security.JWTScheme) (context.Context, error)
+}
+
+// APIName is the name of the API as defined in the design.
+const APIName = "ivcap"
+
+// APIVersion is the version of the API as defined in the design.
+const APIVersion = "0.44"
+
+// ServiceName is the name of the service as defined in the design. This is the
+// same value that is set in the endpoint request contexts under the ServiceKey
+// key.
+const ServiceName = "servicex"
+
+// MethodNames lists the service method names as defined in the design. These
+// are the same values that are set in the endpoint request contexts under the
+// MethodKey key.
+var MethodNames = [5]string{"list", "create_service", "read", "update", "delete"}
+
+// Something wasn't right with this request
+type BadRequestT struct {
+	// Information message
+	Message string
+}
+
+// CreateServicePayload is the payload type of the servicex service
+// create_service method.
+type CreateServicePayload struct {
+	// New services description
+	Services *XServiceDefinitionT
+	// JWT used for authentication
+	JWT string
+}
+
+// DeletePayload is the payload type of the servicex service delete method.
+type DeletePayload struct {
+	// ID of services to update
+	ID string
+	// JWT used for authentication
+	JWT string
+}
+
+// InvalidParameterT is the error returned when a parameter has the wrong value.
+type InvalidParameterT struct {
+	// message describing expected type or pattern.
+	Message string
+	// name of parameter.
+	Name string
+	// provided parameter value.
+	Value *string
+}
+
+// Caller not authorized to access required scope.
+type InvalidScopesT struct {
+	// ID of involved resource
+	ID *string
+	// Message of error
+	Message string
+}
+
+type LinkT struct {
+	// relation type
+	Rel string
+	// mime type
+	Type string
+	// web link
+	Href string
+}
+
+// ListPayload is the payload type of the servicex service list method.
+type ListPayload struct {
+	// The 'limit' query option sets the maximum number of items
+	// to be included in the result.
+	Limit int
+	// The 'filter' system query option allows clients to filter a collection of
+	// resources that are addressed by a request URL. The expression specified with
+	// 'filter'
+	// is evaluated for each resource in the collection, and only items where the
+	// expression
+	// evaluates to true are included in the response.
+	Filter *string
+	// The 'orderby' query option allows clients to request resources in either
+	// ascending order using asc or descending order using desc. If asc or desc not
+	// specified,
+	// then the resources will be ordered in ascending order. The request below
+	// orders Trips on
+	// property EndsAt in descending order.
+	OrderBy *string
+	// When set order result in descending order. Ascending order is the lt.
+	OrderDesc bool
+	// Return the state of the respective resources at that time [now]
+	AtTime *string
+	// The content of 'page' is returned in the 'links' part of a previous query and
+	// will when set, ALL other parameters, except for 'limit' are ignored.
+	Page *string
+	// JWT used for authentication
+	JWT string
+}
+
+// Method is not yet implemented.
+type NotImplementedT struct {
+	// Information message
+	Message string
+}
+
+type ParameterDefT struct {
+	Name        string
+	Label       *string
+	Type        string
+	Description string
+	Unit        *string
+	Constant    *bool
+	Optional    *bool
+	Default     *string
+	Options     []*ParameterOptT
+	Unary       *bool
+}
+
+type ParameterOptT struct {
+	Value       *string
+	Description *string
+}
+
+// ReadPayload is the payload type of the servicex service read method.
+type ReadPayload struct {
+	// ID of services to show
+	ID string
+	// JWT used for authentication
+	JWT string
+}
+
+// Will be returned when receiving a request to create and already existing
+// resource.
+type ResourceAlreadyCreatedT struct {
+	// ID of already existing resource
+	ID string
+	// Message of error
+	Message string
+}
+
+// NotFound is the type returned when attempting to manage a resource that does
+// not exist.
+type ResourceNotFoundT struct {
+	// ID of missing resource
+	ID string
+	// Message of error
+	Message string
+}
+
+// Service necessary to fulfil the request is currently not available.
+type ServiceNotAvailableT struct {
+}
+
+// Unauthorized access to resource
+type UnauthorizedT struct {
+}
+
+// UpdatePayload is the payload type of the servicex service update method.
+type UpdatePayload struct {
+	// ID of services to update
+	ID *string
+	// Create if not already exist
+	ForceCreate *bool
+	// Updated services description
+	Services *XServiceDefinitionT
+	// JWT used for authentication
+	JWT string
+}
+
+type XBasicWorkflowOptsT struct {
+	// container image name
+	Image string
+	// Optionally definesq the image pull policy
+	ImagePullPolicy string `json:"image-pull-policy,omitempty"`
+	// Command to start the container - needed for some container runtimes
+	Command []string
+	// Defines memory resource requests and limits
+	Memory *XResourceMemoryT
+	// Defines cpu resource requests and limits
+	// (see
+	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
+	CPU *XResourceMemoryT
+	// Defines ephemeral storage resource requests and limits
+	// (see
+	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
+	EphemeralStorage *XResourceMemoryT `json:"ephemeral-storage,omitempty"`
+	// Defines required gpu type
+	GpuType *string `json:"gpu-type,omitempty"`
+	// Defines number of required gpu
+	GpuNumber *int `json:"gpu-number,omitempty"`
+	// Defines needed amount of shared-memory
+	SharedMemory *string `json:"shared-memory,omitempty"`
+}
+
+type XReferenceT struct {
+	// Title of reference document
+	Title *string
+	// Link to document
+	URI *string
+}
+
+// See
+// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
+// for units
+type XResourceMemoryT struct {
+	// minimal requirements [0]
+	Request *string
+	// minimal requirements [system limit]
+	Limit *string
+}
+
+type XServiceDefinitionT struct {
+	// More detailed description of the service
+	Description string
+	// Reference to account revenues for this service should be credited to
+	References []*XReferenceT
+	// Link to banner image optionally used for this service
+	Banner *string
+	// Definition of the workflow to use for executing this service
+	Workflow *XWorkflowT
+	// Reference to policy used
+	Policy *string
+	// Optional provider provided name
+	Name *string
+	// Optional provider provided tags
+	Tags []string
+	// Service parameter definitions
+	Parameters []*ParameterDefT
+}
+
+type XServiceListItem struct {
+	// ID
+	ID string
+	// Optional customer provided name
+	Name *string
+	// Optional description of the service
+	Description *string
+	// Optional banner image for this service
+	Banner *string
+	// time this service was published
+	PublishedAt *string
+	// Reference to policy used
+	Policy *string
+	// Reference to billable account
+	Account string
+	Href    string `json:"href,omitempty"`
+}
+
+// XServiceListRT is the result type of the servicex service list method.
+type XServiceListRT struct {
+	// Services
+	Items []*XServiceListItem
+	// Time at which this list was valid
+	AtTime string
+	Links  []*LinkT
+}
+
+// XServiceStatusRT is the result type of the servicex service create_service
+// method.
+type XServiceStatusRT struct {
+	// ID
+	ID string
+	// More detailed description of the service
+	Description *string
+	// Service status
+	Status string
+	// Reference to billable account
+	Account string
+	Links   []*LinkT
+	// Optional provider provided name
+	Name *string
+	// Optional provider provided tags
+	Tags []string
+	// Service parameter definitions
+	Parameters []*ParameterDefT
+}
+
+// Defines the workflow to use to execute this service. Currently supported
+// 'types' are 'basic'
+// and 'argo'. In case of 'basic', use the 'basic' element for further
+// parameters. In the current implementation
+// 'opts' is expected to contain the same schema as 'basic'
+type XWorkflowT struct {
+	// Type of workflow
+	Type string
+	// Type of workflow
+	Basic *XBasicWorkflowOptsT
+	// Defines the workflow using argo's WF schema
+	Argo any
+}
+
+// Error returns an error description.
+func (e *BadRequestT) Error() string {
+	return "Something wasn't right with this request"
+}
+
+// ErrorName returns "BadRequestT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *BadRequestT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "BadRequestT".
+func (e *BadRequestT) GoaErrorName() string {
+	return "bad-request"
+}
+
+// Error returns an error description.
+func (e *InvalidParameterT) Error() string {
+	return "InvalidParameterT is the error returned when a parameter has the wrong value."
+}
+
+// ErrorName returns "InvalidParameterT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *InvalidParameterT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "InvalidParameterT".
+func (e *InvalidParameterT) GoaErrorName() string {
+	return "invalid-parameter"
+}
+
+// Error returns an error description.
+func (e *InvalidScopesT) Error() string {
+	return "Caller not authorized to access required scope."
+}
+
+// ErrorName returns "InvalidScopesT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *InvalidScopesT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "InvalidScopesT".
+func (e *InvalidScopesT) GoaErrorName() string {
+	return e.Message
+}
+
+// Error returns an error description.
+func (e *NotImplementedT) Error() string {
+	return "Method is not yet implemented."
+}
+
+// ErrorName returns "NotImplementedT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *NotImplementedT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "NotImplementedT".
+func (e *NotImplementedT) GoaErrorName() string {
+	return "not-implemented"
+}
+
+// Error returns an error description.
+func (e *ResourceAlreadyCreatedT) Error() string {
+	return "Will be returned when receiving a request to create and already existing resource."
+}
+
+// ErrorName returns "ResourceAlreadyCreatedT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ResourceAlreadyCreatedT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ResourceAlreadyCreatedT".
+func (e *ResourceAlreadyCreatedT) GoaErrorName() string {
+	return "already-created"
+}
+
+// Error returns an error description.
+func (e *ResourceNotFoundT) Error() string {
+	return "NotFound is the type returned when attempting to manage a resource that does not exist."
+}
+
+// ErrorName returns "ResourceNotFoundT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ResourceNotFoundT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ResourceNotFoundT".
+func (e *ResourceNotFoundT) GoaErrorName() string {
+	return "not-found"
+}
+
+// Error returns an error description.
+func (e *ServiceNotAvailableT) Error() string {
+	return "Service necessary to fulfil the request is currently not available."
+}
+
+// ErrorName returns "ServiceNotAvailableT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *ServiceNotAvailableT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "ServiceNotAvailableT".
+func (e *ServiceNotAvailableT) GoaErrorName() string {
+	return "not-available"
+}
+
+// Error returns an error description.
+func (e *UnauthorizedT) Error() string {
+	return "Unauthorized access to resource"
+}
+
+// ErrorName returns "UnauthorizedT".
+//
+// Deprecated: Use GoaErrorName - https://github.com/goadesign/goa/issues/3105
+func (e *UnauthorizedT) ErrorName() string {
+	return e.GoaErrorName()
+}
+
+// GoaErrorName returns "UnauthorizedT".
+func (e *UnauthorizedT) GoaErrorName() string {
+	return "not-authorized"
+}
+
+// NewXServiceListRT initializes result type XServiceListRT from viewed result
+// type XServiceListRT.
+func NewXServiceListRT(vres *servicexviews.XServiceListRT) *XServiceListRT {
+	return newXServiceListRT(vres.Projected)
+}
+
+// NewViewedXServiceListRT initializes viewed result type XServiceListRT from
+// result type XServiceListRT using the given view.
+func NewViewedXServiceListRT(res *XServiceListRT, view string) *servicexviews.XServiceListRT {
+	p := newXServiceListRTView(res)
+	return &servicexviews.XServiceListRT{Projected: p, View: "default"}
+}
+
+// newXServiceListRT converts projected type XServiceListRT to service type
+// XServiceListRT.
+func newXServiceListRT(vres *servicexviews.XServiceListRTView) *XServiceListRT {
+	res := &XServiceListRT{}
+	if vres.AtTime != nil {
+		res.AtTime = *vres.AtTime
+	}
+	if vres.Items != nil {
+		res.Items = make([]*XServiceListItem, len(vres.Items))
+		for i, val := range vres.Items {
+			res.Items[i] = transformServicexviewsXServiceListItemViewToXServiceListItem(val)
+		}
+	}
+	if vres.Links != nil {
+		res.Links = make([]*LinkT, len(vres.Links))
+		for i, val := range vres.Links {
+			res.Links[i] = transformServicexviewsLinkTViewToLinkT(val)
+		}
+	}
+	return res
+}
+
+// newXServiceListRTView projects result type XServiceListRT to projected type
+// XServiceListRTView using the "default" view.
+func newXServiceListRTView(res *XServiceListRT) *servicexviews.XServiceListRTView {
+	vres := &servicexviews.XServiceListRTView{
+		AtTime: &res.AtTime,
+	}
+	if res.Items != nil {
+		vres.Items = make([]*servicexviews.XServiceListItemView, len(res.Items))
+		for i, val := range res.Items {
+			vres.Items[i] = transformXServiceListItemToServicexviewsXServiceListItemView(val)
+		}
+	} else {
+		vres.Items = []*servicexviews.XServiceListItemView{}
+	}
+	if res.Links != nil {
+		vres.Links = make([]*servicexviews.LinkTView, len(res.Links))
+		for i, val := range res.Links {
+			vres.Links[i] = transformLinkTToServicexviewsLinkTView(val)
+		}
+	} else {
+		vres.Links = []*servicexviews.LinkTView{}
+	}
+	return vres
+}
+
+// transformServicexviewsXServiceListItemViewToXServiceListItem builds a value
+// of type *XServiceListItem from a value of type
+// *servicexviews.XServiceListItemView.
+func transformServicexviewsXServiceListItemViewToXServiceListItem(v *servicexviews.XServiceListItemView) *XServiceListItem {
+	if v == nil {
+		return nil
+	}
+	res := &XServiceListItem{
+		ID:          *v.ID,
+		Name:        v.Name,
+		Description: v.Description,
+		Banner:      v.Banner,
+		PublishedAt: v.PublishedAt,
+		Policy:      v.Policy,
+		Account:     *v.Account,
+		Href:        *v.Href,
+	}
+
+	return res
+}
+
+// transformServicexviewsLinkTViewToLinkT builds a value of type *LinkT from a
+// value of type *servicexviews.LinkTView.
+func transformServicexviewsLinkTViewToLinkT(v *servicexviews.LinkTView) *LinkT {
+	if v == nil {
+		return nil
+	}
+	res := &LinkT{
+		Rel:  *v.Rel,
+		Type: *v.Type,
+		Href: *v.Href,
+	}
+
+	return res
+}
+
+// transformXServiceListItemToServicexviewsXServiceListItemView builds a value
+// of type *servicexviews.XServiceListItemView from a value of type
+// *XServiceListItem.
+func transformXServiceListItemToServicexviewsXServiceListItemView(v *XServiceListItem) *servicexviews.XServiceListItemView {
+	res := &servicexviews.XServiceListItemView{
+		ID:          &v.ID,
+		Name:        v.Name,
+		Description: v.Description,
+		Banner:      v.Banner,
+		PublishedAt: v.PublishedAt,
+		Policy:      v.Policy,
+		Account:     &v.Account,
+		Href:        &v.Href,
+	}
+
+	return res
+}
+
+// transformLinkTToServicexviewsLinkTView builds a value of type
+// *servicexviews.LinkTView from a value of type *LinkT.
+func transformLinkTToServicexviewsLinkTView(v *LinkT) *servicexviews.LinkTView {
+	res := &servicexviews.LinkTView{
+		Rel:  &v.Rel,
+		Type: &v.Type,
+		Href: &v.Href,
+	}
+
+	return res
+}

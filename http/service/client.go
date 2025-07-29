@@ -1,10 +1,10 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -20,27 +20,48 @@ import (
 	"context"
 	"net/http"
 
+	service "github.com/ivcap-works/ivcap-core-api/gen/service"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
 
 // Client lists the service service endpoint HTTP clients.
 type Client struct {
-	// List Doer is the HTTP client used to make requests to the list endpoint.
-	ListDoer goahttp.Doer
+	// ServiceList Doer is the HTTP client used to make requests to the
+	// service-list endpoint.
+	ServiceListDoer goahttp.Doer
 
-	// CreateService Doer is the HTTP client used to make requests to the
-	// create_service endpoint.
-	CreateServiceDoer goahttp.Doer
+	// ServiceCreate Doer is the HTTP client used to make requests to the
+	// service-create endpoint.
+	ServiceCreateDoer goahttp.Doer
 
-	// Read Doer is the HTTP client used to make requests to the read endpoint.
-	ReadDoer goahttp.Doer
+	// ServiceRead Doer is the HTTP client used to make requests to the
+	// service-read endpoint.
+	ServiceReadDoer goahttp.Doer
 
-	// Update Doer is the HTTP client used to make requests to the update endpoint.
-	UpdateDoer goahttp.Doer
+	// ServiceUpdate Doer is the HTTP client used to make requests to the
+	// service-update endpoint.
+	ServiceUpdateDoer goahttp.Doer
 
-	// Delete Doer is the HTTP client used to make requests to the delete endpoint.
-	DeleteDoer goahttp.Doer
+	// ServiceDelete Doer is the HTTP client used to make requests to the
+	// service-delete endpoint.
+	ServiceDeleteDoer goahttp.Doer
+
+	// JobList Doer is the HTTP client used to make requests to the job-list
+	// endpoint.
+	JobListDoer goahttp.Doer
+
+	// JobCreate Doer is the HTTP client used to make requests to the job-create
+	// endpoint.
+	JobCreateDoer goahttp.Doer
+
+	// JobRead Doer is the HTTP client used to make requests to the job-read
+	// endpoint.
+	JobReadDoer goahttp.Doer
+
+	// JobOutput Doer is the HTTP client used to make requests to the job-output
+	// endpoint.
+	JobOutputDoer goahttp.Doer
 
 	// CORS Doer is the HTTP client used to make requests to the  endpoint.
 	CORSDoer goahttp.Doer
@@ -65,11 +86,15 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ListDoer:            doer,
-		CreateServiceDoer:   doer,
-		ReadDoer:            doer,
-		UpdateDoer:          doer,
-		DeleteDoer:          doer,
+		ServiceListDoer:     doer,
+		ServiceCreateDoer:   doer,
+		ServiceReadDoer:     doer,
+		ServiceUpdateDoer:   doer,
+		ServiceDeleteDoer:   doer,
+		JobListDoer:         doer,
+		JobCreateDoer:       doer,
+		JobReadDoer:         doer,
+		JobOutputDoer:       doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
 		scheme:              scheme,
@@ -79,15 +104,15 @@ func NewClient(
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the service service
-// list server.
-func (c *Client) List() goa.Endpoint {
+// ServiceList returns an endpoint that makes HTTP requests to the service
+// service service-list server.
+func (c *Client) ServiceList() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeListRequest(c.encoder)
-		decodeResponse = DecodeListResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeServiceListRequest(c.encoder)
+		decodeResponse = DecodeServiceListResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildListRequest(ctx, v)
+		req, err := c.BuildServiceListRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -95,23 +120,23 @@ func (c *Client) List() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ListDoer.Do(req)
+		resp, err := c.ServiceListDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "list", err)
+			return nil, goahttp.ErrRequestError("service", "service-list", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// CreateService returns an endpoint that makes HTTP requests to the service
-// service create_service server.
-func (c *Client) CreateService() goa.Endpoint {
+// ServiceCreate returns an endpoint that makes HTTP requests to the service
+// service service-create server.
+func (c *Client) ServiceCreate() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeCreateServiceRequest(c.encoder)
-		decodeResponse = DecodeCreateServiceResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeServiceCreateRequest(c.encoder)
+		decodeResponse = DecodeServiceCreateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildCreateServiceRequest(ctx, v)
+		req, err := c.BuildServiceCreateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -119,23 +144,23 @@ func (c *Client) CreateService() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.CreateServiceDoer.Do(req)
+		resp, err := c.ServiceCreateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "create_service", err)
+			return nil, goahttp.ErrRequestError("service", "service-create", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Read returns an endpoint that makes HTTP requests to the service service
-// read server.
-func (c *Client) Read() goa.Endpoint {
+// ServiceRead returns an endpoint that makes HTTP requests to the service
+// service service-read server.
+func (c *Client) ServiceRead() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeReadRequest(c.encoder)
-		decodeResponse = DecodeReadResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeServiceReadRequest(c.encoder)
+		decodeResponse = DecodeServiceReadResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildReadRequest(ctx, v)
+		req, err := c.BuildServiceReadRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -143,23 +168,23 @@ func (c *Client) Read() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.ReadDoer.Do(req)
+		resp, err := c.ServiceReadDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "read", err)
+			return nil, goahttp.ErrRequestError("service", "service-read", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Update returns an endpoint that makes HTTP requests to the service service
-// update server.
-func (c *Client) Update() goa.Endpoint {
+// ServiceUpdate returns an endpoint that makes HTTP requests to the service
+// service service-update server.
+func (c *Client) ServiceUpdate() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeUpdateRequest(c.encoder)
-		decodeResponse = DecodeUpdateResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeServiceUpdateRequest(c.encoder)
+		decodeResponse = DecodeServiceUpdateResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildUpdateRequest(ctx, v)
+		req, err := c.BuildServiceUpdateRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -167,23 +192,23 @@ func (c *Client) Update() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.UpdateDoer.Do(req)
+		resp, err := c.ServiceUpdateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "update", err)
+			return nil, goahttp.ErrRequestError("service", "service-update", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Delete returns an endpoint that makes HTTP requests to the service service
-// delete server.
-func (c *Client) Delete() goa.Endpoint {
+// ServiceDelete returns an endpoint that makes HTTP requests to the service
+// service service-delete server.
+func (c *Client) ServiceDelete() goa.Endpoint {
 	var (
-		encodeRequest  = EncodeDeleteRequest(c.encoder)
-		decodeResponse = DecodeDeleteResponse(c.decoder, c.RestoreResponseBody)
+		encodeRequest  = EncodeServiceDeleteRequest(c.encoder)
+		decodeResponse = DecodeServiceDeleteResponse(c.decoder, c.RestoreResponseBody)
 	)
 	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildDeleteRequest(ctx, v)
+		req, err := c.BuildServiceDeleteRequest(ctx, v)
 		if err != nil {
 			return nil, err
 		}
@@ -191,10 +216,116 @@ func (c *Client) Delete() goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		resp, err := c.DeleteDoer.Do(req)
+		resp, err := c.ServiceDeleteDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "delete", err)
+			return nil, goahttp.ErrRequestError("service", "service-delete", err)
 		}
 		return decodeResponse(resp)
+	}
+}
+
+// JobList returns an endpoint that makes HTTP requests to the service service
+// job-list server.
+func (c *Client) JobList() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeJobListRequest(c.encoder)
+		decodeResponse = DecodeJobListResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildJobListRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.JobListDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("service", "job-list", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// JobCreate returns an endpoint that makes HTTP requests to the service
+// service job-create server.
+func (c *Client) JobCreate() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeJobCreateRequest(c.encoder)
+		decodeResponse = DecodeJobCreateResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildJobCreateRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.JobCreateDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("service", "job-create", err)
+		}
+		res, err := decodeResponse(resp)
+		if err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		return &service.JobCreateResponseData{Result: res.(*service.JobCreateResult), Body: resp.Body}, nil
+	}
+}
+
+// JobRead returns an endpoint that makes HTTP requests to the service service
+// job-read server.
+func (c *Client) JobRead() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeJobReadRequest(c.encoder)
+		decodeResponse = DecodeJobReadResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildJobReadRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.JobReadDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("service", "job-read", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// JobOutput returns an endpoint that makes HTTP requests to the service
+// service job-output server.
+func (c *Client) JobOutput() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeJobOutputRequest(c.encoder)
+		decodeResponse = DecodeJobOutputResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildJobOutputRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.JobOutputDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("service", "job-output", err)
+		}
+		res, err := decodeResponse(resp)
+		if err != nil {
+			resp.Body.Close()
+			return nil, err
+		}
+		return &service.JobOutputResponseData{Result: res.(*service.JobOutputResult), Body: resp.Body}, nil
 	}
 }

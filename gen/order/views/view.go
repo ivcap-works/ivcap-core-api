@@ -1,10 +1,10 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -203,7 +203,7 @@ func ValidateOrderListItemView(result *OrderListItemView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
 	}
 	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
 	if result.Status != nil {
 		if !(*result.Status == "unknown" || *result.Status == "pending" || *result.Status == "scheduled" || *result.Status == "executing" || *result.Status == "succeeded" || *result.Status == "failed" || *result.Status == "error") {

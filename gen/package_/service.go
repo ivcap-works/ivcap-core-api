@@ -1,10 +1,10 @@
-// Copyright 2024 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -28,6 +28,10 @@ type Service interface {
 	// list ivcap service's docker images under account
 	List(context.Context, *ListPayload) (res *ListResult, err error)
 	// pull ivcap service's docker image
+
+	// If body implements [io.WriterTo], that implementation will be used instead.
+	// Consider [goa.design/goa/v3/pkg.SkipResponseWriter] to adapt existing
+	// implementations.
 	Pull(context.Context, *PullPayload) (res *PullResultT, body io.ReadCloser, err error)
 	// upload service's docker image to container registry
 	Push(context.Context, *PushPayload, io.ReadCloser) (res *PushResult, err error)
@@ -47,7 +51,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.43"
+const APIVersion = "0.44"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
