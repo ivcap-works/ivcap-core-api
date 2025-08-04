@@ -2,7 +2,7 @@ module github.com/ivcap-works/ivcap-core-api
 
 go 1.19
 
-require goa.design/goa/v3 v3.11.0
+require goa.design/goa/v3 v3.20.1
 
 require (
 	github.com/dimfeld/httptreemux/v5 v5.5.0 // indirect
