@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -643,7 +643,7 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("asserter", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
@@ -970,7 +970,7 @@ func ValidateMetadataListItemRTResponseBody(body *MetadataListItemRTResponseBody
 		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))

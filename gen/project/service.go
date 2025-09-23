@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -42,6 +42,11 @@ type Service interface {
 	//	- "default"
 	//	- "tiny"
 	Read(context.Context, *ReadPayload) (res *ProjectStatusRT, view string, err error)
+	// Sets the metadata of a project.
+	// The "view" return value must have one of the following views
+	//	- "default"
+	//	- "tiny"
+	SetProjectInformation(context.Context, *SetProjectInformationPayload) (res *ProjectStatusRT, view string, err error)
 	// Lists the current members of a project.
 	ListProjectMembers(context.Context, *ListProjectMembersPayload) (res *MembersList, err error)
 	// Adds or Updates the roles of a user in a project.
@@ -71,7 +76,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.43"
+const APIVersion = "0.46"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -81,7 +86,7 @@ const ServiceName = "project"
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
 // MethodKey key.
-var MethodNames = [11]string{"list", "CreateProject", "delete", "read", "ListProjectMembers", "UpdateMembership", "RemoveMembership", "DefaultProject", "SetDefaultProject", "ProjectAccount", "SetProjectAccount"}
+var MethodNames = [12]string{"list", "CreateProject", "delete", "read", "SetProjectInformation", "ListProjectMembers", "UpdateMembership", "RemoveMembership", "DefaultProject", "SetDefaultProject", "ProjectAccount", "SetProjectAccount"}
 
 // AccountResult is the result type of the project service ProjectAccount
 // method.
@@ -213,29 +218,39 @@ type ProjectAccountPayload struct {
 }
 
 type ProjectCreateRequest struct {
+	// Project URN
+	Urn *string
 	// Project name
 	Name string
-	// URN of the billing account
-	AccountUrn *string
-	// URN of the parent project
-	ParentProjectUrn *string
+	// Account URN
+	Account *string
+	// Parent Project URN
+	Parent *string
 	// Additional Metadata
 	Properties *ProjectProperties
 }
 
 type ProjectListItem struct {
-	// Project Name
-	Name *string
 	// User Role
 	Role *string
-	// Project URN
-	Urn *string
+	// Project status
+	Status *string
 	// DateTime project was created
 	CreatedAt *string
 	// DateTime project last modified
 	ModifiedAt *string
 	// Time at which this list was valid
 	AtTime *string
+	// Project URN
+	Urn string
+	// Project name
+	Name *string
+	// Account URN
+	Account *string
+	// Parent Project URN
+	Parent *string
+	// Additional Metadata
+	Properties *ProjectProperties
 }
 
 type ProjectListItemCollection []*ProjectListItem
@@ -251,6 +266,19 @@ type ProjectListRT struct {
 	Page *string
 }
 
+type ProjectModifyRequest struct {
+	// Project URN
+	Urn *string
+	// Project name
+	Name *string
+	// Account URN
+	Account *string
+	// Parent Project URN
+	Parent *string
+	// Additional Metadata
+	Properties *ProjectProperties
+}
+
 type ProjectProperties struct {
 	// String metadata for detailing the use of this project
 	Details *string
@@ -259,22 +287,26 @@ type ProjectProperties struct {
 // ProjectStatusRT is the result type of the project service CreateProject
 // method.
 type ProjectStatusRT struct {
+	// User Role
+	Role *string
 	// Project status
 	Status *string
 	// DateTime project was created
 	CreatedAt *string
 	// DateTime project last modified
 	ModifiedAt *string
+	// Time at which this list was valid
+	AtTime *string
+	// Project URN
+	Urn string
+	// Project name
+	Name *string
 	// Account URN
 	Account *string
 	// Parent Project URN
 	Parent *string
 	// Additional Metadata
 	Properties *ProjectProperties
-	// Project URN
-	Urn string
-	// Project name
-	Name *string
 }
 
 // ReadPayload is the payload type of the project service read method.
@@ -327,6 +359,17 @@ type SetProjectAccountPayload struct {
 	ProjectUrn string
 	// Account URN
 	AccountUrn string
+	// JWT used for authentication
+	JWT string
+}
+
+// SetProjectInformationPayload is the payload type of the project service
+// SetProjectInformation method.
+type SetProjectInformationPayload struct {
+	// Project URN
+	Urn string
+	// Modify project information
+	Project *ProjectModifyRequest
 	// JWT used for authentication
 	JWT string
 }
@@ -631,11 +674,19 @@ func newProjectListItemCollectionViewTiny(res ProjectListItemCollection) project
 func newProjectListItem(vres *projectviews.ProjectListItemView) *ProjectListItem {
 	res := &ProjectListItem{
 		Name:       vres.Name,
+		Account:    vres.Account,
+		Parent:     vres.Parent,
 		Role:       vres.Role,
-		Urn:        vres.Urn,
+		Status:     vres.Status,
 		CreatedAt:  vres.CreatedAt,
 		ModifiedAt: vres.ModifiedAt,
 		AtTime:     vres.AtTime,
+	}
+	if vres.Urn != nil {
+		res.Urn = *vres.Urn
+	}
+	if vres.Properties != nil {
+		res.Properties = transformProjectviewsProjectPropertiesViewToProjectProperties(vres.Properties)
 	}
 	return res
 }
@@ -643,8 +694,9 @@ func newProjectListItem(vres *projectviews.ProjectListItemView) *ProjectListItem
 // newProjectListItemTiny converts projected type ProjectListItem to service
 // type ProjectListItem.
 func newProjectListItemTiny(vres *projectviews.ProjectListItemView) *ProjectListItem {
-	res := &ProjectListItem{
-		Urn: vres.Urn,
+	res := &ProjectListItem{}
+	if vres.Urn != nil {
+		res.Urn = *vres.Urn
 	}
 	return res
 }
@@ -653,12 +705,18 @@ func newProjectListItemTiny(vres *projectviews.ProjectListItemView) *ProjectList
 // type ProjectListItemView using the "default" view.
 func newProjectListItemView(res *ProjectListItem) *projectviews.ProjectListItemView {
 	vres := &projectviews.ProjectListItemView{
-		Name:       res.Name,
 		Role:       res.Role,
-		Urn:        res.Urn,
+		Status:     res.Status,
 		CreatedAt:  res.CreatedAt,
 		ModifiedAt: res.ModifiedAt,
 		AtTime:     res.AtTime,
+		Urn:        &res.Urn,
+		Name:       res.Name,
+		Account:    res.Account,
+		Parent:     res.Parent,
+	}
+	if res.Properties != nil {
+		vres.Properties = transformProjectPropertiesToProjectviewsProjectPropertiesView(res.Properties)
 	}
 	return vres
 }
@@ -667,7 +725,7 @@ func newProjectListItemView(res *ProjectListItem) *projectviews.ProjectListItemV
 // type ProjectListItemView using the "tiny" view.
 func newProjectListItemViewTiny(res *ProjectListItem) *projectviews.ProjectListItemView {
 	vres := &projectviews.ProjectListItemView{
-		Urn: res.Urn,
+		Urn: &res.Urn,
 	}
 	return vres
 }
@@ -679,9 +737,11 @@ func newProjectStatusRT(vres *projectviews.ProjectStatusRTView) *ProjectStatusRT
 		Name:       vres.Name,
 		Account:    vres.Account,
 		Parent:     vres.Parent,
+		Role:       vres.Role,
 		Status:     vres.Status,
 		CreatedAt:  vres.CreatedAt,
 		ModifiedAt: vres.ModifiedAt,
+		AtTime:     vres.AtTime,
 	}
 	if vres.Urn != nil {
 		res.Urn = *vres.Urn
@@ -706,13 +766,15 @@ func newProjectStatusRTTiny(vres *projectviews.ProjectStatusRTView) *ProjectStat
 // type ProjectStatusRTView using the "default" view.
 func newProjectStatusRTView(res *ProjectStatusRT) *projectviews.ProjectStatusRTView {
 	vres := &projectviews.ProjectStatusRTView{
+		Role:       res.Role,
 		Status:     res.Status,
 		CreatedAt:  res.CreatedAt,
 		ModifiedAt: res.ModifiedAt,
-		Account:    res.Account,
-		Parent:     res.Parent,
+		AtTime:     res.AtTime,
 		Urn:        &res.Urn,
 		Name:       res.Name,
+		Account:    res.Account,
+		Parent:     res.Parent,
 	}
 	if res.Properties != nil {
 		vres.Properties = transformProjectPropertiesToProjectviewsProjectPropertiesView(res.Properties)

@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -38,6 +38,10 @@ type Client struct {
 
 	// Read Doer is the HTTP client used to make requests to the read endpoint.
 	ReadDoer goahttp.Doer
+
+	// SetProjectInformation Doer is the HTTP client used to make requests to the
+	// SetProjectInformation endpoint.
+	SetProjectInformationDoer goahttp.Doer
 
 	// ListProjectMembers Doer is the HTTP client used to make requests to the
 	// ListProjectMembers endpoint.
@@ -90,23 +94,24 @@ func NewClient(
 	restoreBody bool,
 ) *Client {
 	return &Client{
-		ListDoer:               doer,
-		CreateProjectDoer:      doer,
-		DeleteDoer:             doer,
-		ReadDoer:               doer,
-		ListProjectMembersDoer: doer,
-		UpdateMembershipDoer:   doer,
-		RemoveMembershipDoer:   doer,
-		DefaultProjectDoer:     doer,
-		SetDefaultProjectDoer:  doer,
-		ProjectAccountDoer:     doer,
-		SetProjectAccountDoer:  doer,
-		CORSDoer:               doer,
-		RestoreResponseBody:    restoreBody,
-		scheme:                 scheme,
-		host:                   host,
-		decoder:                dec,
-		encoder:                enc,
+		ListDoer:                  doer,
+		CreateProjectDoer:         doer,
+		DeleteDoer:                doer,
+		ReadDoer:                  doer,
+		SetProjectInformationDoer: doer,
+		ListProjectMembersDoer:    doer,
+		UpdateMembershipDoer:      doer,
+		RemoveMembershipDoer:      doer,
+		DefaultProjectDoer:        doer,
+		SetDefaultProjectDoer:     doer,
+		ProjectAccountDoer:        doer,
+		SetProjectAccountDoer:     doer,
+		CORSDoer:                  doer,
+		RestoreResponseBody:       restoreBody,
+		scheme:                    scheme,
+		host:                      host,
+		decoder:                   dec,
+		encoder:                   enc,
 	}
 }
 
@@ -201,6 +206,30 @@ func (c *Client) Read() goa.Endpoint {
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("project", "read", err)
+		}
+		return decodeResponse(resp)
+	}
+}
+
+// SetProjectInformation returns an endpoint that makes HTTP requests to the
+// project service SetProjectInformation server.
+func (c *Client) SetProjectInformation() goa.Endpoint {
+	var (
+		encodeRequest  = EncodeSetProjectInformationRequest(c.encoder)
+		decodeResponse = DecodeSetProjectInformationResponse(c.decoder, c.RestoreResponseBody)
+	)
+	return func(ctx context.Context, v any) (any, error) {
+		req, err := c.BuildSetProjectInformationRequest(ctx, v)
+		if err != nil {
+			return nil, err
+		}
+		err = encodeRequest(req, v)
+		if err != nil {
+			return nil, err
+		}
+		resp, err := c.SetProjectInformationDoer.Do(req)
+		if err != nil {
+			return nil, goahttp.ErrRequestError("project", "SetProjectInformation", err)
 		}
 		return decodeResponse(resp)
 	}

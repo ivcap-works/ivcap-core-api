@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package client
 
 import (
+	"unicode/utf8"
+
 	project "github.com/ivcap-works/ivcap-core-api/gen/project"
 	projectviews "github.com/ivcap-works/ivcap-core-api/gen/project/views"
 	goa "goa.design/goa/v3/pkg"
@@ -25,12 +27,29 @@ import (
 // CreateProjectRequestBody is the type of the "project" service
 // "CreateProject" endpoint HTTP request body.
 type CreateProjectRequestBody struct {
+	// Project URN
+	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
 	// Project name
 	Name string `form:"name" json:"name" xml:"name"`
-	// URN of the billing account
-	AccountUrn *string `form:"account_urn,omitempty" json:"account_urn,omitempty" xml:"account_urn,omitempty"`
-	// URN of the parent project
-	ParentProjectUrn *string `form:"parent_project_urn,omitempty" json:"parent_project_urn,omitempty" xml:"parent_project_urn,omitempty"`
+	// Account URN
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Parent Project URN
+	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
+	// Additional Metadata
+	Properties *ProjectProperties `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
+}
+
+// SetProjectInformationRequestBody is the type of the "project" service
+// "SetProjectInformation" endpoint HTTP request body.
+type SetProjectInformationRequestBody struct {
+	// Project URN
+	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Account URN
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Parent Project URN
+	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
 	// Additional Metadata
 	Properties *ProjectPropertiesRequestBodyRequestBody `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
 }
@@ -73,43 +92,76 @@ type ListResponseBody struct {
 // CreateProjectResponseBody is the type of the "project" service
 // "CreateProject" endpoint HTTP response body.
 type CreateProjectResponseBody struct {
+	// User Role
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
 	// Project status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// DateTime project was created
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// DateTime project last modified
 	ModifiedAt *string `form:"modified_at,omitempty" json:"modified_at,omitempty" xml:"modified_at,omitempty"`
+	// Time at which this list was valid
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	// Project URN
+	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Account URN
 	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	// Parent Project URN
 	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
 	// Additional Metadata
 	Properties *ProjectPropertiesResponseBody `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
-	// Project URN
-	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
-	// Project name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 }
 
 // ReadResponseBody is the type of the "project" service "read" endpoint HTTP
 // response body.
 type ReadResponseBody struct {
+	// User Role
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
 	// Project status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// DateTime project was created
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// DateTime project last modified
 	ModifiedAt *string `form:"modified_at,omitempty" json:"modified_at,omitempty" xml:"modified_at,omitempty"`
+	// Time at which this list was valid
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	// Project URN
+	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Account URN
 	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	// Parent Project URN
 	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
 	// Additional Metadata
 	Properties *ProjectPropertiesResponseBody `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
+}
+
+// SetProjectInformationResponseBody is the type of the "project" service
+// "SetProjectInformation" endpoint HTTP response body.
+type SetProjectInformationResponseBody struct {
+	// User Role
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
+	// Project status
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
+	// DateTime project was created
+	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
+	// DateTime project last modified
+	ModifiedAt *string `form:"modified_at,omitempty" json:"modified_at,omitempty" xml:"modified_at,omitempty"`
+	// Time at which this list was valid
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
 	// Project URN
 	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
 	// Project name
 	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Account URN
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Parent Project URN
+	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
+	// Additional Metadata
+	Properties *ProjectPropertiesResponseBody `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
 }
 
 // ListProjectMembersResponseBody is the type of the "project" service
@@ -127,22 +179,26 @@ type ListProjectMembersResponseBody struct {
 // DefaultProjectResponseBody is the type of the "project" service
 // "DefaultProject" endpoint HTTP response body.
 type DefaultProjectResponseBody struct {
+	// User Role
+	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
 	// Project status
 	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// DateTime project was created
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// DateTime project last modified
 	ModifiedAt *string `form:"modified_at,omitempty" json:"modified_at,omitempty" xml:"modified_at,omitempty"`
+	// Time at which this list was valid
+	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
+	// Project URN
+	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// Account URN
 	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
 	// Parent Project URN
 	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
 	// Additional Metadata
 	Properties *ProjectPropertiesResponseBody `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
-	// Project URN
-	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
-	// Project name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 }
 
 // ProjectAccountResponseBody is the type of the "project" service
@@ -270,6 +326,54 @@ type ReadNotImplementedResponseBody struct {
 // ReadNotFoundResponseBody is the type of the "project" service "read"
 // endpoint HTTP response body for the "not-found" error.
 type ReadNotFoundResponseBody struct {
+	// ID of missing resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SetProjectInformationBadRequestResponseBody is the type of the "project"
+// service "SetProjectInformation" endpoint HTTP response body for the
+// "bad-request" error.
+type SetProjectInformationBadRequestResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SetProjectInformationInvalidParameterResponseBody is the type of the
+// "project" service "SetProjectInformation" endpoint HTTP response body for
+// the "invalid-parameter" error.
+type SetProjectInformationInvalidParameterResponseBody struct {
+	// message describing expected type or pattern.
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+	// name of parameter.
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// provided parameter value.
+	Value *string `form:"value,omitempty" json:"value,omitempty" xml:"value,omitempty"`
+}
+
+// SetProjectInformationInvalidScopesResponseBody is the type of the "project"
+// service "SetProjectInformation" endpoint HTTP response body for the
+// "invalid-scopes" error.
+type SetProjectInformationInvalidScopesResponseBody struct {
+	// ID of involved resource
+	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+	// Message of error
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SetProjectInformationNotImplementedResponseBody is the type of the "project"
+// service "SetProjectInformation" endpoint HTTP response body for the
+// "not-implemented" error.
+type SetProjectInformationNotImplementedResponseBody struct {
+	// Information message
+	Message *string `form:"message,omitempty" json:"message,omitempty" xml:"message,omitempty"`
+}
+
+// SetProjectInformationNotFoundResponseBody is the type of the "project"
+// service "SetProjectInformation" endpoint HTTP response body for the
+// "not-found" error.
+type SetProjectInformationNotFoundResponseBody struct {
 	// ID of missing resource
 	ID *string `form:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
 	// Message of error
@@ -603,30 +707,44 @@ type ProjectListItemCollectionResponseBody []*ProjectListItemResponseBody
 
 // ProjectListItemResponseBody is used to define fields on response body types.
 type ProjectListItemResponseBody struct {
-	// Project Name
-	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
 	// User Role
 	Role *string `form:"role,omitempty" json:"role,omitempty" xml:"role,omitempty"`
-	// Project URN
-	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
+	// Project status
+	Status *string `form:"status,omitempty" json:"status,omitempty" xml:"status,omitempty"`
 	// DateTime project was created
 	CreatedAt *string `form:"created_at,omitempty" json:"created_at,omitempty" xml:"created_at,omitempty"`
 	// DateTime project last modified
 	ModifiedAt *string `form:"modified_at,omitempty" json:"modified_at,omitempty" xml:"modified_at,omitempty"`
 	// Time at which this list was valid
 	AtTime *string `form:"at-time,omitempty" json:"at-time,omitempty" xml:"at-time,omitempty"`
-}
-
-// ProjectPropertiesRequestBodyRequestBody is used to define fields on request
-// body types.
-type ProjectPropertiesRequestBodyRequestBody struct {
-	// String metadata for detailing the use of this project
-	Details *string `form:"details,omitempty" json:"details,omitempty" xml:"details,omitempty"`
+	// Project URN
+	Urn *string `form:"urn,omitempty" json:"urn,omitempty" xml:"urn,omitempty"`
+	// Project name
+	Name *string `form:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	// Account URN
+	Account *string `form:"account,omitempty" json:"account,omitempty" xml:"account,omitempty"`
+	// Parent Project URN
+	Parent *string `form:"parent,omitempty" json:"parent,omitempty" xml:"parent,omitempty"`
+	// Additional Metadata
+	Properties *ProjectPropertiesResponseBody `form:"properties,omitempty" json:"properties,omitempty" xml:"properties,omitempty"`
 }
 
 // ProjectPropertiesResponseBody is used to define fields on response body
 // types.
 type ProjectPropertiesResponseBody struct {
+	// String metadata for detailing the use of this project
+	Details *string `form:"details,omitempty" json:"details,omitempty" xml:"details,omitempty"`
+}
+
+// ProjectProperties is used to define fields on request body types.
+type ProjectProperties struct {
+	// String metadata for detailing the use of this project
+	Details *string `form:"details,omitempty" json:"details,omitempty" xml:"details,omitempty"`
+}
+
+// ProjectPropertiesRequestBodyRequestBody is used to define fields on request
+// body types.
+type ProjectPropertiesRequestBodyRequestBody struct {
 	// String metadata for detailing the use of this project
 	Details *string `form:"details,omitempty" json:"details,omitempty" xml:"details,omitempty"`
 }
@@ -645,9 +763,25 @@ type UserListItemResponseBody struct {
 // the "CreateProject" endpoint of the "project" service.
 func NewCreateProjectRequestBody(p *project.CreateProjectPayload) *CreateProjectRequestBody {
 	body := &CreateProjectRequestBody{
-		Name:             p.Project.Name,
-		AccountUrn:       p.Project.AccountUrn,
-		ParentProjectUrn: p.Project.ParentProjectUrn,
+		Urn:     p.Project.Urn,
+		Name:    p.Project.Name,
+		Account: p.Project.Account,
+		Parent:  p.Project.Parent,
+	}
+	if p.Project.Properties != nil {
+		body.Properties = marshalProjectProjectPropertiesToProjectProperties(p.Project.Properties)
+	}
+	return body
+}
+
+// NewSetProjectInformationRequestBody builds the HTTP request body from the
+// payload of the "SetProjectInformation" endpoint of the "project" service.
+func NewSetProjectInformationRequestBody(p *project.SetProjectInformationPayload) *SetProjectInformationRequestBody {
+	body := &SetProjectInformationRequestBody{
+		Urn:     p.Project.Urn,
+		Name:    p.Project.Name,
+		Account: p.Project.Account,
+		Parent:  p.Project.Parent,
 	}
 	if p.Project.Properties != nil {
 		body.Properties = marshalProjectProjectPropertiesToProjectPropertiesRequestBodyRequestBody(p.Project.Properties)
@@ -760,13 +894,15 @@ func NewListNotAuthorized() *project.UnauthorizedT {
 // endpoint result from a HTTP "OK" response.
 func NewCreateProjectProjectStatusRTOK(body *CreateProjectResponseBody) *projectviews.ProjectStatusRTView {
 	v := &projectviews.ProjectStatusRTView{
+		Role:       body.Role,
 		Status:     body.Status,
 		CreatedAt:  body.CreatedAt,
 		ModifiedAt: body.ModifiedAt,
-		Account:    body.Account,
-		Parent:     body.Parent,
+		AtTime:     body.AtTime,
 		Urn:        body.Urn,
 		Name:       body.Name,
+		Account:    body.Account,
+		Parent:     body.Parent,
 	}
 	if body.Properties != nil {
 		v.Properties = unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(body.Properties)
@@ -885,13 +1021,15 @@ func NewDeleteNotAuthorized() *project.UnauthorizedT {
 // from a HTTP "OK" response.
 func NewReadProjectStatusRTOK(body *ReadResponseBody) *projectviews.ProjectStatusRTView {
 	v := &projectviews.ProjectStatusRTView{
+		Role:       body.Role,
 		Status:     body.Status,
 		CreatedAt:  body.CreatedAt,
 		ModifiedAt: body.ModifiedAt,
-		Account:    body.Account,
-		Parent:     body.Parent,
+		AtTime:     body.AtTime,
 		Urn:        body.Urn,
 		Name:       body.Name,
+		Account:    body.Account,
+		Parent:     body.Parent,
 	}
 	if body.Properties != nil {
 		v.Properties = unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(body.Properties)
@@ -951,6 +1089,97 @@ func NewReadNotAvailable() *project.ServiceNotAvailableT {
 // NewReadNotAuthorized builds a project service read endpoint not-authorized
 // error.
 func NewReadNotAuthorized() *project.UnauthorizedT {
+	v := &project.UnauthorizedT{}
+
+	return v
+}
+
+// NewSetProjectInformationProjectStatusRTOK builds a "project" service
+// "SetProjectInformation" endpoint result from a HTTP "OK" response.
+func NewSetProjectInformationProjectStatusRTOK(body *SetProjectInformationResponseBody) *projectviews.ProjectStatusRTView {
+	v := &projectviews.ProjectStatusRTView{
+		Role:       body.Role,
+		Status:     body.Status,
+		CreatedAt:  body.CreatedAt,
+		ModifiedAt: body.ModifiedAt,
+		AtTime:     body.AtTime,
+		Urn:        body.Urn,
+		Name:       body.Name,
+		Account:    body.Account,
+		Parent:     body.Parent,
+	}
+	if body.Properties != nil {
+		v.Properties = unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(body.Properties)
+	}
+
+	return v
+}
+
+// NewSetProjectInformationBadRequest builds a project service
+// SetProjectInformation endpoint bad-request error.
+func NewSetProjectInformationBadRequest(body *SetProjectInformationBadRequestResponseBody) *project.BadRequestT {
+	v := &project.BadRequestT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSetProjectInformationInvalidParameter builds a project service
+// SetProjectInformation endpoint invalid-parameter error.
+func NewSetProjectInformationInvalidParameter(body *SetProjectInformationInvalidParameterResponseBody) *project.InvalidParameterT {
+	v := &project.InvalidParameterT{
+		Message: *body.Message,
+		Name:    *body.Name,
+		Value:   body.Value,
+	}
+
+	return v
+}
+
+// NewSetProjectInformationInvalidScopes builds a project service
+// SetProjectInformation endpoint invalid-scopes error.
+func NewSetProjectInformationInvalidScopes(body *SetProjectInformationInvalidScopesResponseBody) *project.InvalidScopesT {
+	v := &project.InvalidScopesT{
+		ID:      body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSetProjectInformationNotImplemented builds a project service
+// SetProjectInformation endpoint not-implemented error.
+func NewSetProjectInformationNotImplemented(body *SetProjectInformationNotImplementedResponseBody) *project.NotImplementedT {
+	v := &project.NotImplementedT{
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSetProjectInformationNotFound builds a project service
+// SetProjectInformation endpoint not-found error.
+func NewSetProjectInformationNotFound(body *SetProjectInformationNotFoundResponseBody) *project.ResourceNotFoundT {
+	v := &project.ResourceNotFoundT{
+		ID:      *body.ID,
+		Message: *body.Message,
+	}
+
+	return v
+}
+
+// NewSetProjectInformationNotAvailable builds a project service
+// SetProjectInformation endpoint not-available error.
+func NewSetProjectInformationNotAvailable() *project.ServiceNotAvailableT {
+	v := &project.ServiceNotAvailableT{}
+
+	return v
+}
+
+// NewSetProjectInformationNotAuthorized builds a project service
+// SetProjectInformation endpoint not-authorized error.
+func NewSetProjectInformationNotAuthorized() *project.UnauthorizedT {
 	v := &project.UnauthorizedT{}
 
 	return v
@@ -1185,13 +1414,15 @@ func NewRemoveMembershipNotAuthorized() *project.UnauthorizedT {
 // "DefaultProject" endpoint result from a HTTP "OK" response.
 func NewDefaultProjectProjectStatusRTOK(body *DefaultProjectResponseBody) *projectviews.ProjectStatusRTView {
 	v := &projectviews.ProjectStatusRTView{
+		Role:       body.Role,
 		Status:     body.Status,
 		CreatedAt:  body.CreatedAt,
 		ModifiedAt: body.ModifiedAt,
-		Account:    body.Account,
-		Parent:     body.Parent,
+		AtTime:     body.AtTime,
 		Urn:        body.Urn,
 		Name:       body.Name,
+		Account:    body.Account,
+		Parent:     body.Parent,
 	}
 	if body.Properties != nil {
 		v.Properties = unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(body.Properties)
@@ -1670,6 +1901,63 @@ func ValidateReadNotFoundResponseBody(body *ReadNotFoundResponseBody) (err error
 	return
 }
 
+// ValidateSetProjectInformationBadRequestResponseBody runs the validations
+// defined on SetProjectInformation_bad-request_Response_Body
+func ValidateSetProjectInformationBadRequestResponseBody(body *SetProjectInformationBadRequestResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSetProjectInformationInvalidParameterResponseBody runs the
+// validations defined on SetProjectInformation_invalid-parameter_Response_Body
+func ValidateSetProjectInformationInvalidParameterResponseBody(body *SetProjectInformationInvalidParameterResponseBody) (err error) {
+	if body.Name == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("name", "body"))
+	}
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSetProjectInformationInvalidScopesResponseBody runs the validations
+// defined on SetProjectInformation_invalid-scopes_Response_Body
+func ValidateSetProjectInformationInvalidScopesResponseBody(body *SetProjectInformationInvalidScopesResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+	}
+	return
+}
+
+// ValidateSetProjectInformationNotImplementedResponseBody runs the validations
+// defined on SetProjectInformation_not-implemented_Response_Body
+func ValidateSetProjectInformationNotImplementedResponseBody(body *SetProjectInformationNotImplementedResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	return
+}
+
+// ValidateSetProjectInformationNotFoundResponseBody runs the validations
+// defined on SetProjectInformation_not-found_Response_Body
+func ValidateSetProjectInformationNotFoundResponseBody(body *SetProjectInformationNotFoundResponseBody) (err error) {
+	if body.Message == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("message", "body"))
+	}
+	if body.ID == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("id", "body"))
+	}
+	if body.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
+	}
+	return
+}
+
 // ValidateListProjectMembersBadRequestResponseBody runs the validations
 // defined on ListProjectMembers_bad-request_Response_Body
 func ValidateListProjectMembersBadRequestResponseBody(body *ListProjectMembersBadRequestResponseBody) (err error) {
@@ -2085,6 +2373,14 @@ func ValidateProjectListItemCollectionResponseBody(body ProjectListItemCollectio
 // ValidateProjectListItemResponseBody runs the validations defined on
 // ProjectListItemResponseBody
 func ValidateProjectListItemResponseBody(body *ProjectListItemResponseBody) (err error) {
+	if body.Urn == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("urn", "body"))
+	}
+	if body.Status != nil {
+		if !(*body.Status == "unknown" || *body.Status == "active" || *body.Status == "disabled" || *body.Status == "deleted") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("body.status", *body.Status, []any{"unknown", "active", "disabled", "deleted"}))
+		}
+	}
 	if body.CreatedAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.created_at", *body.CreatedAt, goa.FormatDateTime))
 	}
@@ -2093,6 +2389,20 @@ func ValidateProjectListItemResponseBody(body *ProjectListItemResponseBody) (err
 	}
 	if body.AtTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.at-time", *body.AtTime, goa.FormatDateTime))
+	}
+	if body.Urn != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.urn", *body.Urn, goa.FormatURI))
+	}
+	if body.Name != nil {
+		if utf8.RuneCountInString(*body.Name) < 3 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", *body.Name, utf8.RuneCountInString(*body.Name), 3, true))
+		}
+	}
+	if body.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+	}
+	if body.Parent != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.parent", *body.Parent, goa.FormatURI))
 	}
 	return
 }

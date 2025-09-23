@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -86,6 +86,26 @@ type MessagestatusView struct {
 	ID *string
 }
 
+// MessageListView is a type that runs validations on a projected type.
+type MessageListView struct {
+	// Messages in the queue
+	Messages []*PublishedmessageView
+	// Time at which this list was valid
+	AtTime *string
+}
+
+// PublishedmessageView is a type that runs validations on a projected type.
+type PublishedmessageView struct {
+	// Message identifier
+	ID *string
+	// Message content in JSON format.
+	Content any
+	// Schema used for message
+	Schema *string
+	// Encoding type of message content (defaults to 'application/json')
+	ContentType *string
+}
+
 var (
 	// CreatequeueresponseMap is a map indexing the attribute names of
 	// Createqueueresponse by view name.
@@ -117,6 +137,16 @@ var (
 	MessagestatusMap = map[string][]string{
 		"default": {
 			"id",
+		},
+	}
+	// PublishedmessageMap is a map indexing the attribute names of
+	// Publishedmessage by view name.
+	PublishedmessageMap = map[string][]string{
+		"default": {
+			"id",
+			"content",
+			"schema",
+			"content-type",
 		},
 	}
 )
@@ -188,7 +218,7 @@ func ValidateReadqueueresponseView(result *ReadqueueresponseView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("created-at", "result"))
 	}
 	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
 	if result.FirstTime != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.first-time", *result.FirstTime, goa.FormatDateTime))
@@ -205,6 +235,33 @@ func ValidateReadqueueresponseView(result *ReadqueueresponseView) (err error) {
 // ValidateMessagestatusView runs the validations defined on MessagestatusView
 // using the "default" view.
 func ValidateMessagestatusView(result *MessagestatusView) (err error) {
+	if result.ID != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
+	}
+	return
+}
+
+// ValidateMessageListView runs the validations defined on MessageListView.
+func ValidateMessageListView(result *MessageListView) (err error) {
+	if result.Messages == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("messages", "result"))
+	}
+	for _, e := range result.Messages {
+		if e != nil {
+			if err2 := ValidatePublishedmessageView(e); err2 != nil {
+				err = goa.MergeErrors(err, err2)
+			}
+		}
+	}
+	if result.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidatePublishedmessageView runs the validations defined on
+// PublishedmessageView using the "default" view.
+func ValidatePublishedmessageView(result *PublishedmessageView) (err error) {
 	if result.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
