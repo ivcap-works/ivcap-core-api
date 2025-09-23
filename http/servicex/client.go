@@ -4,7 +4,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//     http://www.apache.org/licenses/LICENSE-2.0
+//      http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -24,7 +24,7 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// Client lists the service service endpoint HTTP clients.
+// Client lists the servicex service endpoint HTTP clients.
 type Client struct {
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
@@ -55,7 +55,7 @@ type Client struct {
 	decoder func(*http.Response) goahttp.Decoder
 }
 
-// NewClient instantiates HTTP clients for all the service service servers.
+// NewClient instantiates HTTP clients for all the servicex service servers.
 func NewClient(
 	scheme string,
 	host string,
@@ -79,7 +79,7 @@ func NewClient(
 	}
 }
 
-// List returns an endpoint that makes HTTP requests to the service service
+// List returns an endpoint that makes HTTP requests to the servicex service
 // list server.
 func (c *Client) List() goa.Endpoint {
 	var (
@@ -97,13 +97,13 @@ func (c *Client) List() goa.Endpoint {
 		}
 		resp, err := c.ListDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "list", err)
+			return nil, goahttp.ErrRequestError("servicex", "list", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// CreateService returns an endpoint that makes HTTP requests to the service
+// CreateService returns an endpoint that makes HTTP requests to the servicex
 // service create_service server.
 func (c *Client) CreateService() goa.Endpoint {
 	var (
@@ -121,13 +121,13 @@ func (c *Client) CreateService() goa.Endpoint {
 		}
 		resp, err := c.CreateServiceDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "create_service", err)
+			return nil, goahttp.ErrRequestError("servicex", "create_service", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Read returns an endpoint that makes HTTP requests to the service service
+// Read returns an endpoint that makes HTTP requests to the servicex service
 // read server.
 func (c *Client) Read() goa.Endpoint {
 	var (
@@ -145,13 +145,13 @@ func (c *Client) Read() goa.Endpoint {
 		}
 		resp, err := c.ReadDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "read", err)
+			return nil, goahttp.ErrRequestError("servicex", "read", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Update returns an endpoint that makes HTTP requests to the service service
+// Update returns an endpoint that makes HTTP requests to the servicex service
 // update server.
 func (c *Client) Update() goa.Endpoint {
 	var (
@@ -169,13 +169,13 @@ func (c *Client) Update() goa.Endpoint {
 		}
 		resp, err := c.UpdateDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "update", err)
+			return nil, goahttp.ErrRequestError("servicex", "update", err)
 		}
 		return decodeResponse(resp)
 	}
 }
 
-// Delete returns an endpoint that makes HTTP requests to the service service
+// Delete returns an endpoint that makes HTTP requests to the servicex service
 // delete server.
 func (c *Client) Delete() goa.Endpoint {
 	var (
@@ -193,7 +193,7 @@ func (c *Client) Delete() goa.Endpoint {
 		}
 		resp, err := c.DeleteDoer.Do(req)
 		if err != nil {
-			return nil, goahttp.ErrRequestError("service", "delete", err)
+			return nil, goahttp.ErrRequestError("servicex", "delete", err)
 		}
 		return decodeResponse(resp)
 	}
