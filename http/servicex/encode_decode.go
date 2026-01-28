@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -958,6 +958,10 @@ func marshalServicexParameterDefTToParameterDefT(v *servicex.ParameterDefT) *Par
 	if v.Options != nil {
 		res.Options = make([]*ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
+			if val == nil {
+				res.Options[i] = nil
+				continue
+			}
 			res.Options[i] = marshalServicexParameterOptTToParameterOptT(val)
 		}
 	}
@@ -1082,6 +1086,10 @@ func marshalParameterDefTToServicexParameterDefT(v *ParameterDefT) *servicex.Par
 	if v.Options != nil {
 		res.Options = make([]*servicex.ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
+			if val == nil {
+				res.Options[i] = nil
+				continue
+			}
 			res.Options[i] = marshalParameterOptTToServicexParameterOptT(val)
 		}
 	}
@@ -1132,6 +1140,10 @@ func unmarshalParameterDefTResponseBodyToServicexParameterDefT(v *ParameterDefTR
 	if v.Options != nil {
 		res.Options = make([]*servicex.ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
+			if val == nil {
+				res.Options[i] = nil
+				continue
+			}
 			res.Options[i] = unmarshalParameterOptTResponseBodyToServicexParameterOptT(val)
 		}
 	}

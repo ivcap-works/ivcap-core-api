@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -95,6 +95,10 @@ func NewSearchListRTOK(body *SearchResponseBody) *search.SearchListRT {
 	}
 	v.Links = make([]*search.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToSearchLinkT(val)
 	}
 

@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -287,6 +287,10 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	if body.Parameters != nil {
 		v.Parameters = make([]*order.ParameterT, len(body.Parameters))
 		for i, val := range body.Parameters {
+			if val == nil {
+				v.Parameters[i] = nil
+				continue
+			}
 			v.Parameters[i] = marshalParameterTToOrderParameterT(val)
 		}
 	} else {

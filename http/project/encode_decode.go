@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -616,6 +616,181 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 		default:
 			body, _ := io.ReadAll(resp.Body)
 			return nil, goahttp.ErrInvalidResponse("project", "read", resp.StatusCode, string(body))
+		}
+	}
+}
+
+// BuildSetProjectInformationRequest instantiates a HTTP request object with
+// method and path set to call the "project" service "SetProjectInformation"
+// endpoint
+func (c *Client) BuildSetProjectInformationRequest(ctx context.Context, v any) (*http.Request, error) {
+	var (
+		urn string
+	)
+	{
+		p, ok := v.(*project.SetProjectInformationPayload)
+		if !ok {
+			return nil, goahttp.ErrInvalidType("project", "SetProjectInformation", "*project.SetProjectInformationPayload", v)
+		}
+		urn = p.Urn
+	}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: SetProjectInformationProjectPath(urn)}
+	req, err := http.NewRequest("PUT", u.String(), nil)
+	if err != nil {
+		return nil, goahttp.ErrInvalidURL("project", "SetProjectInformation", u.String(), err)
+	}
+	if ctx != nil {
+		req = req.WithContext(ctx)
+	}
+
+	return req, nil
+}
+
+// EncodeSetProjectInformationRequest returns an encoder for requests sent to
+// the project SetProjectInformation server.
+func EncodeSetProjectInformationRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
+	return func(req *http.Request, v any) error {
+		p, ok := v.(*project.SetProjectInformationPayload)
+		if !ok {
+			return goahttp.ErrInvalidType("project", "SetProjectInformation", "*project.SetProjectInformationPayload", v)
+		}
+		{
+			head := p.JWT
+			if !strings.Contains(head, " ") {
+				req.Header.Set("Authorization", "Bearer "+head)
+			} else {
+				req.Header.Set("Authorization", head)
+			}
+		}
+		body := NewSetProjectInformationRequestBody(p)
+		if err := encoder(req).Encode(&body); err != nil {
+			return goahttp.ErrEncodingError("project", "SetProjectInformation", err)
+		}
+		return nil
+	}
+}
+
+// DecodeSetProjectInformationResponse returns a decoder for responses returned
+// by the project SetProjectInformation endpoint. restoreBody controls whether
+// the response body should be restored after having been read.
+// DecodeSetProjectInformationResponse may return the following errors:
+//   - "bad-request" (type *project.BadRequestT): http.StatusBadRequest
+//   - "invalid-parameter" (type *project.InvalidParameterT): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *project.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *project.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *project.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *project.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *project.UnauthorizedT): http.StatusUnauthorized
+//   - error: internal error
+func DecodeSetProjectInformationResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
+	return func(resp *http.Response) (any, error) {
+		if restoreBody {
+			b, err := io.ReadAll(resp.Body)
+			if err != nil {
+				return nil, err
+			}
+			resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			defer func() {
+				resp.Body = io.NopCloser(bytes.NewBuffer(b))
+			}()
+		} else {
+			defer resp.Body.Close()
+		}
+		switch resp.StatusCode {
+		case http.StatusOK:
+			var (
+				body SetProjectInformationResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("project", "SetProjectInformation", err)
+			}
+			p := NewSetProjectInformationProjectStatusRTOK(&body)
+			view := resp.Header.Get("goa-view")
+			vres := &projectviews.ProjectStatusRT{Projected: p, View: view}
+			if err = projectviews.ValidateProjectStatusRT(vres); err != nil {
+				return nil, goahttp.ErrValidationError("project", "SetProjectInformation", err)
+			}
+			res := project.NewProjectStatusRT(vres)
+			return res, nil
+		case http.StatusBadRequest:
+			var (
+				body SetProjectInformationBadRequestResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("project", "SetProjectInformation", err)
+			}
+			err = ValidateSetProjectInformationBadRequestResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("project", "SetProjectInformation", err)
+			}
+			return nil, NewSetProjectInformationBadRequest(&body)
+		case http.StatusUnprocessableEntity:
+			var (
+				body SetProjectInformationInvalidParameterResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("project", "SetProjectInformation", err)
+			}
+			err = ValidateSetProjectInformationInvalidParameterResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("project", "SetProjectInformation", err)
+			}
+			return nil, NewSetProjectInformationInvalidParameter(&body)
+		case http.StatusForbidden:
+			var (
+				body SetProjectInformationInvalidScopesResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("project", "SetProjectInformation", err)
+			}
+			err = ValidateSetProjectInformationInvalidScopesResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("project", "SetProjectInformation", err)
+			}
+			return nil, NewSetProjectInformationInvalidScopes(&body)
+		case http.StatusNotImplemented:
+			var (
+				body SetProjectInformationNotImplementedResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("project", "SetProjectInformation", err)
+			}
+			err = ValidateSetProjectInformationNotImplementedResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("project", "SetProjectInformation", err)
+			}
+			return nil, NewSetProjectInformationNotImplemented(&body)
+		case http.StatusNotFound:
+			var (
+				body SetProjectInformationNotFoundResponseBody
+				err  error
+			)
+			err = decoder(resp).Decode(&body)
+			if err != nil {
+				return nil, goahttp.ErrDecodingError("project", "SetProjectInformation", err)
+			}
+			err = ValidateSetProjectInformationNotFoundResponseBody(&body)
+			if err != nil {
+				return nil, goahttp.ErrValidationError("project", "SetProjectInformation", err)
+			}
+			return nil, NewSetProjectInformationNotFound(&body)
+		case http.StatusServiceUnavailable:
+			return nil, NewSetProjectInformationNotAvailable()
+		case http.StatusUnauthorized:
+			return nil, NewSetProjectInformationNotAuthorized()
+		default:
+			body, _ := io.ReadAll(resp.Body)
+			return nil, goahttp.ErrInvalidResponse("project", "SetProjectInformation", resp.StatusCode, string(body))
 		}
 	}
 }
@@ -1757,12 +1932,58 @@ func DecodeSetProjectAccountResponse(decoder func(*http.Response) goahttp.Decode
 // *ProjectListItemResponseBody.
 func unmarshalProjectListItemResponseBodyToProjectviewsProjectListItemView(v *ProjectListItemResponseBody) *projectviews.ProjectListItemView {
 	res := &projectviews.ProjectListItemView{
-		Name:       v.Name,
 		Role:       v.Role,
-		Urn:        v.Urn,
+		Status:     v.Status,
 		CreatedAt:  v.CreatedAt,
 		ModifiedAt: v.ModifiedAt,
 		AtTime:     v.AtTime,
+		Urn:        v.Urn,
+		Name:       v.Name,
+		Account:    v.Account,
+		Parent:     v.Parent,
+	}
+	if v.Properties != nil {
+		res.Properties = unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(v.Properties)
+	}
+
+	return res
+}
+
+// unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView
+// builds a value of type *projectviews.ProjectPropertiesView from a value of
+// type *ProjectPropertiesResponseBody.
+func unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(v *ProjectPropertiesResponseBody) *projectviews.ProjectPropertiesView {
+	if v == nil {
+		return nil
+	}
+	res := &projectviews.ProjectPropertiesView{
+		Details: v.Details,
+	}
+
+	return res
+}
+
+// marshalProjectProjectPropertiesToProjectProperties builds a value of type
+// *ProjectProperties from a value of type *project.ProjectProperties.
+func marshalProjectProjectPropertiesToProjectProperties(v *project.ProjectProperties) *ProjectProperties {
+	if v == nil {
+		return nil
+	}
+	res := &ProjectProperties{
+		Details: v.Details,
+	}
+
+	return res
+}
+
+// marshalProjectPropertiesToProjectProjectProperties builds a value of type
+// *project.ProjectProperties from a value of type *ProjectProperties.
+func marshalProjectPropertiesToProjectProjectProperties(v *ProjectProperties) *project.ProjectProperties {
+	if v == nil {
+		return nil
+	}
+	res := &project.ProjectProperties{
+		Details: v.Details,
 	}
 
 	return res
@@ -1790,20 +2011,6 @@ func marshalProjectPropertiesRequestBodyRequestBodyToProjectProjectProperties(v 
 		return nil
 	}
 	res := &project.ProjectProperties{
-		Details: v.Details,
-	}
-
-	return res
-}
-
-// unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView
-// builds a value of type *projectviews.ProjectPropertiesView from a value of
-// type *ProjectPropertiesResponseBody.
-func unmarshalProjectPropertiesResponseBodyToProjectviewsProjectPropertiesView(v *ProjectPropertiesResponseBody) *projectviews.ProjectPropertiesView {
-	if v == nil {
-		return nil
-	}
-	res := &projectviews.ProjectPropertiesView{
 		Details: v.Details,
 	}
 

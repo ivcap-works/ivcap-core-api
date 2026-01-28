@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -110,7 +110,7 @@ func BuildCreateServicePayload(servicexCreateServiceBody string, servicexCreateS
 	{
 		err = json.Unmarshal([]byte(servicexCreateServiceBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://vonruedengulgowski.name/maritza.tremblay\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         },\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         },\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Aut consequuntur occaecati sint et dolor.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"image-pull-policy\": \"Natus officia quae sed blanditiis vero.\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            },\n            \"shared-memory\": \"1Gi\"\n         },\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://keelingbatz.biz/ally\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Fuga veritatis qui asperiores quaerat molestiae.\",\n            \"uri\": \"http://jacobsonolson.name/rosalind_schmidt\"\n         },\n         {\n            \"title\": \"Fuga veritatis qui asperiores quaerat molestiae.\",\n            \"uri\": \"http://jacobsonolson.name/rosalind_schmidt\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Repellat nemo recusandae asperiores dolorum voluptas.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"image-pull-policy\": \"Praesentium saepe minima non qui quos voluptate.\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            },\n            \"shared-memory\": \"1Gi\"\n         },\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -153,6 +153,10 @@ func BuildCreateServicePayload(servicexCreateServiceBody string, servicexCreateS
 	if body.References != nil {
 		v.References = make([]*servicex.XReferenceT, len(body.References))
 		for i, val := range body.References {
+			if val == nil {
+				v.References[i] = nil
+				continue
+			}
 			v.References[i] = marshalXReferenceTRequestBodyRequestBodyToServicexXReferenceT(val)
 		}
 	}
@@ -168,6 +172,10 @@ func BuildCreateServicePayload(servicexCreateServiceBody string, servicexCreateS
 	if body.Parameters != nil {
 		v.Parameters = make([]*servicex.ParameterDefT, len(body.Parameters))
 		for i, val := range body.Parameters {
+			if val == nil {
+				v.Parameters[i] = nil
+				continue
+			}
 			v.Parameters[i] = marshalParameterDefTToServicexParameterDefT(val)
 		}
 	} else {
@@ -207,7 +215,7 @@ func BuildUpdatePayload(servicexUpdateBody string, servicexUpdateID string, serv
 	{
 		err = json.Unmarshal([]byte(servicexUpdateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://johnson.biz/keven\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         },\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         },\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         },\n         {\n            \"title\": \"Assumenda sit.\",\n            \"uri\": \"http://stoltenberg.name/aletha.howell\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Aut consequuntur occaecati sint et dolor.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"image-pull-policy\": \"Natus officia quae sed blanditiis vero.\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            },\n            \"shared-memory\": \"1Gi\"\n         },\n         \"type\": \"basic\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"banner\": \"http://quigley.net/hollie\",\n      \"description\": \"This service ...\",\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"description\": \"The name of the region as according to ...\",\n            \"label\": \"Region Name\",\n            \"name\": \"region\",\n            \"type\": \"string\"\n         },\n         {\n            \"label\": \"Rainfall/month threshold\",\n            \"name\": \"threshold\",\n            \"type\": \"float\",\n            \"unit\": \"m\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"references\": [\n         {\n            \"title\": \"Fuga veritatis qui asperiores quaerat molestiae.\",\n            \"uri\": \"http://jacobsonolson.name/rosalind_schmidt\"\n         },\n         {\n            \"title\": \"Fuga veritatis qui asperiores quaerat molestiae.\",\n            \"uri\": \"http://jacobsonolson.name/rosalind_schmidt\"\n         },\n         {\n            \"title\": \"Fuga veritatis qui asperiores quaerat molestiae.\",\n            \"uri\": \"http://jacobsonolson.name/rosalind_schmidt\"\n         },\n         {\n            \"title\": \"Fuga veritatis qui asperiores quaerat molestiae.\",\n            \"uri\": \"http://jacobsonolson.name/rosalind_schmidt\"\n         }\n      ],\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ],\n      \"workflow\": {\n         \"argo\": \"Repellat nemo recusandae asperiores dolorum voluptas.\",\n         \"basic\": {\n            \"command\": [\n               \"/bin/sh\",\n               \"-c\",\n               \"echo $PATH\"\n            ],\n            \"cpu\": {\n               \"limit\": \"100m\",\n               \"request\": \"10m\"\n            },\n            \"ephemeral-storage\": {\n               \"limit\": \"4Gi\",\n               \"request\": \"2Gi\"\n            },\n            \"gpu-number\": 2,\n            \"gpu-type\": \"nvidia-tesla-t4\",\n            \"image\": \"alpine\",\n            \"image-pull-policy\": \"Praesentium saepe minima non qui quos voluptate.\",\n            \"memory\": {\n               \"limit\": \"100Mi\",\n               \"request\": \"10Mi\"\n            },\n            \"shared-memory\": \"1Gi\"\n         },\n         \"type\": \"basic\"\n      }\n   }'")
 		}
 		if body.Workflow == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("workflow", "body"))
@@ -265,6 +273,10 @@ func BuildUpdatePayload(servicexUpdateBody string, servicexUpdateID string, serv
 	if body.References != nil {
 		v.References = make([]*servicex.XReferenceT, len(body.References))
 		for i, val := range body.References {
+			if val == nil {
+				v.References[i] = nil
+				continue
+			}
 			v.References[i] = marshalXReferenceTRequestBodyRequestBodyToServicexXReferenceT(val)
 		}
 	}
@@ -280,6 +292,10 @@ func BuildUpdatePayload(servicexUpdateBody string, servicexUpdateID string, serv
 	if body.Parameters != nil {
 		v.Parameters = make([]*servicex.ParameterDefT, len(body.Parameters))
 		for i, val := range body.Parameters {
+			if val == nil {
+				v.Parameters[i] = nil
+				continue
+			}
 			v.Parameters[i] = marshalParameterDefTToServicexParameterDefT(val)
 		}
 	} else {

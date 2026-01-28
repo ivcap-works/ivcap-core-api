@@ -1,13 +1,11 @@
 module github.com/ivcap-works/ivcap-core-api
 
-go 1.19
+go 1.25.3
 
-require goa.design/goa/v3 v3.20.1
+require goa.design/goa/v3 v3.24.1
 
 require (
-	github.com/dimfeld/httptreemux/v5 v5.5.0 // indirect
-	github.com/google/uuid v1.3.0 // indirect
-	github.com/gorilla/websocket v1.5.0 // indirect
-	github.com/hashicorp/errwrap v1.1.0 // indirect
-	github.com/hashicorp/go-multierror v1.1.1 // indirect
+	github.com/go-chi/chi/v5 v5.2.4 // indirect
+	github.com/google/uuid v1.6.0 // indirect
+	github.com/gorilla/websocket v1.5.3 // indirect
 )

@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -458,6 +458,10 @@ func NewCreateServiceRequestBody(p *servicex.CreateServicePayload) *CreateServic
 	if p.Services.References != nil {
 		body.References = make([]*XReferenceTRequestBodyRequestBody, len(p.Services.References))
 		for i, val := range p.Services.References {
+			if val == nil {
+				body.References[i] = nil
+				continue
+			}
 			body.References[i] = marshalServicexXReferenceTToXReferenceTRequestBodyRequestBody(val)
 		}
 	}
@@ -473,6 +477,10 @@ func NewCreateServiceRequestBody(p *servicex.CreateServicePayload) *CreateServic
 	if p.Services.Parameters != nil {
 		body.Parameters = make([]*ParameterDefT, len(p.Services.Parameters))
 		for i, val := range p.Services.Parameters {
+			if val == nil {
+				body.Parameters[i] = nil
+				continue
+			}
 			body.Parameters[i] = marshalServicexParameterDefTToParameterDefT(val)
 		}
 	} else {
@@ -493,6 +501,10 @@ func NewUpdateRequestBody(p *servicex.UpdatePayload) *UpdateRequestBody {
 	if p.Services.References != nil {
 		body.References = make([]*XReferenceTRequestBodyRequestBody, len(p.Services.References))
 		for i, val := range p.Services.References {
+			if val == nil {
+				body.References[i] = nil
+				continue
+			}
 			body.References[i] = marshalServicexXReferenceTToXReferenceTRequestBodyRequestBody(val)
 		}
 	}
@@ -508,6 +520,10 @@ func NewUpdateRequestBody(p *servicex.UpdatePayload) *UpdateRequestBody {
 	if p.Services.Parameters != nil {
 		body.Parameters = make([]*ParameterDefT, len(p.Services.Parameters))
 		for i, val := range p.Services.Parameters {
+			if val == nil {
+				body.Parameters[i] = nil
+				continue
+			}
 			body.Parameters[i] = marshalServicexParameterDefTToParameterDefT(val)
 		}
 	} else {
@@ -524,10 +540,18 @@ func NewListXServiceListRTOK(body *ListResponseBody) *servicexviews.XServiceList
 	}
 	v.Items = make([]*servicexviews.XServiceListItemView, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalXServiceListItemResponseBodyToServicexviewsXServiceListItemView(val)
 	}
 	v.Links = make([]*servicexviews.LinkTView, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToServicexviewsLinkTView(val)
 	}
 
@@ -604,6 +628,10 @@ func NewCreateServiceXServiceStatusRTCreated(body *CreateServiceResponseBody) *s
 	}
 	v.Links = make([]*servicex.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToServicexLinkT(val)
 	}
 	if body.Tags != nil {
@@ -614,6 +642,10 @@ func NewCreateServiceXServiceStatusRTCreated(body *CreateServiceResponseBody) *s
 	}
 	v.Parameters = make([]*servicex.ParameterDefT, len(body.Parameters))
 	for i, val := range body.Parameters {
+		if val == nil {
+			v.Parameters[i] = nil
+			continue
+		}
 		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServicexParameterDefT(val)
 	}
 
@@ -713,6 +745,10 @@ func NewReadXServiceStatusRTOK(body *ReadResponseBody) *servicex.XServiceStatusR
 	}
 	v.Links = make([]*servicex.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToServicexLinkT(val)
 	}
 	if body.Tags != nil {
@@ -723,6 +759,10 @@ func NewReadXServiceStatusRTOK(body *ReadResponseBody) *servicex.XServiceStatusR
 	}
 	v.Parameters = make([]*servicex.ParameterDefT, len(body.Parameters))
 	for i, val := range body.Parameters {
+		if val == nil {
+			v.Parameters[i] = nil
+			continue
+		}
 		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServicexParameterDefT(val)
 	}
 
@@ -797,6 +837,10 @@ func NewUpdateXServiceStatusRTOK(body *UpdateResponseBody) *servicex.XServiceSta
 	}
 	v.Links = make([]*servicex.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToServicexLinkT(val)
 	}
 	if body.Tags != nil {
@@ -807,6 +851,10 @@ func NewUpdateXServiceStatusRTOK(body *UpdateResponseBody) *servicex.XServiceSta
 	}
 	v.Parameters = make([]*servicex.ParameterDefT, len(body.Parameters))
 	for i, val := range body.Parameters {
+		if val == nil {
+			v.Parameters[i] = nil
+			continue
+		}
 		v.Parameters[i] = unmarshalParameterDefTResponseBodyToServicexParameterDefT(val)
 	}
 

@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -47,7 +47,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.44"
+const APIVersion = "0.47"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -490,12 +490,20 @@ func newXServiceListRT(vres *servicexviews.XServiceListRTView) *XServiceListRT {
 	if vres.Items != nil {
 		res.Items = make([]*XServiceListItem, len(vres.Items))
 		for i, val := range vres.Items {
+			if val == nil {
+				res.Items[i] = nil
+				continue
+			}
 			res.Items[i] = transformServicexviewsXServiceListItemViewToXServiceListItem(val)
 		}
 	}
 	if vres.Links != nil {
 		res.Links = make([]*LinkT, len(vres.Links))
 		for i, val := range vres.Links {
+			if val == nil {
+				res.Links[i] = nil
+				continue
+			}
 			res.Links[i] = transformServicexviewsLinkTViewToLinkT(val)
 		}
 	}
@@ -511,6 +519,10 @@ func newXServiceListRTView(res *XServiceListRT) *servicexviews.XServiceListRTVie
 	if res.Items != nil {
 		vres.Items = make([]*servicexviews.XServiceListItemView, len(res.Items))
 		for i, val := range res.Items {
+			if val == nil {
+				vres.Items[i] = nil
+				continue
+			}
 			vres.Items[i] = transformXServiceListItemToServicexviewsXServiceListItemView(val)
 		}
 	} else {
@@ -519,6 +531,10 @@ func newXServiceListRTView(res *XServiceListRT) *servicexviews.XServiceListRTVie
 	if res.Links != nil {
 		vres.Links = make([]*servicexviews.LinkTView, len(res.Links))
 		for i, val := range res.Links {
+			if val == nil {
+				vres.Links[i] = nil
+				continue
+			}
 			vres.Links[i] = transformLinkTToServicexviewsLinkTView(val)
 		}
 	} else {

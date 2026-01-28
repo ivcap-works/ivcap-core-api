@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -17,6 +17,8 @@
 package views
 
 import (
+	"unicode/utf8"
+
 	goa "goa.design/goa/v3/pkg"
 )
 
@@ -53,44 +55,56 @@ type ProjectListItemCollectionView []*ProjectListItemView
 
 // ProjectListItemView is a type that runs validations on a projected type.
 type ProjectListItemView struct {
-	// Project Name
-	Name *string
 	// User Role
 	Role *string
-	// Project URN
-	Urn *string
-	// DateTime project was created
-	CreatedAt *string
-	// DateTime project last modified
-	ModifiedAt *string
-	// Time at which this list was valid
-	AtTime *string
-}
-
-// ProjectStatusRTView is a type that runs validations on a projected type.
-type ProjectStatusRTView struct {
 	// Project status
 	Status *string
 	// DateTime project was created
 	CreatedAt *string
 	// DateTime project last modified
 	ModifiedAt *string
+	// Time at which this list was valid
+	AtTime *string
+	// Project URN
+	Urn *string
+	// Project name
+	Name *string
 	// Account URN
 	Account *string
 	// Parent Project URN
 	Parent *string
 	// Additional Metadata
 	Properties *ProjectPropertiesView
-	// Project URN
-	Urn *string
-	// Project name
-	Name *string
 }
 
 // ProjectPropertiesView is a type that runs validations on a projected type.
 type ProjectPropertiesView struct {
 	// String metadata for detailing the use of this project
 	Details *string
+}
+
+// ProjectStatusRTView is a type that runs validations on a projected type.
+type ProjectStatusRTView struct {
+	// User Role
+	Role *string
+	// Project status
+	Status *string
+	// DateTime project was created
+	CreatedAt *string
+	// DateTime project last modified
+	ModifiedAt *string
+	// Time at which this list was valid
+	AtTime *string
+	// Project URN
+	Urn *string
+	// Project name
+	Name *string
+	// Account URN
+	Account *string
+	// Parent Project URN
+	Parent *string
+	// Additional Metadata
+	Properties *ProjectPropertiesView
 }
 
 var (
@@ -116,10 +130,12 @@ var (
 			"name",
 			"account",
 			"parent",
+			"role",
 			"status",
 			"created_at",
 			"modified_at",
 			"properties",
+			"at-time",
 		},
 		"tiny": {
 			"name",
@@ -130,9 +146,13 @@ var (
 	// ProjectListItemCollection by view name.
 	ProjectListItemCollectionMap = map[string][]string{
 		"default": {
-			"name",
-			"role",
 			"urn",
+			"name",
+			"account",
+			"parent",
+			"properties",
+			"role",
+			"status",
 			"created_at",
 			"modified_at",
 			"at-time",
@@ -145,9 +165,13 @@ var (
 	// by view name.
 	ProjectListItemMap = map[string][]string{
 		"default": {
-			"name",
-			"role",
 			"urn",
+			"name",
+			"account",
+			"parent",
+			"properties",
+			"role",
+			"status",
 			"created_at",
 			"modified_at",
 			"at-time",
@@ -239,33 +263,16 @@ func ValidateProjectListItemCollectionViewTiny(result ProjectListItemCollectionV
 // ValidateProjectListItemView runs the validations defined on
 // ProjectListItemView using the "default" view.
 func ValidateProjectListItemView(result *ProjectListItemView) (err error) {
-	if result.CreatedAt != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.created_at", *result.CreatedAt, goa.FormatDateTime))
-	}
-	if result.ModifiedAt != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.modified_at", *result.ModifiedAt, goa.FormatDateTime))
-	}
-	if result.AtTime != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
-	}
-	return
-}
-
-// ValidateProjectListItemViewTiny runs the validations defined on
-// ProjectListItemView using the "tiny" view.
-func ValidateProjectListItemViewTiny(result *ProjectListItemView) (err error) {
-
-	return
-}
-
-// ValidateProjectStatusRTView runs the validations defined on
-// ProjectStatusRTView using the "default" view.
-func ValidateProjectStatusRTView(result *ProjectStatusRTView) (err error) {
 	if result.Urn == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("urn", "result"))
 	}
 	if result.Urn != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.urn", *result.Urn, goa.FormatURI))
+	}
+	if result.Name != nil {
+		if utf8.RuneCountInString(*result.Name) < 3 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.name", *result.Name, utf8.RuneCountInString(*result.Name), 3, true))
+		}
 	}
 	if result.Account != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.account", *result.Account, goa.FormatURI))
@@ -284,16 +291,20 @@ func ValidateProjectStatusRTView(result *ProjectStatusRTView) (err error) {
 	if result.ModifiedAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.modified_at", *result.ModifiedAt, goa.FormatDateTime))
 	}
+	if result.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
+	}
 	return
 }
 
-// ValidateProjectStatusRTViewTiny runs the validations defined on
-// ProjectStatusRTView using the "tiny" view.
-func ValidateProjectStatusRTViewTiny(result *ProjectStatusRTView) (err error) {
-	if result.Status != nil {
-		if !(*result.Status == "unknown" || *result.Status == "active" || *result.Status == "disabled" || *result.Status == "deleted") {
-			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "active", "disabled", "deleted"}))
-		}
+// ValidateProjectListItemViewTiny runs the validations defined on
+// ProjectListItemView using the "tiny" view.
+func ValidateProjectListItemViewTiny(result *ProjectListItemView) (err error) {
+	if result.Urn == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("urn", "result"))
+	}
+	if result.Urn != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.urn", *result.Urn, goa.FormatURI))
 	}
 	return
 }
@@ -302,5 +313,58 @@ func ValidateProjectStatusRTViewTiny(result *ProjectStatusRTView) (err error) {
 // ProjectPropertiesView.
 func ValidateProjectPropertiesView(result *ProjectPropertiesView) (err error) {
 
+	return
+}
+
+// ValidateProjectStatusRTView runs the validations defined on
+// ProjectStatusRTView using the "default" view.
+func ValidateProjectStatusRTView(result *ProjectStatusRTView) (err error) {
+	if result.Urn == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("urn", "result"))
+	}
+	if result.Urn != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.urn", *result.Urn, goa.FormatURI))
+	}
+	if result.Name != nil {
+		if utf8.RuneCountInString(*result.Name) < 3 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.name", *result.Name, utf8.RuneCountInString(*result.Name), 3, true))
+		}
+	}
+	if result.Account != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.account", *result.Account, goa.FormatURI))
+	}
+	if result.Parent != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.parent", *result.Parent, goa.FormatURI))
+	}
+	if result.Status != nil {
+		if !(*result.Status == "unknown" || *result.Status == "active" || *result.Status == "disabled" || *result.Status == "deleted") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "active", "disabled", "deleted"}))
+		}
+	}
+	if result.CreatedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.created_at", *result.CreatedAt, goa.FormatDateTime))
+	}
+	if result.ModifiedAt != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.modified_at", *result.ModifiedAt, goa.FormatDateTime))
+	}
+	if result.AtTime != nil {
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.at-time", *result.AtTime, goa.FormatDateTime))
+	}
+	return
+}
+
+// ValidateProjectStatusRTViewTiny runs the validations defined on
+// ProjectStatusRTView using the "tiny" view.
+func ValidateProjectStatusRTViewTiny(result *ProjectStatusRTView) (err error) {
+	if result.Name != nil {
+		if utf8.RuneCountInString(*result.Name) < 3 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("result.name", *result.Name, utf8.RuneCountInString(*result.Name), 3, true))
+		}
+	}
+	if result.Status != nil {
+		if !(*result.Status == "unknown" || *result.Status == "active" || *result.Status == "disabled" || *result.Status == "deleted") {
+			err = goa.MergeErrors(err, goa.InvalidEnumValueError("result.status", *result.Status, []any{"unknown", "active", "disabled", "deleted"}))
+		}
+	}
 	return
 }

@@ -1,10 +1,10 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//     http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -105,7 +105,7 @@ func BuildSetPayload(secretSetBody string, secretSetJWT string) (*secret.SetPayl
 	{
 		err = json.Unmarshal([]byte(secretSetBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"expiry-time\": 5157382180580921132,\n      \"secret-name\": \"Illo odit et.\",\n      \"secret-type\": \"Esse dolorem laudantium nisi laboriosam dolores.\",\n      \"secret-value\": \"Vero quis fugiat ducimus nostrum.\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"expiry-time\": 6755364420672407724,\n      \"secret-name\": \"Reiciendis aut beatae ut.\",\n      \"secret-type\": \"Asperiores consequatur necessitatibus est commodi iste tenetur.\",\n      \"secret-value\": \"Exercitationem quia et nihil mollitia maiores.\"\n   }'")
 		}
 	}
 	var jwt string
