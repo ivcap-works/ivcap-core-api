@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -49,7 +49,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.43"
+const APIVersion = "0.47"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -552,6 +552,30 @@ func newMessagestatus(vres *queueviews.MessagestatusView) *Messagestatus {
 func newMessagestatusView(res *Messagestatus) *queueviews.MessagestatusView {
 	vres := &queueviews.MessagestatusView{
 		ID: res.ID,
+	}
+	return vres
+}
+
+// newPublishedmessage converts projected type Publishedmessage to service type
+// Publishedmessage.
+func newPublishedmessage(vres *queueviews.PublishedmessageView) *Publishedmessage {
+	res := &Publishedmessage{
+		ID:          vres.ID,
+		Content:     vres.Content,
+		Schema:      vres.Schema,
+		ContentType: vres.ContentType,
+	}
+	return res
+}
+
+// newPublishedmessageView projects result type Publishedmessage to projected
+// type PublishedmessageView using the "default" view.
+func newPublishedmessageView(res *Publishedmessage) *queueviews.PublishedmessageView {
+	vres := &queueviews.PublishedmessageView{
+		ID:          res.ID,
+		Content:     res.Content,
+		Schema:      res.Schema,
+		ContentType: res.ContentType,
 	}
 	return vres
 }

@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,6 +38,11 @@ func DeleteProjectPath(id string) string {
 // ReadProjectPath returns the URL path to the project service read HTTP endpoint.
 func ReadProjectPath(id string) string {
 	return fmt.Sprintf("/1/project/%v", id)
+}
+
+// SetProjectInformationProjectPath returns the URL path to the project service SetProjectInformation HTTP endpoint.
+func SetProjectInformationProjectPath(urn string) string {
+	return fmt.Sprintf("/1/project/%v", urn)
 }
 
 // ListProjectMembersProjectPath returns the URL path to the project service ListProjectMembers HTTP endpoint.

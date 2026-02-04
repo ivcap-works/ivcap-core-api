@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -256,7 +256,7 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	{
 		err = json.Unmarshal([]byte(orderCreateBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"description\": \"Events for the event service\",\n      \"name\": \"events\",\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\"\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"name\": \"Fire risk for Lot2\",\n      \"parameters\": [\n         {\n            \"name\": \"region\",\n            \"value\": \"Upper Valley\"\n         },\n         {\n            \"name\": \"threshold\",\n            \"value\": \"10\"\n         }\n      ],\n      \"policy\": \"urn:ivcap:policy:123e4567-e89b-12d3-a456-426614174000\",\n      \"service\": \"urn:ivcap:service:123e4567-e89b-12d3-a456-426614174000\",\n      \"tags\": [\n         \"tag1\",\n         \"tag2\"\n      ]\n   }'")
 		}
 		if body.Parameters == nil {
 			err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
@@ -287,6 +287,10 @@ func BuildCreatePayload(orderCreateBody string, orderCreateJWT string) (*order.C
 	if body.Parameters != nil {
 		v.Parameters = make([]*order.ParameterT, len(body.Parameters))
 		for i, val := range body.Parameters {
+			if val == nil {
+				v.Parameters[i] = nil
+				continue
+			}
 			v.Parameters[i] = marshalParameterTToOrderParameterT(val)
 		}
 	} else {

@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -570,10 +570,18 @@ func NewListQueueListResultOK(body *ListResponseBody) *queue.QueueListResult {
 	}
 	v.Items = make([]*queue.QueueListItem, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalQueueListItemResponseBodyToQueueQueueListItem(val)
 	}
 	v.Links = make([]*queue.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToQueueLinkT(val)
 	}
 
@@ -714,6 +722,10 @@ func NewDequeueMessageListOK(body *DequeueResponseBody) *queue.MessageList {
 	}
 	v.Messages = make([]*queue.Publishedmessage, len(body.Messages))
 	for i, val := range body.Messages {
+		if val == nil {
+			v.Messages[i] = nil
+			continue
+		}
 		v.Messages[i] = unmarshalPublishedmessageResponseBodyToQueuePublishedmessage(val)
 	}
 
