@@ -1,6 +1,6 @@
 module github.com/ivcap-works/ivcap-core-api
 
-go 1.25.3
+go 1.25.7
 
 require goa.design/goa/v3 v3.24.1
 
