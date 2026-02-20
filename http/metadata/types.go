@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -282,6 +282,10 @@ func NewReadMetadataRecordRTOK(body *ReadResponseBody) *metadata.MetadataRecordR
 	}
 	v.Links = make([]*metadata.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToMetadataLinkT(val)
 	}
 
@@ -355,10 +359,18 @@ func NewListMetaRTOK(body *ListResponseBody) *metadata.ListMetaRT {
 	}
 	v.Items = make([]*metadata.MetadataListItemRT, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalMetadataListItemRTResponseBodyToMetadataMetadataListItemRT(val)
 	}
 	v.Links = make([]*metadata.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToMetadataLinkT(val)
 	}
 
@@ -643,7 +655,7 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("asserter", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))
@@ -970,7 +982,7 @@ func ValidateMetadataListItemRTResponseBody(body *MetadataListItemRTResponseBody
 		err = goa.MergeErrors(err, goa.MissingFieldError("schema", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Entity != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.entity", *body.Entity, goa.FormatURI))

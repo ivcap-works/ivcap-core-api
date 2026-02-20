@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -310,6 +310,10 @@ func NewReadAspectRTOK(body *ReadResponseBody) *aspect.AspectRT {
 	}
 	v.Links = make([]*aspect.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToAspectLinkT(val)
 	}
 
@@ -383,10 +387,18 @@ func NewListAspectListRTOK(body *ListResponseBody) *aspect.AspectListRT {
 	}
 	v.Items = make([]*aspect.AspectListItemRT, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(val)
 	}
 	v.Links = make([]*aspect.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToAspectLinkT(val)
 	}
 
@@ -1057,6 +1069,9 @@ func ValidateAspectListItemRTResponseBody(body *AspectListItemRTResponseBody) (e
 	}
 	if body.ContentType == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
+	}
+	if body.ValidFrom == nil {
+		err = goa.MergeErrors(err, goa.MissingFieldError("valid-from", "body"))
 	}
 	if body.ID != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))

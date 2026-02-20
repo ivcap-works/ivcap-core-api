@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -209,10 +209,18 @@ func NewListResultOK(body *ListResponseBody) *secret.ListResult {
 	v := &secret.ListResult{}
 	v.Items = make([]*secret.SecretListItem, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalSecretListItemResponseBodyToSecretSecretListItem(val)
 	}
 	v.Links = make([]*secret.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToSecretLinkT(val)
 	}
 

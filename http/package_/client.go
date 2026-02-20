@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,7 +20,6 @@ import (
 	"context"
 	"net/http"
 
-	package_ "github.com/ivcap-works/ivcap-core-api/gen/package_"
 	goahttp "goa.design/goa/v3/http"
 	goa "goa.design/goa/v3/pkg"
 )
@@ -29,15 +28,6 @@ import (
 type Client struct {
 	// List Doer is the HTTP client used to make requests to the list endpoint.
 	ListDoer goahttp.Doer
-
-	// Pull Doer is the HTTP client used to make requests to the pull endpoint.
-	PullDoer goahttp.Doer
-
-	// Push Doer is the HTTP client used to make requests to the push endpoint.
-	PushDoer goahttp.Doer
-
-	// Status Doer is the HTTP client used to make requests to the status endpoint.
-	StatusDoer goahttp.Doer
 
 	// Remove Doer is the HTTP client used to make requests to the remove endpoint.
 	RemoveDoer goahttp.Doer
@@ -66,9 +56,6 @@ func NewClient(
 ) *Client {
 	return &Client{
 		ListDoer:            doer,
-		PullDoer:            doer,
-		PushDoer:            doer,
-		StatusDoer:          doer,
 		RemoveDoer:          doer,
 		CORSDoer:            doer,
 		RestoreResponseBody: restoreBody,
@@ -98,83 +85,6 @@ func (c *Client) List() goa.Endpoint {
 		resp, err := c.ListDoer.Do(req)
 		if err != nil {
 			return nil, goahttp.ErrRequestError("package", "list", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// Pull returns an endpoint that makes HTTP requests to the package service
-// pull server.
-func (c *Client) Pull() goa.Endpoint {
-	var (
-		encodeRequest  = EncodePullRequest(c.encoder)
-		decodeResponse = DecodePullResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildPullRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.PullDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("package", "pull", err)
-		}
-		res, err := decodeResponse(resp)
-		if err != nil {
-			resp.Body.Close()
-			return nil, err
-		}
-		return &package_.PullResponseData{Result: res.(*package_.PullResultT), Body: resp.Body}, nil
-	}
-}
-
-// Push returns an endpoint that makes HTTP requests to the package service
-// push server.
-func (c *Client) Push() goa.Endpoint {
-	var (
-		encodeRequest  = EncodePushRequest(c.encoder)
-		decodeResponse = DecodePushResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildPushRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.PushDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("package", "push", err)
-		}
-		return decodeResponse(resp)
-	}
-}
-
-// Status returns an endpoint that makes HTTP requests to the package service
-// status server.
-func (c *Client) Status() goa.Endpoint {
-	var (
-		encodeRequest  = EncodeStatusRequest(c.encoder)
-		decodeResponse = DecodeStatusResponse(c.decoder, c.RestoreResponseBody)
-	)
-	return func(ctx context.Context, v any) (any, error) {
-		req, err := c.BuildStatusRequest(ctx, v)
-		if err != nil {
-			return nil, err
-		}
-		err = encodeRequest(req, v)
-		if err != nil {
-			return nil, err
-		}
-		resp, err := c.StatusDoer.Do(req)
-		if err != nil {
-			return nil, goahttp.ErrRequestError("package", "status", err)
 		}
 		return decodeResponse(resp)
 	}

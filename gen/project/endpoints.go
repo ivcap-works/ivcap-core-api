@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,17 +25,18 @@ import (
 
 // Endpoints wraps the "project" service endpoints.
 type Endpoints struct {
-	List               goa.Endpoint
-	CreateProject      goa.Endpoint
-	Delete             goa.Endpoint
-	Read               goa.Endpoint
-	ListProjectMembers goa.Endpoint
-	UpdateMembership   goa.Endpoint
-	RemoveMembership   goa.Endpoint
-	DefaultProject     goa.Endpoint
-	SetDefaultProject  goa.Endpoint
-	ProjectAccount     goa.Endpoint
-	SetProjectAccount  goa.Endpoint
+	List                  goa.Endpoint
+	CreateProject         goa.Endpoint
+	Delete                goa.Endpoint
+	Read                  goa.Endpoint
+	SetProjectInformation goa.Endpoint
+	ListProjectMembers    goa.Endpoint
+	UpdateMembership      goa.Endpoint
+	RemoveMembership      goa.Endpoint
+	DefaultProject        goa.Endpoint
+	SetDefaultProject     goa.Endpoint
+	ProjectAccount        goa.Endpoint
+	SetProjectAccount     goa.Endpoint
 }
 
 // NewEndpoints wraps the methods of the "project" service with endpoints.
@@ -43,17 +44,18 @@ func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
 	return &Endpoints{
-		List:               NewListEndpoint(s, a.JWTAuth),
-		CreateProject:      NewCreateProjectEndpoint(s, a.JWTAuth),
-		Delete:             NewDeleteEndpoint(s, a.JWTAuth),
-		Read:               NewReadEndpoint(s, a.JWTAuth),
-		ListProjectMembers: NewListProjectMembersEndpoint(s, a.JWTAuth),
-		UpdateMembership:   NewUpdateMembershipEndpoint(s, a.JWTAuth),
-		RemoveMembership:   NewRemoveMembershipEndpoint(s, a.JWTAuth),
-		DefaultProject:     NewDefaultProjectEndpoint(s, a.JWTAuth),
-		SetDefaultProject:  NewSetDefaultProjectEndpoint(s, a.JWTAuth),
-		ProjectAccount:     NewProjectAccountEndpoint(s, a.JWTAuth),
-		SetProjectAccount:  NewSetProjectAccountEndpoint(s, a.JWTAuth),
+		List:                  NewListEndpoint(s, a.JWTAuth),
+		CreateProject:         NewCreateProjectEndpoint(s, a.JWTAuth),
+		Delete:                NewDeleteEndpoint(s, a.JWTAuth),
+		Read:                  NewReadEndpoint(s, a.JWTAuth),
+		SetProjectInformation: NewSetProjectInformationEndpoint(s, a.JWTAuth),
+		ListProjectMembers:    NewListProjectMembersEndpoint(s, a.JWTAuth),
+		UpdateMembership:      NewUpdateMembershipEndpoint(s, a.JWTAuth),
+		RemoveMembership:      NewRemoveMembershipEndpoint(s, a.JWTAuth),
+		DefaultProject:        NewDefaultProjectEndpoint(s, a.JWTAuth),
+		SetDefaultProject:     NewSetDefaultProjectEndpoint(s, a.JWTAuth),
+		ProjectAccount:        NewProjectAccountEndpoint(s, a.JWTAuth),
+		SetProjectAccount:     NewSetProjectAccountEndpoint(s, a.JWTAuth),
 	}
 }
 
@@ -63,6 +65,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.CreateProject = m(e.CreateProject)
 	e.Delete = m(e.Delete)
 	e.Read = m(e.Read)
+	e.SetProjectInformation = m(e.SetProjectInformation)
 	e.ListProjectMembers = m(e.ListProjectMembers)
 	e.UpdateMembership = m(e.UpdateMembership)
 	e.RemoveMembership = m(e.RemoveMembership)
@@ -155,6 +158,30 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 			return nil, err
 		}
 		res, view, err := s.Read(ctx, p)
+		if err != nil {
+			return nil, err
+		}
+		vres := NewViewedProjectStatusRT(res, view)
+		return vres, nil
+	}
+}
+
+// NewSetProjectInformationEndpoint returns an endpoint function that calls the
+// method "SetProjectInformation" of service "project".
+func NewSetProjectInformationEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
+	return func(ctx context.Context, req any) (any, error) {
+		p := req.(*SetProjectInformationPayload)
+		var err error
+		sc := security.JWTScheme{
+			Name:           "jwt",
+			Scopes:         []string{"consumer:read", "consumer:write"},
+			RequiredScopes: []string{"consumer:write"},
+		}
+		ctx, err = authJWTFn(ctx, p.JWT, &sc)
+		if err != nil {
+			return nil, err
+		}
+		res, view, err := s.SetProjectInformation(ctx, p)
 		if err != nil {
 			return nil, err
 		}

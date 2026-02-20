@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -48,7 +48,7 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.43"
+const APIVersion = "0.47"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
@@ -78,7 +78,7 @@ type AspectListItemRT struct {
 	// Content-Type header, MUST be of application/json.
 	ContentType string `json:"content-type,omitempty"`
 	// Time this assertion became valid
-	ValidFrom *string
+	ValidFrom string
 	// Time this assertion became valid
 	ValidTo *string
 }

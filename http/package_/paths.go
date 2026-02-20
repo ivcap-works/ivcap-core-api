@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,21 +19,6 @@ package client
 // ListPackagePath returns the URL path to the package service list HTTP endpoint.
 func ListPackagePath() string {
 	return "/1/packages/list"
-}
-
-// PullPackagePath returns the URL path to the package service pull HTTP endpoint.
-func PullPackagePath() string {
-	return "/1/packages/pull"
-}
-
-// PushPackagePath returns the URL path to the package service push HTTP endpoint.
-func PushPackagePath() string {
-	return "/1/packages/push"
-}
-
-// StatusPackagePath returns the URL path to the package service status HTTP endpoint.
-func StatusPackagePath() string {
-	return "/1/packages/status"
 }
 
 // RemovePackagePath returns the URL path to the package service remove HTTP endpoint.

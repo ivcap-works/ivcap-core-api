@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,18 +25,18 @@ import (
 	"net/url"
 	"strings"
 
-	service "github.com/ivcap-works/ivcap-core-api/gen/service"
-	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
+	servicex "github.com/ivcap-works/ivcap-core-api/gen/servicex"
+	servicexviews "github.com/ivcap-works/ivcap-core-api/gen/servicex/views"
 	goahttp "goa.design/goa/v3/http"
 )
 
 // BuildListRequest instantiates a HTTP request object with method and path set
-// to call the "service" service "list" endpoint
+// to call the "servicex" service "list" endpoint
 func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListServicePath()}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ListServicexPath()}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("service", "list", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("servicex", "list", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -45,13 +45,13 @@ func (c *Client) BuildListRequest(ctx context.Context, v any) (*http.Request, er
 	return req, nil
 }
 
-// EncodeListRequest returns an encoder for requests sent to the service list
+// EncodeListRequest returns an encoder for requests sent to the servicex list
 // server.
 func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*service.ListPayload)
+		p, ok := v.(*servicex.ListPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("service", "list", "*service.ListPayload", v)
+			return goahttp.ErrInvalidType("servicex", "list", "*servicex.ListPayload", v)
 		}
 		{
 			head := p.JWT
@@ -81,16 +81,16 @@ func EncodeListRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 	}
 }
 
-// DecodeListResponse returns a decoder for responses returned by the service
+// DecodeListResponse returns a decoder for responses returned by the servicex
 // list endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeListResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
-//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
-//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
-//   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
+//   - "bad-request" (type *servicex.BadRequestT): http.StatusBadRequest
+//   - "invalid-parameter" (type *servicex.InvalidParameterT): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *servicex.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *servicex.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *servicex.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *servicex.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -114,15 +114,15 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "list", err)
+				return nil, goahttp.ErrDecodingError("servicex", "list", err)
 			}
-			p := NewListServiceListRTOK(&body)
+			p := NewListXServiceListRTOK(&body)
 			view := "default"
-			vres := &serviceviews.ServiceListRT{Projected: p, View: view}
-			if err = serviceviews.ValidateServiceListRT(vres); err != nil {
-				return nil, goahttp.ErrValidationError("service", "list", err)
+			vres := &servicexviews.XServiceListRT{Projected: p, View: view}
+			if err = servicexviews.ValidateXServiceListRT(vres); err != nil {
+				return nil, goahttp.ErrValidationError("servicex", "list", err)
 			}
-			res := service.NewServiceListRT(vres)
+			res := servicex.NewXServiceListRT(vres)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -131,11 +131,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "list", err)
+				return nil, goahttp.ErrDecodingError("servicex", "list", err)
 			}
 			err = ValidateListBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "list", err)
+				return nil, goahttp.ErrValidationError("servicex", "list", err)
 			}
 			return nil, NewListBadRequest(&body)
 		case http.StatusUnprocessableEntity:
@@ -145,11 +145,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "list", err)
+				return nil, goahttp.ErrDecodingError("servicex", "list", err)
 			}
 			err = ValidateListInvalidParameterResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "list", err)
+				return nil, goahttp.ErrValidationError("servicex", "list", err)
 			}
 			return nil, NewListInvalidParameter(&body)
 		case http.StatusForbidden:
@@ -159,11 +159,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "list", err)
+				return nil, goahttp.ErrDecodingError("servicex", "list", err)
 			}
 			err = ValidateListInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "list", err)
+				return nil, goahttp.ErrValidationError("servicex", "list", err)
 			}
 			return nil, NewListInvalidScopes(&body)
 		case http.StatusNotImplemented:
@@ -173,11 +173,11 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "list", err)
+				return nil, goahttp.ErrDecodingError("servicex", "list", err)
 			}
 			err = ValidateListNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "list", err)
+				return nil, goahttp.ErrValidationError("servicex", "list", err)
 			}
 			return nil, NewListNotImplemented(&body)
 		case http.StatusServiceUnavailable:
@@ -186,18 +186,18 @@ func DecodeListResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			return nil, NewListNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("service", "list", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("servicex", "list", resp.StatusCode, string(body))
 		}
 	}
 }
 
 // BuildCreateServiceRequest instantiates a HTTP request object with method and
-// path set to call the "service" service "create_service" endpoint
+// path set to call the "servicex" service "create_service" endpoint
 func (c *Client) BuildCreateServiceRequest(ctx context.Context, v any) (*http.Request, error) {
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateServiceServicePath()}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: CreateServiceServicexPath()}
 	req, err := http.NewRequest("POST", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("service", "create_service", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("servicex", "create_service", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -207,12 +207,12 @@ func (c *Client) BuildCreateServiceRequest(ctx context.Context, v any) (*http.Re
 }
 
 // EncodeCreateServiceRequest returns an encoder for requests sent to the
-// service create_service server.
+// servicex create_service server.
 func EncodeCreateServiceRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*service.CreateServicePayload)
+		p, ok := v.(*servicex.CreateServicePayload)
 		if !ok {
-			return goahttp.ErrInvalidType("service", "create_service", "*service.CreateServicePayload", v)
+			return goahttp.ErrInvalidType("servicex", "create_service", "*servicex.CreateServicePayload", v)
 		}
 		{
 			head := p.JWT
@@ -224,24 +224,24 @@ func EncodeCreateServiceRequest(encoder func(*http.Request) goahttp.Encoder) fun
 		}
 		body := NewCreateServiceRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("service", "create_service", err)
+			return goahttp.ErrEncodingError("servicex", "create_service", err)
 		}
 		return nil
 	}
 }
 
 // DecodeCreateServiceResponse returns a decoder for responses returned by the
-// service create_service endpoint. restoreBody controls whether the response
+// servicex create_service endpoint. restoreBody controls whether the response
 // body should be restored after having been read.
 // DecodeCreateServiceResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
-//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
-//   - "already-created" (type *service.ResourceAlreadyCreatedT): http.StatusConflict
-//   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
-//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
-//   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
+//   - "bad-request" (type *servicex.BadRequestT): http.StatusBadRequest
+//   - "invalid-parameter" (type *servicex.InvalidParameterT): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *servicex.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *servicex.NotImplementedT): http.StatusNotImplemented
+//   - "already-created" (type *servicex.ResourceAlreadyCreatedT): http.StatusConflict
+//   - "not-found" (type *servicex.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *servicex.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *servicex.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -265,13 +265,13 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
-			res := NewCreateServiceServiceStatusRTCreated(&body)
+			res := NewCreateServiceXServiceStatusRTCreated(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -280,11 +280,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
 			return nil, NewCreateServiceBadRequest(&body)
 		case http.StatusUnprocessableEntity:
@@ -294,11 +294,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceInvalidParameterResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
 			return nil, NewCreateServiceInvalidParameter(&body)
 		case http.StatusForbidden:
@@ -308,11 +308,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
 			return nil, NewCreateServiceInvalidScopes(&body)
 		case http.StatusNotImplemented:
@@ -322,11 +322,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
 			return nil, NewCreateServiceNotImplemented(&body)
 		case http.StatusConflict:
@@ -336,11 +336,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceAlreadyCreatedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
 			return nil, NewCreateServiceAlreadyCreated(&body)
 		case http.StatusNotFound:
@@ -350,11 +350,11 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "create_service", err)
+				return nil, goahttp.ErrDecodingError("servicex", "create_service", err)
 			}
 			err = ValidateCreateServiceNotFoundResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "create_service", err)
+				return nil, goahttp.ErrValidationError("servicex", "create_service", err)
 			}
 			return nil, NewCreateServiceNotFound(&body)
 		case http.StatusServiceUnavailable:
@@ -363,28 +363,28 @@ func DecodeCreateServiceResponse(decoder func(*http.Response) goahttp.Decoder, r
 			return nil, NewCreateServiceNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("service", "create_service", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("servicex", "create_service", resp.StatusCode, string(body))
 		}
 	}
 }
 
 // BuildReadRequest instantiates a HTTP request object with method and path set
-// to call the "service" service "read" endpoint
+// to call the "servicex" service "read" endpoint
 func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
 	{
-		p, ok := v.(*service.ReadPayload)
+		p, ok := v.(*servicex.ReadPayload)
 		if !ok {
-			return nil, goahttp.ErrInvalidType("service", "read", "*service.ReadPayload", v)
+			return nil, goahttp.ErrInvalidType("servicex", "read", "*servicex.ReadPayload", v)
 		}
 		id = p.ID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReadServicePath(id)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: ReadServicexPath(id)}
 	req, err := http.NewRequest("GET", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("service", "read", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("servicex", "read", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -393,13 +393,13 @@ func (c *Client) BuildReadRequest(ctx context.Context, v any) (*http.Request, er
 	return req, nil
 }
 
-// EncodeReadRequest returns an encoder for requests sent to the service read
+// EncodeReadRequest returns an encoder for requests sent to the servicex read
 // server.
 func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*service.ReadPayload)
+		p, ok := v.(*servicex.ReadPayload)
 		if !ok {
-			return goahttp.ErrInvalidType("service", "read", "*service.ReadPayload", v)
+			return goahttp.ErrInvalidType("servicex", "read", "*servicex.ReadPayload", v)
 		}
 		{
 			head := p.JWT
@@ -413,16 +413,16 @@ func EncodeReadRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.R
 	}
 }
 
-// DecodeReadResponse returns a decoder for responses returned by the service
+// DecodeReadResponse returns a decoder for responses returned by the servicex
 // read endpoint. restoreBody controls whether the response body should be
 // restored after having been read.
 // DecodeReadResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
-//   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
-//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
-//   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
+//   - "bad-request" (type *servicex.BadRequestT): http.StatusBadRequest
+//   - "invalid-scopes" (type *servicex.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *servicex.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *servicex.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *servicex.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *servicex.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -446,13 +446,13 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "read", err)
+				return nil, goahttp.ErrDecodingError("servicex", "read", err)
 			}
 			err = ValidateReadResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "read", err)
+				return nil, goahttp.ErrValidationError("servicex", "read", err)
 			}
-			res := NewReadServiceStatusRTOK(&body)
+			res := NewReadXServiceStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -461,11 +461,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "read", err)
+				return nil, goahttp.ErrDecodingError("servicex", "read", err)
 			}
 			err = ValidateReadBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "read", err)
+				return nil, goahttp.ErrValidationError("servicex", "read", err)
 			}
 			return nil, NewReadBadRequest(&body)
 		case http.StatusForbidden:
@@ -475,11 +475,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "read", err)
+				return nil, goahttp.ErrDecodingError("servicex", "read", err)
 			}
 			err = ValidateReadInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "read", err)
+				return nil, goahttp.ErrValidationError("servicex", "read", err)
 			}
 			return nil, NewReadInvalidScopes(&body)
 		case http.StatusNotImplemented:
@@ -489,11 +489,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "read", err)
+				return nil, goahttp.ErrDecodingError("servicex", "read", err)
 			}
 			err = ValidateReadNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "read", err)
+				return nil, goahttp.ErrValidationError("servicex", "read", err)
 			}
 			return nil, NewReadNotImplemented(&body)
 		case http.StatusNotFound:
@@ -503,11 +503,11 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "read", err)
+				return nil, goahttp.ErrDecodingError("servicex", "read", err)
 			}
 			err = ValidateReadNotFoundResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "read", err)
+				return nil, goahttp.ErrValidationError("servicex", "read", err)
 			}
 			return nil, NewReadNotFound(&body)
 		case http.StatusServiceUnavailable:
@@ -516,30 +516,30 @@ func DecodeReadResponse(decoder func(*http.Response) goahttp.Decoder, restoreBod
 			return nil, NewReadNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("service", "read", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("servicex", "read", resp.StatusCode, string(body))
 		}
 	}
 }
 
 // BuildUpdateRequest instantiates a HTTP request object with method and path
-// set to call the "service" service "update" endpoint
+// set to call the "servicex" service "update" endpoint
 func (c *Client) BuildUpdateRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
 	{
-		p, ok := v.(*service.UpdatePayload)
+		p, ok := v.(*servicex.UpdatePayload)
 		if !ok {
-			return nil, goahttp.ErrInvalidType("service", "update", "*service.UpdatePayload", v)
+			return nil, goahttp.ErrInvalidType("servicex", "update", "*servicex.UpdatePayload", v)
 		}
 		if p.ID != nil {
 			id = *p.ID
 		}
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateServicePath(id)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: UpdateServicexPath(id)}
 	req, err := http.NewRequest("PUT", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("service", "update", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("servicex", "update", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -548,13 +548,13 @@ func (c *Client) BuildUpdateRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
-// EncodeUpdateRequest returns an encoder for requests sent to the service
+// EncodeUpdateRequest returns an encoder for requests sent to the servicex
 // update server.
 func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*service.UpdatePayload)
+		p, ok := v.(*servicex.UpdatePayload)
 		if !ok {
-			return goahttp.ErrInvalidType("service", "update", "*service.UpdatePayload", v)
+			return goahttp.ErrInvalidType("servicex", "update", "*servicex.UpdatePayload", v)
 		}
 		{
 			head := p.JWT
@@ -571,23 +571,23 @@ func EncodeUpdateRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 		req.URL.RawQuery = values.Encode()
 		body := NewUpdateRequestBody(p)
 		if err := encoder(req).Encode(&body); err != nil {
-			return goahttp.ErrEncodingError("service", "update", err)
+			return goahttp.ErrEncodingError("servicex", "update", err)
 		}
 		return nil
 	}
 }
 
-// DecodeUpdateResponse returns a decoder for responses returned by the service
-// update endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
+// DecodeUpdateResponse returns a decoder for responses returned by the
+// servicex update endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
 // DecodeUpdateResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-parameter" (type *service.InvalidParameterT): http.StatusUnprocessableEntity
-//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
-//   - "not-found" (type *service.ResourceNotFoundT): http.StatusNotFound
-//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
-//   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
+//   - "bad-request" (type *servicex.BadRequestT): http.StatusBadRequest
+//   - "invalid-parameter" (type *servicex.InvalidParameterT): http.StatusUnprocessableEntity
+//   - "invalid-scopes" (type *servicex.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *servicex.NotImplementedT): http.StatusNotImplemented
+//   - "not-found" (type *servicex.ResourceNotFoundT): http.StatusNotFound
+//   - "not-available" (type *servicex.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *servicex.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -611,13 +611,13 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "update", err)
+				return nil, goahttp.ErrDecodingError("servicex", "update", err)
 			}
 			err = ValidateUpdateResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "update", err)
+				return nil, goahttp.ErrValidationError("servicex", "update", err)
 			}
-			res := NewUpdateServiceStatusRTOK(&body)
+			res := NewUpdateXServiceStatusRTOK(&body)
 			return res, nil
 		case http.StatusBadRequest:
 			var (
@@ -626,11 +626,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "update", err)
+				return nil, goahttp.ErrDecodingError("servicex", "update", err)
 			}
 			err = ValidateUpdateBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "update", err)
+				return nil, goahttp.ErrValidationError("servicex", "update", err)
 			}
 			return nil, NewUpdateBadRequest(&body)
 		case http.StatusUnprocessableEntity:
@@ -640,11 +640,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "update", err)
+				return nil, goahttp.ErrDecodingError("servicex", "update", err)
 			}
 			err = ValidateUpdateInvalidParameterResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "update", err)
+				return nil, goahttp.ErrValidationError("servicex", "update", err)
 			}
 			return nil, NewUpdateInvalidParameter(&body)
 		case http.StatusForbidden:
@@ -654,11 +654,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "update", err)
+				return nil, goahttp.ErrDecodingError("servicex", "update", err)
 			}
 			err = ValidateUpdateInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "update", err)
+				return nil, goahttp.ErrValidationError("servicex", "update", err)
 			}
 			return nil, NewUpdateInvalidScopes(&body)
 		case http.StatusNotImplemented:
@@ -668,11 +668,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "update", err)
+				return nil, goahttp.ErrDecodingError("servicex", "update", err)
 			}
 			err = ValidateUpdateNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "update", err)
+				return nil, goahttp.ErrValidationError("servicex", "update", err)
 			}
 			return nil, NewUpdateNotImplemented(&body)
 		case http.StatusNotFound:
@@ -682,11 +682,11 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "update", err)
+				return nil, goahttp.ErrDecodingError("servicex", "update", err)
 			}
 			err = ValidateUpdateNotFoundResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "update", err)
+				return nil, goahttp.ErrValidationError("servicex", "update", err)
 			}
 			return nil, NewUpdateNotFound(&body)
 		case http.StatusServiceUnavailable:
@@ -695,28 +695,28 @@ func DecodeUpdateResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			return nil, NewUpdateNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("service", "update", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("servicex", "update", resp.StatusCode, string(body))
 		}
 	}
 }
 
 // BuildDeleteRequest instantiates a HTTP request object with method and path
-// set to call the "service" service "delete" endpoint
+// set to call the "servicex" service "delete" endpoint
 func (c *Client) BuildDeleteRequest(ctx context.Context, v any) (*http.Request, error) {
 	var (
 		id string
 	)
 	{
-		p, ok := v.(*service.DeletePayload)
+		p, ok := v.(*servicex.DeletePayload)
 		if !ok {
-			return nil, goahttp.ErrInvalidType("service", "delete", "*service.DeletePayload", v)
+			return nil, goahttp.ErrInvalidType("servicex", "delete", "*servicex.DeletePayload", v)
 		}
 		id = p.ID
 	}
-	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteServicePath(id)}
+	u := &url.URL{Scheme: c.scheme, Host: c.host, Path: DeleteServicexPath(id)}
 	req, err := http.NewRequest("DELETE", u.String(), nil)
 	if err != nil {
-		return nil, goahttp.ErrInvalidURL("service", "delete", u.String(), err)
+		return nil, goahttp.ErrInvalidURL("servicex", "delete", u.String(), err)
 	}
 	if ctx != nil {
 		req = req.WithContext(ctx)
@@ -725,13 +725,13 @@ func (c *Client) BuildDeleteRequest(ctx context.Context, v any) (*http.Request, 
 	return req, nil
 }
 
-// EncodeDeleteRequest returns an encoder for requests sent to the service
+// EncodeDeleteRequest returns an encoder for requests sent to the servicex
 // delete server.
 func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http.Request, any) error {
 	return func(req *http.Request, v any) error {
-		p, ok := v.(*service.DeletePayload)
+		p, ok := v.(*servicex.DeletePayload)
 		if !ok {
-			return goahttp.ErrInvalidType("service", "delete", "*service.DeletePayload", v)
+			return goahttp.ErrInvalidType("servicex", "delete", "*servicex.DeletePayload", v)
 		}
 		{
 			head := p.JWT
@@ -745,15 +745,15 @@ func EncodeDeleteRequest(encoder func(*http.Request) goahttp.Encoder) func(*http
 	}
 }
 
-// DecodeDeleteResponse returns a decoder for responses returned by the service
-// delete endpoint. restoreBody controls whether the response body should be
-// restored after having been read.
+// DecodeDeleteResponse returns a decoder for responses returned by the
+// servicex delete endpoint. restoreBody controls whether the response body
+// should be restored after having been read.
 // DecodeDeleteResponse may return the following errors:
-//   - "bad-request" (type *service.BadRequestT): http.StatusBadRequest
-//   - "invalid-scopes" (type *service.InvalidScopesT): http.StatusForbidden
-//   - "not-implemented" (type *service.NotImplementedT): http.StatusNotImplemented
-//   - "not-available" (type *service.ServiceNotAvailableT): http.StatusServiceUnavailable
-//   - "not-authorized" (type *service.UnauthorizedT): http.StatusUnauthorized
+//   - "bad-request" (type *servicex.BadRequestT): http.StatusBadRequest
+//   - "invalid-scopes" (type *servicex.InvalidScopesT): http.StatusForbidden
+//   - "not-implemented" (type *servicex.NotImplementedT): http.StatusNotImplemented
+//   - "not-available" (type *servicex.ServiceNotAvailableT): http.StatusServiceUnavailable
+//   - "not-authorized" (type *servicex.UnauthorizedT): http.StatusUnauthorized
 //   - error: internal error
 func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreBody bool) func(*http.Response) (any, error) {
 	return func(resp *http.Response) (any, error) {
@@ -779,11 +779,11 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "delete", err)
+				return nil, goahttp.ErrDecodingError("servicex", "delete", err)
 			}
 			err = ValidateDeleteBadRequestResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "delete", err)
+				return nil, goahttp.ErrValidationError("servicex", "delete", err)
 			}
 			return nil, NewDeleteBadRequest(&body)
 		case http.StatusForbidden:
@@ -793,11 +793,11 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "delete", err)
+				return nil, goahttp.ErrDecodingError("servicex", "delete", err)
 			}
 			err = ValidateDeleteInvalidScopesResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "delete", err)
+				return nil, goahttp.ErrValidationError("servicex", "delete", err)
 			}
 			return nil, NewDeleteInvalidScopes(&body)
 		case http.StatusNotImplemented:
@@ -807,11 +807,11 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			)
 			err = decoder(resp).Decode(&body)
 			if err != nil {
-				return nil, goahttp.ErrDecodingError("service", "delete", err)
+				return nil, goahttp.ErrDecodingError("servicex", "delete", err)
 			}
 			err = ValidateDeleteNotImplementedResponseBody(&body)
 			if err != nil {
-				return nil, goahttp.ErrValidationError("service", "delete", err)
+				return nil, goahttp.ErrValidationError("servicex", "delete", err)
 			}
 			return nil, NewDeleteNotImplemented(&body)
 		case http.StatusServiceUnavailable:
@@ -820,16 +820,16 @@ func DecodeDeleteResponse(decoder func(*http.Response) goahttp.Decoder, restoreB
 			return nil, NewDeleteNotAuthorized()
 		default:
 			body, _ := io.ReadAll(resp.Body)
-			return nil, goahttp.ErrInvalidResponse("service", "delete", resp.StatusCode, string(body))
+			return nil, goahttp.ErrInvalidResponse("servicex", "delete", resp.StatusCode, string(body))
 		}
 	}
 }
 
-// unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView builds
-// a value of type *serviceviews.ServiceListItemView from a value of type
-// *ServiceListItemResponseBody.
-func unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(v *ServiceListItemResponseBody) *serviceviews.ServiceListItemView {
-	res := &serviceviews.ServiceListItemView{
+// unmarshalXServiceListItemResponseBodyToServicexviewsXServiceListItemView
+// builds a value of type *servicexviews.XServiceListItemView from a value of
+// type *XServiceListItemResponseBody.
+func unmarshalXServiceListItemResponseBodyToServicexviewsXServiceListItemView(v *XServiceListItemResponseBody) *servicexviews.XServiceListItemView {
+	res := &servicexviews.XServiceListItemView{
 		ID:          v.ID,
 		Name:        v.Name,
 		Description: v.Description,
@@ -843,10 +843,10 @@ func unmarshalServiceListItemResponseBodyToServiceviewsServiceListItemView(v *Se
 	return res
 }
 
-// unmarshalLinkTResponseBodyToServiceviewsLinkTView builds a value of type
-// *serviceviews.LinkTView from a value of type *LinkTResponseBody.
-func unmarshalLinkTResponseBodyToServiceviewsLinkTView(v *LinkTResponseBody) *serviceviews.LinkTView {
-	res := &serviceviews.LinkTView{
+// unmarshalLinkTResponseBodyToServicexviewsLinkTView builds a value of type
+// *servicexviews.LinkTView from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToServicexviewsLinkTView(v *LinkTResponseBody) *servicexviews.LinkTView {
+	res := &servicexviews.LinkTView{
 		Rel:  v.Rel,
 		Type: v.Type,
 		Href: v.Href,
@@ -855,14 +855,14 @@ func unmarshalLinkTResponseBodyToServiceviewsLinkTView(v *LinkTResponseBody) *se
 	return res
 }
 
-// marshalServiceReferenceTToReferenceTRequestBodyRequestBody builds a value of
-// type *ReferenceTRequestBodyRequestBody from a value of type
-// *service.ReferenceT.
-func marshalServiceReferenceTToReferenceTRequestBodyRequestBody(v *service.ReferenceT) *ReferenceTRequestBodyRequestBody {
+// marshalServicexXReferenceTToXReferenceTRequestBodyRequestBody builds a value
+// of type *XReferenceTRequestBodyRequestBody from a value of type
+// *servicex.XReferenceT.
+func marshalServicexXReferenceTToXReferenceTRequestBodyRequestBody(v *servicex.XReferenceT) *XReferenceTRequestBodyRequestBody {
 	if v == nil {
 		return nil
 	}
-	res := &ReferenceTRequestBodyRequestBody{
+	res := &XReferenceTRequestBodyRequestBody{
 		Title: v.Title,
 		URI:   v.URI,
 	}
@@ -870,29 +870,29 @@ func marshalServiceReferenceTToReferenceTRequestBodyRequestBody(v *service.Refer
 	return res
 }
 
-// marshalServiceWorkflowTToWorkflowTRequestBodyRequestBody builds a value of
-// type *WorkflowTRequestBodyRequestBody from a value of type
-// *service.WorkflowT.
-func marshalServiceWorkflowTToWorkflowTRequestBodyRequestBody(v *service.WorkflowT) *WorkflowTRequestBodyRequestBody {
-	res := &WorkflowTRequestBodyRequestBody{
+// marshalServicexXWorkflowTToXWorkflowTRequestBodyRequestBody builds a value
+// of type *XWorkflowTRequestBodyRequestBody from a value of type
+// *servicex.XWorkflowT.
+func marshalServicexXWorkflowTToXWorkflowTRequestBodyRequestBody(v *servicex.XWorkflowT) *XWorkflowTRequestBodyRequestBody {
+	res := &XWorkflowTRequestBodyRequestBody{
 		Type: v.Type,
 		Argo: v.Argo,
 	}
 	if v.Basic != nil {
-		res.Basic = marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(v.Basic)
+		res.Basic = marshalServicexXBasicWorkflowOptsTToXBasicWorkflowOptsTRequestBodyRequestBody(v.Basic)
 	}
 
 	return res
 }
 
-// marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody
-// builds a value of type *BasicWorkflowOptsTRequestBodyRequestBody from a
-// value of type *service.BasicWorkflowOptsT.
-func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(v *service.BasicWorkflowOptsT) *BasicWorkflowOptsTRequestBodyRequestBody {
+// marshalServicexXBasicWorkflowOptsTToXBasicWorkflowOptsTRequestBodyRequestBody
+// builds a value of type *XBasicWorkflowOptsTRequestBodyRequestBody from a
+// value of type *servicex.XBasicWorkflowOptsT.
+func marshalServicexXBasicWorkflowOptsTToXBasicWorkflowOptsTRequestBodyRequestBody(v *servicex.XBasicWorkflowOptsT) *XBasicWorkflowOptsTRequestBodyRequestBody {
 	if v == nil {
 		return nil
 	}
-	res := &BasicWorkflowOptsTRequestBodyRequestBody{
+	res := &XBasicWorkflowOptsTRequestBodyRequestBody{
 		Image:           v.Image,
 		ImagePullPolicy: v.ImagePullPolicy,
 		GpuType:         v.GpuType,
@@ -914,26 +914,26 @@ func marshalServiceBasicWorkflowOptsTToBasicWorkflowOptsTRequestBodyRequestBody(
 		res.Command = []string{}
 	}
 	if v.Memory != nil {
-		res.Memory = marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v.Memory)
+		res.Memory = marshalServicexXResourceMemoryTToXResourceMemoryTRequestBodyRequestBody(v.Memory)
 	}
 	if v.CPU != nil {
-		res.CPU = marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v.CPU)
+		res.CPU = marshalServicexXResourceMemoryTToXResourceMemoryTRequestBodyRequestBody(v.CPU)
 	}
 	if v.EphemeralStorage != nil {
-		res.EphemeralStorage = marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v.EphemeralStorage)
+		res.EphemeralStorage = marshalServicexXResourceMemoryTToXResourceMemoryTRequestBodyRequestBody(v.EphemeralStorage)
 	}
 
 	return res
 }
 
-// marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody builds
-// a value of type *ResourceMemoryTRequestBodyRequestBody from a value of type
-// *service.ResourceMemoryT.
-func marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v *service.ResourceMemoryT) *ResourceMemoryTRequestBodyRequestBody {
+// marshalServicexXResourceMemoryTToXResourceMemoryTRequestBodyRequestBody
+// builds a value of type *XResourceMemoryTRequestBodyRequestBody from a value
+// of type *servicex.XResourceMemoryT.
+func marshalServicexXResourceMemoryTToXResourceMemoryTRequestBodyRequestBody(v *servicex.XResourceMemoryT) *XResourceMemoryTRequestBodyRequestBody {
 	if v == nil {
 		return nil
 	}
-	res := &ResourceMemoryTRequestBodyRequestBody{
+	res := &XResourceMemoryTRequestBodyRequestBody{
 		Request: v.Request,
 		Limit:   v.Limit,
 	}
@@ -941,9 +941,9 @@ func marshalServiceResourceMemoryTToResourceMemoryTRequestBodyRequestBody(v *ser
 	return res
 }
 
-// marshalServiceParameterDefTToParameterDefT builds a value of type
-// *ParameterDefT from a value of type *service.ParameterDefT.
-func marshalServiceParameterDefTToParameterDefT(v *service.ParameterDefT) *ParameterDefT {
+// marshalServicexParameterDefTToParameterDefT builds a value of type
+// *ParameterDefT from a value of type *servicex.ParameterDefT.
+func marshalServicexParameterDefTToParameterDefT(v *servicex.ParameterDefT) *ParameterDefT {
 	res := &ParameterDefT{
 		Name:        v.Name,
 		Label:       v.Label,
@@ -958,16 +958,20 @@ func marshalServiceParameterDefTToParameterDefT(v *service.ParameterDefT) *Param
 	if v.Options != nil {
 		res.Options = make([]*ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
-			res.Options[i] = marshalServiceParameterOptTToParameterOptT(val)
+			if val == nil {
+				res.Options[i] = nil
+				continue
+			}
+			res.Options[i] = marshalServicexParameterOptTToParameterOptT(val)
 		}
 	}
 
 	return res
 }
 
-// marshalServiceParameterOptTToParameterOptT builds a value of type
-// *ParameterOptT from a value of type *service.ParameterOptT.
-func marshalServiceParameterOptTToParameterOptT(v *service.ParameterOptT) *ParameterOptT {
+// marshalServicexParameterOptTToParameterOptT builds a value of type
+// *ParameterOptT from a value of type *servicex.ParameterOptT.
+func marshalServicexParameterOptTToParameterOptT(v *servicex.ParameterOptT) *ParameterOptT {
 	if v == nil {
 		return nil
 	}
@@ -979,14 +983,14 @@ func marshalServiceParameterOptTToParameterOptT(v *service.ParameterOptT) *Param
 	return res
 }
 
-// marshalReferenceTRequestBodyRequestBodyToServiceReferenceT builds a value of
-// type *service.ReferenceT from a value of type
-// *ReferenceTRequestBodyRequestBody.
-func marshalReferenceTRequestBodyRequestBodyToServiceReferenceT(v *ReferenceTRequestBodyRequestBody) *service.ReferenceT {
+// marshalXReferenceTRequestBodyRequestBodyToServicexXReferenceT builds a value
+// of type *servicex.XReferenceT from a value of type
+// *XReferenceTRequestBodyRequestBody.
+func marshalXReferenceTRequestBodyRequestBodyToServicexXReferenceT(v *XReferenceTRequestBodyRequestBody) *servicex.XReferenceT {
 	if v == nil {
 		return nil
 	}
-	res := &service.ReferenceT{
+	res := &servicex.XReferenceT{
 		Title: v.Title,
 		URI:   v.URI,
 	}
@@ -994,29 +998,29 @@ func marshalReferenceTRequestBodyRequestBodyToServiceReferenceT(v *ReferenceTReq
 	return res
 }
 
-// marshalWorkflowTRequestBodyRequestBodyToServiceWorkflowT builds a value of
-// type *service.WorkflowT from a value of type
-// *WorkflowTRequestBodyRequestBody.
-func marshalWorkflowTRequestBodyRequestBodyToServiceWorkflowT(v *WorkflowTRequestBodyRequestBody) *service.WorkflowT {
-	res := &service.WorkflowT{
+// marshalXWorkflowTRequestBodyRequestBodyToServicexXWorkflowT builds a value
+// of type *servicex.XWorkflowT from a value of type
+// *XWorkflowTRequestBodyRequestBody.
+func marshalXWorkflowTRequestBodyRequestBodyToServicexXWorkflowT(v *XWorkflowTRequestBodyRequestBody) *servicex.XWorkflowT {
+	res := &servicex.XWorkflowT{
 		Type: v.Type,
 		Argo: v.Argo,
 	}
 	if v.Basic != nil {
-		res.Basic = marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(v.Basic)
+		res.Basic = marshalXBasicWorkflowOptsTRequestBodyRequestBodyToServicexXBasicWorkflowOptsT(v.Basic)
 	}
 
 	return res
 }
 
-// marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT
-// builds a value of type *service.BasicWorkflowOptsT from a value of type
-// *BasicWorkflowOptsTRequestBodyRequestBody.
-func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(v *BasicWorkflowOptsTRequestBodyRequestBody) *service.BasicWorkflowOptsT {
+// marshalXBasicWorkflowOptsTRequestBodyRequestBodyToServicexXBasicWorkflowOptsT
+// builds a value of type *servicex.XBasicWorkflowOptsT from a value of type
+// *XBasicWorkflowOptsTRequestBodyRequestBody.
+func marshalXBasicWorkflowOptsTRequestBodyRequestBodyToServicexXBasicWorkflowOptsT(v *XBasicWorkflowOptsTRequestBodyRequestBody) *servicex.XBasicWorkflowOptsT {
 	if v == nil {
 		return nil
 	}
-	res := &service.BasicWorkflowOptsT{
+	res := &servicex.XBasicWorkflowOptsT{
 		Image:           v.Image,
 		ImagePullPolicy: v.ImagePullPolicy,
 		GpuType:         v.GpuType,
@@ -1038,26 +1042,26 @@ func marshalBasicWorkflowOptsTRequestBodyRequestBodyToServiceBasicWorkflowOptsT(
 		res.Command = []string{}
 	}
 	if v.Memory != nil {
-		res.Memory = marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v.Memory)
+		res.Memory = marshalXResourceMemoryTRequestBodyRequestBodyToServicexXResourceMemoryT(v.Memory)
 	}
 	if v.CPU != nil {
-		res.CPU = marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v.CPU)
+		res.CPU = marshalXResourceMemoryTRequestBodyRequestBodyToServicexXResourceMemoryT(v.CPU)
 	}
 	if v.EphemeralStorage != nil {
-		res.EphemeralStorage = marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v.EphemeralStorage)
+		res.EphemeralStorage = marshalXResourceMemoryTRequestBodyRequestBodyToServicexXResourceMemoryT(v.EphemeralStorage)
 	}
 
 	return res
 }
 
-// marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT builds
-// a value of type *service.ResourceMemoryT from a value of type
-// *ResourceMemoryTRequestBodyRequestBody.
-func marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v *ResourceMemoryTRequestBodyRequestBody) *service.ResourceMemoryT {
+// marshalXResourceMemoryTRequestBodyRequestBodyToServicexXResourceMemoryT
+// builds a value of type *servicex.XResourceMemoryT from a value of type
+// *XResourceMemoryTRequestBodyRequestBody.
+func marshalXResourceMemoryTRequestBodyRequestBodyToServicexXResourceMemoryT(v *XResourceMemoryTRequestBodyRequestBody) *servicex.XResourceMemoryT {
 	if v == nil {
 		return nil
 	}
-	res := &service.ResourceMemoryT{
+	res := &servicex.XResourceMemoryT{
 		Request: v.Request,
 		Limit:   v.Limit,
 	}
@@ -1065,10 +1069,10 @@ func marshalResourceMemoryTRequestBodyRequestBodyToServiceResourceMemoryT(v *Res
 	return res
 }
 
-// marshalParameterDefTToServiceParameterDefT builds a value of type
-// *service.ParameterDefT from a value of type *ParameterDefT.
-func marshalParameterDefTToServiceParameterDefT(v *ParameterDefT) *service.ParameterDefT {
-	res := &service.ParameterDefT{
+// marshalParameterDefTToServicexParameterDefT builds a value of type
+// *servicex.ParameterDefT from a value of type *ParameterDefT.
+func marshalParameterDefTToServicexParameterDefT(v *ParameterDefT) *servicex.ParameterDefT {
+	res := &servicex.ParameterDefT{
 		Name:        v.Name,
 		Label:       v.Label,
 		Type:        v.Type,
@@ -1080,22 +1084,26 @@ func marshalParameterDefTToServiceParameterDefT(v *ParameterDefT) *service.Param
 		Unary:       v.Unary,
 	}
 	if v.Options != nil {
-		res.Options = make([]*service.ParameterOptT, len(v.Options))
+		res.Options = make([]*servicex.ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
-			res.Options[i] = marshalParameterOptTToServiceParameterOptT(val)
+			if val == nil {
+				res.Options[i] = nil
+				continue
+			}
+			res.Options[i] = marshalParameterOptTToServicexParameterOptT(val)
 		}
 	}
 
 	return res
 }
 
-// marshalParameterOptTToServiceParameterOptT builds a value of type
-// *service.ParameterOptT from a value of type *ParameterOptT.
-func marshalParameterOptTToServiceParameterOptT(v *ParameterOptT) *service.ParameterOptT {
+// marshalParameterOptTToServicexParameterOptT builds a value of type
+// *servicex.ParameterOptT from a value of type *ParameterOptT.
+func marshalParameterOptTToServicexParameterOptT(v *ParameterOptT) *servicex.ParameterOptT {
 	if v == nil {
 		return nil
 	}
-	res := &service.ParameterOptT{
+	res := &servicex.ParameterOptT{
 		Value:       v.Value,
 		Description: v.Description,
 	}
@@ -1103,10 +1111,10 @@ func marshalParameterOptTToServiceParameterOptT(v *ParameterOptT) *service.Param
 	return res
 }
 
-// unmarshalLinkTResponseBodyToServiceLinkT builds a value of type
-// *service.LinkT from a value of type *LinkTResponseBody.
-func unmarshalLinkTResponseBodyToServiceLinkT(v *LinkTResponseBody) *service.LinkT {
-	res := &service.LinkT{
+// unmarshalLinkTResponseBodyToServicexLinkT builds a value of type
+// *servicex.LinkT from a value of type *LinkTResponseBody.
+func unmarshalLinkTResponseBodyToServicexLinkT(v *LinkTResponseBody) *servicex.LinkT {
+	res := &servicex.LinkT{
 		Rel:  *v.Rel,
 		Type: *v.Type,
 		Href: *v.Href,
@@ -1115,10 +1123,10 @@ func unmarshalLinkTResponseBodyToServiceLinkT(v *LinkTResponseBody) *service.Lin
 	return res
 }
 
-// unmarshalParameterDefTResponseBodyToServiceParameterDefT builds a value of
-// type *service.ParameterDefT from a value of type *ParameterDefTResponseBody.
-func unmarshalParameterDefTResponseBodyToServiceParameterDefT(v *ParameterDefTResponseBody) *service.ParameterDefT {
-	res := &service.ParameterDefT{
+// unmarshalParameterDefTResponseBodyToServicexParameterDefT builds a value of
+// type *servicex.ParameterDefT from a value of type *ParameterDefTResponseBody.
+func unmarshalParameterDefTResponseBodyToServicexParameterDefT(v *ParameterDefTResponseBody) *servicex.ParameterDefT {
+	res := &servicex.ParameterDefT{
 		Name:        *v.Name,
 		Label:       v.Label,
 		Type:        *v.Type,
@@ -1130,22 +1138,26 @@ func unmarshalParameterDefTResponseBodyToServiceParameterDefT(v *ParameterDefTRe
 		Unary:       v.Unary,
 	}
 	if v.Options != nil {
-		res.Options = make([]*service.ParameterOptT, len(v.Options))
+		res.Options = make([]*servicex.ParameterOptT, len(v.Options))
 		for i, val := range v.Options {
-			res.Options[i] = unmarshalParameterOptTResponseBodyToServiceParameterOptT(val)
+			if val == nil {
+				res.Options[i] = nil
+				continue
+			}
+			res.Options[i] = unmarshalParameterOptTResponseBodyToServicexParameterOptT(val)
 		}
 	}
 
 	return res
 }
 
-// unmarshalParameterOptTResponseBodyToServiceParameterOptT builds a value of
-// type *service.ParameterOptT from a value of type *ParameterOptTResponseBody.
-func unmarshalParameterOptTResponseBodyToServiceParameterOptT(v *ParameterOptTResponseBody) *service.ParameterOptT {
+// unmarshalParameterOptTResponseBodyToServicexParameterOptT builds a value of
+// type *servicex.ParameterOptT from a value of type *ParameterOptTResponseBody.
+func unmarshalParameterOptTResponseBodyToServicexParameterOptT(v *ParameterOptTResponseBody) *servicex.ParameterOptT {
 	if v == nil {
 		return nil
 	}
-	res := &service.ParameterOptT{
+	res := &servicex.ParameterOptT{
 		Value:       v.Value,
 		Description: v.Description,
 	}

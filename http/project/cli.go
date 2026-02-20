@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"strconv"
+	"unicode/utf8"
 
 	project "github.com/ivcap-works/ivcap-core-api/gen/project"
 	goa "goa.design/goa/v3/pkg"
@@ -110,13 +111,19 @@ func BuildCreateProjectPayload(projectCreateProjectBody string, projectCreatePro
 	{
 		err = json.Unmarshal([]byte(projectCreateProjectBody), &body)
 		if err != nil {
-			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account_urn\": \"urn:ivcap:account:146d4ac9-244a-4aee-aa32-a28f4b91e60d\",\n      \"name\": \"My project name\",\n      \"parent_project_urn\": \"urn:ivcap:project:8a82775b-27d9-4635-b006-7ef5553656d1\",\n      \"properties\": {\n         \"details\": \"Created for to investigate [objective]\"\n      }\n   }'")
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account\": \"urn:ivcap:account:146d4ac9-244a-4aee-aa32-a28f4b91e60d\",\n      \"name\": \"My project name\",\n      \"parent\": \"urn:ivcap:project:8a82775b-27d9-4635-b006-7ef5553656d1\",\n      \"properties\": {\n         \"details\": \"Created to investigate [objective]\"\n      },\n      \"urn\": \"urn:ivcap:project:8a82775b-27d9-4635-b006-7ef5553656d1\"\n   }'")
 		}
-		if body.AccountUrn != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.account_urn", *body.AccountUrn, goa.FormatURI))
+		if body.Urn != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.urn", *body.Urn, goa.FormatURI))
 		}
-		if body.ParentProjectUrn != nil {
-			err = goa.MergeErrors(err, goa.ValidateFormat("body.parent_project_urn", *body.ParentProjectUrn, goa.FormatURI))
+		if utf8.RuneCountInString(body.Name) < 3 {
+			err = goa.MergeErrors(err, goa.InvalidLengthError("body.name", body.Name, utf8.RuneCountInString(body.Name), 3, true))
+		}
+		if body.Account != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.account", *body.Account, goa.FormatURI))
+		}
+		if body.Parent != nil {
+			err = goa.MergeErrors(err, goa.ValidateFormat("body.parent", *body.Parent, goa.FormatURI))
 		}
 		if err != nil {
 			return nil, err
@@ -127,12 +134,13 @@ func BuildCreateProjectPayload(projectCreateProjectBody string, projectCreatePro
 		jwt = projectCreateProjectJWT
 	}
 	v := &project.ProjectCreateRequest{
-		Name:             body.Name,
-		AccountUrn:       body.AccountUrn,
-		ParentProjectUrn: body.ParentProjectUrn,
+		Urn:     body.Urn,
+		Name:    body.Name,
+		Account: body.Account,
+		Parent:  body.Parent,
 	}
 	if body.Properties != nil {
-		v.Properties = marshalProjectPropertiesRequestBodyRequestBodyToProjectProjectProperties(body.Properties)
+		v.Properties = marshalProjectPropertiesToProjectProjectProperties(body.Properties)
 	}
 	res := &project.CreateProjectPayload{
 		Project: v,
@@ -176,6 +184,47 @@ func BuildReadPayload(projectReadID string, projectReadJWT string) (*project.Rea
 	v.JWT = jwt
 
 	return v, nil
+}
+
+// BuildSetProjectInformationPayload builds the payload for the project
+// SetProjectInformation endpoint from CLI flags.
+func BuildSetProjectInformationPayload(projectSetProjectInformationBody string, projectSetProjectInformationUrn string, projectSetProjectInformationJWT string) (*project.SetProjectInformationPayload, error) {
+	var err error
+	var body SetProjectInformationRequestBody
+	{
+		err = json.Unmarshal([]byte(projectSetProjectInformationBody), &body)
+		if err != nil {
+			return nil, fmt.Errorf("invalid JSON for body, \nerror: %s, \nexample of valid JSON:\n%s", err, "'{\n      \"account\": \"urn:ivcap:account:146d4ac9-244a-4aee-aa32-a28f4b91e60d\",\n      \"name\": \"My project name\",\n      \"parent\": \"urn:ivcap:project:8a82775b-27d9-4635-b006-7ef5553656d1\",\n      \"properties\": {\n         \"details\": \"Created to investigate [objective]\"\n      },\n      \"urn\": \"urn:ivcap:project:8a82775b-27d9-4635-b006-7ef5553656d1\"\n   }'")
+		}
+	}
+	var urn string
+	{
+		urn = projectSetProjectInformationUrn
+		err = goa.MergeErrors(err, goa.ValidateFormat("urn", urn, goa.FormatURI))
+		if err != nil {
+			return nil, err
+		}
+	}
+	var jwt string
+	{
+		jwt = projectSetProjectInformationJWT
+	}
+	v := &project.ProjectModifyRequest{
+		Urn:     body.Urn,
+		Name:    body.Name,
+		Account: body.Account,
+		Parent:  body.Parent,
+	}
+	if body.Properties != nil {
+		v.Properties = marshalProjectPropertiesRequestBodyRequestBodyToProjectProjectProperties(body.Properties)
+	}
+	res := &project.SetProjectInformationPayload{
+		Project: v,
+	}
+	res.Urn = urn
+	res.JWT = jwt
+
+	return res, nil
 }
 
 // BuildListProjectMembersPayload builds the payload for the project

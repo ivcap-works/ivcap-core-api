@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,27 +20,27 @@ import (
 	"fmt"
 )
 
-// ListServicePath returns the URL path to the service service list HTTP endpoint.
-func ListServicePath() string {
+// ListServicexPath returns the URL path to the servicex service list HTTP endpoint.
+func ListServicexPath() string {
 	return "/1/services"
 }
 
-// CreateServiceServicePath returns the URL path to the service service create_service HTTP endpoint.
-func CreateServiceServicePath() string {
+// CreateServiceServicexPath returns the URL path to the servicex service create_service HTTP endpoint.
+func CreateServiceServicexPath() string {
 	return "/1/services"
 }
 
-// ReadServicePath returns the URL path to the service service read HTTP endpoint.
-func ReadServicePath(id string) string {
+// ReadServicexPath returns the URL path to the servicex service read HTTP endpoint.
+func ReadServicexPath(id string) string {
 	return fmt.Sprintf("/1/services/%v", id)
 }
 
-// UpdateServicePath returns the URL path to the service service update HTTP endpoint.
-func UpdateServicePath(id string) string {
+// UpdateServicexPath returns the URL path to the servicex service update HTTP endpoint.
+func UpdateServicexPath(id string) string {
 	return fmt.Sprintf("/1/services/%v", id)
 }
 
-// DeleteServicePath returns the URL path to the service service delete HTTP endpoint.
-func DeleteServicePath(id string) string {
+// DeleteServicexPath returns the URL path to the servicex service delete HTTP endpoint.
+func DeleteServicexPath(id string) string {
 	return fmt.Sprintf("/1/services/%v", id)
 }

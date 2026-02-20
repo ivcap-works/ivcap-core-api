@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -511,6 +511,10 @@ func NewCreateRequestBody(p *order.CreatePayload) *CreateRequestBody {
 	if p.Orders.Parameters != nil {
 		body.Parameters = make([]*ParameterT, len(p.Orders.Parameters))
 		for i, val := range p.Orders.Parameters {
+			if val == nil {
+				body.Parameters[i] = nil
+				continue
+			}
 			body.Parameters[i] = marshalOrderParameterTToParameterT(val)
 		}
 	} else {
@@ -527,10 +531,18 @@ func NewListOrderListRTOK(body *ListResponseBody) *orderviews.OrderListRTView {
 	}
 	v.Items = make([]*orderviews.OrderListItemView, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalOrderListItemResponseBodyToOrderviewsOrderListItemView(val)
 	}
 	v.Links = make([]*orderviews.LinkTView, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderviewsLinkTView(val)
 	}
 
@@ -610,6 +622,10 @@ func NewReadOrderStatusRTOK(body *ReadResponseBody) *order.OrderStatusRT {
 	v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
 	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 	if body.Tags != nil {
@@ -620,6 +636,10 @@ func NewReadOrderStatusRTOK(body *ReadResponseBody) *order.OrderStatusRT {
 	}
 	v.Parameters = make([]*order.ParameterT, len(body.Parameters))
 	for i, val := range body.Parameters {
+		if val == nil {
+			v.Parameters[i] = nil
+			continue
+		}
 		v.Parameters[i] = unmarshalParameterTResponseBodyToOrderParameterT(val)
 	}
 
@@ -687,10 +707,18 @@ func NewProductsPartialProductListTOK(body *ProductsResponseBody) *order.Partial
 	v := &order.PartialProductListT{}
 	v.Items = make([]*order.ProductListItemT, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalProductListItemTResponseBodyToOrderProductListItemT(val)
 	}
 	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 
@@ -772,10 +800,18 @@ func NewMetadataPartialMetaListTOK(body *MetadataResponseBody) *order.PartialMet
 	v := &order.PartialMetaListT{}
 	v.Items = make([]*order.OrderMetadataListItemRT, len(body.Items))
 	for i, val := range body.Items {
+		if val == nil {
+			v.Items[i] = nil
+			continue
+		}
 		v.Items[i] = unmarshalOrderMetadataListItemRTResponseBodyToOrderOrderMetadataListItemRT(val)
 	}
 	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 
@@ -867,6 +903,10 @@ func NewCreateOrderStatusRTOK(body *CreateResponseBody) *order.OrderStatusRT {
 	v.Products = unmarshalPartialProductListTResponseBodyToOrderPartialProductListT(body.Products)
 	v.Links = make([]*order.LinkT, len(body.Links))
 	for i, val := range body.Links {
+		if val == nil {
+			v.Links[i] = nil
+			continue
+		}
 		v.Links[i] = unmarshalLinkTResponseBodyToOrderLinkT(val)
 	}
 	if body.Tags != nil {
@@ -877,6 +917,10 @@ func NewCreateOrderStatusRTOK(body *CreateResponseBody) *order.OrderStatusRT {
 	}
 	v.Parameters = make([]*order.ParameterT, len(body.Parameters))
 	for i, val := range body.Parameters {
+		if val == nil {
+			v.Parameters[i] = nil
+			continue
+		}
 		v.Parameters[i] = unmarshalParameterTResponseBodyToOrderParameterT(val)
 	}
 
@@ -1023,6 +1067,10 @@ func NewLogsNotAuthorized() *order.UnauthorizedT {
 func NewTopOrderTopResultItemCollectionOK(body TopResponseBody) orderviews.OrderTopResultItemCollectionView {
 	v := make([]*orderviews.OrderTopResultItemView, len(body))
 	for i, val := range body {
+		if val == nil {
+			v[i] = nil
+			continue
+		}
 		v[i] = unmarshalOrderTopResultItemResponseToOrderviewsOrderTopResultItemView(val)
 	}
 
@@ -1118,7 +1166,7 @@ func ValidateReadResponseBody(body *ReadResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
@@ -1231,7 +1279,7 @@ func ValidateCreateResponseBody(body *CreateResponseBody) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("parameters", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
@@ -1659,7 +1707,7 @@ func ValidateOrderListItemResponseBody(body *OrderListItemResponseBody) (err err
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Status != nil {
 		if !(*body.Status == "unknown" || *body.Status == "pending" || *body.Status == "scheduled" || *body.Status == "executing" || *body.Status == "succeeded" || *body.Status == "failed" || *body.Status == "error") {
@@ -1755,7 +1803,7 @@ func ValidateOrderMetadataListItemRTResponseBody(body *OrderMetadataListItemRTRe
 		err = goa.MergeErrors(err, goa.MissingFieldError("content-type", "body"))
 	}
 	if body.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("body.id", *body.ID, goa.FormatURI))
 	}
 	if body.Schema != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("body.schema", *body.Schema, goa.FormatURI))

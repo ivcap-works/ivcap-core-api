@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -857,7 +857,7 @@ func unmarshalAspectListItemRTResponseBodyToAspectAspectListItemRT(v *AspectList
 		Schema:      *v.Schema,
 		Content:     v.Content,
 		ContentType: *v.ContentType,
-		ValidFrom:   v.ValidFrom,
+		ValidFrom:   *v.ValidFrom,
 		ValidTo:     v.ValidTo,
 	}
 

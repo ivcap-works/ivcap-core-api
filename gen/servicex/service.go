@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,25 +14,25 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package service
+package servicex
 
 import (
 	"context"
 
-	serviceviews "github.com/ivcap-works/ivcap-core-api/gen/service/views"
+	servicexviews "github.com/ivcap-works/ivcap-core-api/gen/servicex/views"
 	"goa.design/goa/v3/security"
 )
 
 // Manage the life cycle of a service offered on the CRE marketplace.
 type Service interface {
 	// list services
-	List(context.Context, *ListPayload) (res *ServiceListRT, err error)
+	List(context.Context, *ListPayload) (res *XServiceListRT, err error)
 	// Create a new services and return its status.
-	CreateService(context.Context, *CreateServicePayload) (res *ServiceStatusRT, err error)
+	CreateService(context.Context, *CreateServicePayload) (res *XServiceStatusRT, err error)
 	// Show services by ID
-	Read(context.Context, *ReadPayload) (res *ServiceStatusRT, err error)
+	Read(context.Context, *ReadPayload) (res *XServiceStatusRT, err error)
 	// Update an existing services and return its status.
-	Update(context.Context, *UpdatePayload) (res *ServiceStatusRT, err error)
+	Update(context.Context, *UpdatePayload) (res *XServiceStatusRT, err error)
 	// Delete an existing services.
 	Delete(context.Context, *DeletePayload) (err error)
 }
@@ -47,12 +47,12 @@ type Auther interface {
 const APIName = "ivcap"
 
 // APIVersion is the version of the API as defined in the design.
-const APIVersion = "0.43"
+const APIVersion = "0.47"
 
 // ServiceName is the name of the service as defined in the design. This is the
 // same value that is set in the endpoint request contexts under the ServiceKey
 // key.
-const ServiceName = "service"
+const ServiceName = "servicex"
 
 // MethodNames lists the service method names as defined in the design. These
 // are the same values that are set in the endpoint request contexts under the
@@ -65,41 +65,16 @@ type BadRequestT struct {
 	Message string
 }
 
-type BasicWorkflowOptsT struct {
-	// container image name
-	Image string
-	// Optionally definesq the image pull policy
-	ImagePullPolicy string `json:"image-pull-policy,omitempty"`
-	// Command to start the container - needed for some container runtimes
-	Command []string
-	// Defines memory resource requests and limits
-	Memory *ResourceMemoryT
-	// Defines cpu resource requests and limits
-	// (see
-	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
-	CPU *ResourceMemoryT
-	// Defines ephemeral storage resource requests and limits
-	// (see
-	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
-	EphemeralStorage *ResourceMemoryT `json:"ephemeral-storage,omitempty"`
-	// Defines required gpu type
-	GpuType *string `json:"gpu-type,omitempty"`
-	// Defines number of required gpu
-	GpuNumber *int `json:"gpu-number,omitempty"`
-	// Defines needed amount of shared-memory
-	SharedMemory *string `json:"shared-memory,omitempty"`
-}
-
-// CreateServicePayload is the payload type of the service service
+// CreateServicePayload is the payload type of the servicex service
 // create_service method.
 type CreateServicePayload struct {
 	// New services description
-	Services *ServiceDefinitionT
+	Services *XServiceDefinitionT
 	// JWT used for authentication
 	JWT string
 }
 
-// DeletePayload is the payload type of the service service delete method.
+// DeletePayload is the payload type of the servicex service delete method.
 type DeletePayload struct {
 	// ID of services to update
 	ID string
@@ -134,7 +109,7 @@ type LinkT struct {
 	Href string
 }
 
-// ListPayload is the payload type of the service service list method.
+// ListPayload is the payload type of the servicex service list method.
 type ListPayload struct {
 	// The 'limit' query option sets the maximum number of items
 	// to be included in the result.
@@ -188,19 +163,12 @@ type ParameterOptT struct {
 	Description *string
 }
 
-// ReadPayload is the payload type of the service service read method.
+// ReadPayload is the payload type of the servicex service read method.
 type ReadPayload struct {
 	// ID of services to show
 	ID string
 	// JWT used for authentication
 	JWT string
-}
-
-type ReferenceT struct {
-	// Title of reference document
-	Title *string
-	// Link to document
-	URI *string
 }
 
 // Will be returned when receiving a request to create and already existing
@@ -212,16 +180,6 @@ type ResourceAlreadyCreatedT struct {
 	Message string
 }
 
-// See
-// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
-// for units
-type ResourceMemoryT struct {
-	// minimal requirements [0]
-	Request *string
-	// minimal requirements [system limit]
-	Limit *string
-}
-
 // NotFound is the type returned when attempting to manage a resource that does
 // not exist.
 type ResourceNotFoundT struct {
@@ -231,15 +189,77 @@ type ResourceNotFoundT struct {
 	Message string
 }
 
-type ServiceDefinitionT struct {
+// Service necessary to fulfil the request is currently not available.
+type ServiceNotAvailableT struct {
+}
+
+// Unauthorized access to resource
+type UnauthorizedT struct {
+}
+
+// UpdatePayload is the payload type of the servicex service update method.
+type UpdatePayload struct {
+	// ID of services to update
+	ID *string
+	// Create if not already exist
+	ForceCreate *bool
+	// Updated services description
+	Services *XServiceDefinitionT
+	// JWT used for authentication
+	JWT string
+}
+
+type XBasicWorkflowOptsT struct {
+	// container image name
+	Image string
+	// Optionally definesq the image pull policy
+	ImagePullPolicy string `json:"image-pull-policy,omitempty"`
+	// Command to start the container - needed for some container runtimes
+	Command []string
+	// Defines memory resource requests and limits
+	Memory *XResourceMemoryT
+	// Defines cpu resource requests and limits
+	// (see
+	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#meaning-of-cpu)
+	CPU *XResourceMemoryT
+	// Defines ephemeral storage resource requests and limits
+	// (see
+	// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#local-ephemeral-storage)
+	EphemeralStorage *XResourceMemoryT `json:"ephemeral-storage,omitempty"`
+	// Defines required gpu type
+	GpuType *string `json:"gpu-type,omitempty"`
+	// Defines number of required gpu
+	GpuNumber *int `json:"gpu-number,omitempty"`
+	// Defines needed amount of shared-memory
+	SharedMemory *string `json:"shared-memory,omitempty"`
+}
+
+type XReferenceT struct {
+	// Title of reference document
+	Title *string
+	// Link to document
+	URI *string
+}
+
+// See
+// https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/#resource-units-in-kubernetes
+// for units
+type XResourceMemoryT struct {
+	// minimal requirements [0]
+	Request *string
+	// minimal requirements [system limit]
+	Limit *string
+}
+
+type XServiceDefinitionT struct {
 	// More detailed description of the service
 	Description string
 	// Reference to account revenues for this service should be credited to
-	References []*ReferenceT
+	References []*XReferenceT
 	// Link to banner image optionally used for this service
 	Banner *string
 	// Definition of the workflow to use for executing this service
-	Workflow *WorkflowT
+	Workflow *XWorkflowT
 	// Reference to policy used
 	Policy *string
 	// Optional provider provided name
@@ -250,7 +270,7 @@ type ServiceDefinitionT struct {
 	Parameters []*ParameterDefT
 }
 
-type ServiceListItem struct {
+type XServiceListItem struct {
 	// ID
 	ID string
 	// Optional customer provided name
@@ -268,22 +288,18 @@ type ServiceListItem struct {
 	Href    string `json:"href,omitempty"`
 }
 
-// ServiceListRT is the result type of the service service list method.
-type ServiceListRT struct {
+// XServiceListRT is the result type of the servicex service list method.
+type XServiceListRT struct {
 	// Services
-	Items []*ServiceListItem
+	Items []*XServiceListItem
 	// Time at which this list was valid
 	AtTime string
 	Links  []*LinkT
 }
 
-// Service necessary to fulfil the request is currently not available.
-type ServiceNotAvailableT struct {
-}
-
-// ServiceStatusRT is the result type of the service service create_service
+// XServiceStatusRT is the result type of the servicex service create_service
 // method.
-type ServiceStatusRT struct {
+type XServiceStatusRT struct {
 	// ID
 	ID string
 	// More detailed description of the service
@@ -301,32 +317,16 @@ type ServiceStatusRT struct {
 	Parameters []*ParameterDefT
 }
 
-// Unauthorized access to resource
-type UnauthorizedT struct {
-}
-
-// UpdatePayload is the payload type of the service service update method.
-type UpdatePayload struct {
-	// ID of services to update
-	ID *string
-	// Create if not already exist
-	ForceCreate *bool
-	// Updated services description
-	Services *ServiceDefinitionT
-	// JWT used for authentication
-	JWT string
-}
-
 // Defines the workflow to use to execute this service. Currently supported
 // 'types' are 'basic'
 // and 'argo'. In case of 'basic', use the 'basic' element for further
 // parameters. In the current implementation
 // 'opts' is expected to contain the same schema as 'basic'
-type WorkflowT struct {
+type XWorkflowT struct {
 	// Type of workflow
 	Type string
 	// Type of workflow
-	Basic *BasicWorkflowOptsT
+	Basic *XBasicWorkflowOptsT
 	// Defines the workflow using argo's WF schema
 	Argo any
 }
@@ -467,73 +467,90 @@ func (e *UnauthorizedT) GoaErrorName() string {
 	return "not-authorized"
 }
 
-// NewServiceListRT initializes result type ServiceListRT from viewed result
-// type ServiceListRT.
-func NewServiceListRT(vres *serviceviews.ServiceListRT) *ServiceListRT {
-	return newServiceListRT(vres.Projected)
+// NewXServiceListRT initializes result type XServiceListRT from viewed result
+// type XServiceListRT.
+func NewXServiceListRT(vres *servicexviews.XServiceListRT) *XServiceListRT {
+	return newXServiceListRT(vres.Projected)
 }
 
-// NewViewedServiceListRT initializes viewed result type ServiceListRT from
-// result type ServiceListRT using the given view.
-func NewViewedServiceListRT(res *ServiceListRT, view string) *serviceviews.ServiceListRT {
-	p := newServiceListRTView(res)
-	return &serviceviews.ServiceListRT{Projected: p, View: "default"}
+// NewViewedXServiceListRT initializes viewed result type XServiceListRT from
+// result type XServiceListRT using the given view.
+func NewViewedXServiceListRT(res *XServiceListRT, view string) *servicexviews.XServiceListRT {
+	p := newXServiceListRTView(res)
+	return &servicexviews.XServiceListRT{Projected: p, View: "default"}
 }
 
-// newServiceListRT converts projected type ServiceListRT to service type
-// ServiceListRT.
-func newServiceListRT(vres *serviceviews.ServiceListRTView) *ServiceListRT {
-	res := &ServiceListRT{}
+// newXServiceListRT converts projected type XServiceListRT to service type
+// XServiceListRT.
+func newXServiceListRT(vres *servicexviews.XServiceListRTView) *XServiceListRT {
+	res := &XServiceListRT{}
 	if vres.AtTime != nil {
 		res.AtTime = *vres.AtTime
 	}
 	if vres.Items != nil {
-		res.Items = make([]*ServiceListItem, len(vres.Items))
+		res.Items = make([]*XServiceListItem, len(vres.Items))
 		for i, val := range vres.Items {
-			res.Items[i] = transformServiceviewsServiceListItemViewToServiceListItem(val)
+			if val == nil {
+				res.Items[i] = nil
+				continue
+			}
+			res.Items[i] = transformServicexviewsXServiceListItemViewToXServiceListItem(val)
 		}
 	}
 	if vres.Links != nil {
 		res.Links = make([]*LinkT, len(vres.Links))
 		for i, val := range vres.Links {
-			res.Links[i] = transformServiceviewsLinkTViewToLinkT(val)
+			if val == nil {
+				res.Links[i] = nil
+				continue
+			}
+			res.Links[i] = transformServicexviewsLinkTViewToLinkT(val)
 		}
 	}
 	return res
 }
 
-// newServiceListRTView projects result type ServiceListRT to projected type
-// ServiceListRTView using the "default" view.
-func newServiceListRTView(res *ServiceListRT) *serviceviews.ServiceListRTView {
-	vres := &serviceviews.ServiceListRTView{
+// newXServiceListRTView projects result type XServiceListRT to projected type
+// XServiceListRTView using the "default" view.
+func newXServiceListRTView(res *XServiceListRT) *servicexviews.XServiceListRTView {
+	vres := &servicexviews.XServiceListRTView{
 		AtTime: &res.AtTime,
 	}
 	if res.Items != nil {
-		vres.Items = make([]*serviceviews.ServiceListItemView, len(res.Items))
+		vres.Items = make([]*servicexviews.XServiceListItemView, len(res.Items))
 		for i, val := range res.Items {
-			vres.Items[i] = transformServiceListItemToServiceviewsServiceListItemView(val)
+			if val == nil {
+				vres.Items[i] = nil
+				continue
+			}
+			vres.Items[i] = transformXServiceListItemToServicexviewsXServiceListItemView(val)
 		}
 	} else {
-		vres.Items = []*serviceviews.ServiceListItemView{}
+		vres.Items = []*servicexviews.XServiceListItemView{}
 	}
 	if res.Links != nil {
-		vres.Links = make([]*serviceviews.LinkTView, len(res.Links))
+		vres.Links = make([]*servicexviews.LinkTView, len(res.Links))
 		for i, val := range res.Links {
-			vres.Links[i] = transformLinkTToServiceviewsLinkTView(val)
+			if val == nil {
+				vres.Links[i] = nil
+				continue
+			}
+			vres.Links[i] = transformLinkTToServicexviewsLinkTView(val)
 		}
 	} else {
-		vres.Links = []*serviceviews.LinkTView{}
+		vres.Links = []*servicexviews.LinkTView{}
 	}
 	return vres
 }
 
-// transformServiceviewsServiceListItemViewToServiceListItem builds a value of
-// type *ServiceListItem from a value of type *serviceviews.ServiceListItemView.
-func transformServiceviewsServiceListItemViewToServiceListItem(v *serviceviews.ServiceListItemView) *ServiceListItem {
+// transformServicexviewsXServiceListItemViewToXServiceListItem builds a value
+// of type *XServiceListItem from a value of type
+// *servicexviews.XServiceListItemView.
+func transformServicexviewsXServiceListItemViewToXServiceListItem(v *servicexviews.XServiceListItemView) *XServiceListItem {
 	if v == nil {
 		return nil
 	}
-	res := &ServiceListItem{
+	res := &XServiceListItem{
 		ID:          *v.ID,
 		Name:        v.Name,
 		Description: v.Description,
@@ -547,9 +564,9 @@ func transformServiceviewsServiceListItemViewToServiceListItem(v *serviceviews.S
 	return res
 }
 
-// transformServiceviewsLinkTViewToLinkT builds a value of type *LinkT from a
-// value of type *serviceviews.LinkTView.
-func transformServiceviewsLinkTViewToLinkT(v *serviceviews.LinkTView) *LinkT {
+// transformServicexviewsLinkTViewToLinkT builds a value of type *LinkT from a
+// value of type *servicexviews.LinkTView.
+func transformServicexviewsLinkTViewToLinkT(v *servicexviews.LinkTView) *LinkT {
 	if v == nil {
 		return nil
 	}
@@ -562,10 +579,11 @@ func transformServiceviewsLinkTViewToLinkT(v *serviceviews.LinkTView) *LinkT {
 	return res
 }
 
-// transformServiceListItemToServiceviewsServiceListItemView builds a value of
-// type *serviceviews.ServiceListItemView from a value of type *ServiceListItem.
-func transformServiceListItemToServiceviewsServiceListItemView(v *ServiceListItem) *serviceviews.ServiceListItemView {
-	res := &serviceviews.ServiceListItemView{
+// transformXServiceListItemToServicexviewsXServiceListItemView builds a value
+// of type *servicexviews.XServiceListItemView from a value of type
+// *XServiceListItem.
+func transformXServiceListItemToServicexviewsXServiceListItemView(v *XServiceListItem) *servicexviews.XServiceListItemView {
+	res := &servicexviews.XServiceListItemView{
 		ID:          &v.ID,
 		Name:        v.Name,
 		Description: v.Description,
@@ -579,10 +597,10 @@ func transformServiceListItemToServiceviewsServiceListItemView(v *ServiceListIte
 	return res
 }
 
-// transformLinkTToServiceviewsLinkTView builds a value of type
-// *serviceviews.LinkTView from a value of type *LinkT.
-func transformLinkTToServiceviewsLinkTView(v *LinkT) *serviceviews.LinkTView {
-	res := &serviceviews.LinkTView{
+// transformLinkTToServicexviewsLinkTView builds a value of type
+// *servicexviews.LinkTView from a value of type *LinkT.
+func transformLinkTToServicexviewsLinkTView(v *LinkT) *servicexviews.LinkTView {
+	res := &servicexviews.LinkTView{
 		Rel:  &v.Rel,
 		Type: &v.Type,
 		Href: &v.Href,

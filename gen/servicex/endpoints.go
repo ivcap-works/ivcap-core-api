@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
 
 // $ goa gen github.com/ivcap-works/ivcap-core-api/design
 
-package service
+package servicex
 
 import (
 	"context"
@@ -23,7 +23,7 @@ import (
 	"goa.design/goa/v3/security"
 )
 
-// Endpoints wraps the "service" service endpoints.
+// Endpoints wraps the "servicex" service endpoints.
 type Endpoints struct {
 	List          goa.Endpoint
 	CreateService goa.Endpoint
@@ -32,7 +32,7 @@ type Endpoints struct {
 	Delete        goa.Endpoint
 }
 
-// NewEndpoints wraps the methods of the "service" service with endpoints.
+// NewEndpoints wraps the methods of the "servicex" service with endpoints.
 func NewEndpoints(s Service) *Endpoints {
 	// Casting service to Auther interface
 	a := s.(Auther)
@@ -45,7 +45,7 @@ func NewEndpoints(s Service) *Endpoints {
 	}
 }
 
-// Use applies the given middleware to all the "service" service endpoints.
+// Use applies the given middleware to all the "servicex" service endpoints.
 func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 	e.List = m(e.List)
 	e.CreateService = m(e.CreateService)
@@ -55,7 +55,7 @@ func (e *Endpoints) Use(m func(goa.Endpoint) goa.Endpoint) {
 }
 
 // NewListEndpoint returns an endpoint function that calls the method "list" of
-// service "service".
+// service "servicex".
 func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ListPayload)
@@ -73,13 +73,13 @@ func NewListEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 		if err != nil {
 			return nil, err
 		}
-		vres := NewViewedServiceListRT(res, "default")
+		vres := NewViewedXServiceListRT(res, "default")
 		return vres, nil
 	}
 }
 
 // NewCreateServiceEndpoint returns an endpoint function that calls the method
-// "create_service" of service "service".
+// "create_service" of service "servicex".
 func NewCreateServiceEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*CreateServicePayload)
@@ -98,7 +98,7 @@ func NewCreateServiceEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.End
 }
 
 // NewReadEndpoint returns an endpoint function that calls the method "read" of
-// service "service".
+// service "servicex".
 func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*ReadPayload)
@@ -117,7 +117,7 @@ func NewReadEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 }
 
 // NewUpdateEndpoint returns an endpoint function that calls the method
-// "update" of service "service".
+// "update" of service "servicex".
 func NewUpdateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*UpdatePayload)
@@ -136,7 +136,7 @@ func NewUpdateEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 }
 
 // NewDeleteEndpoint returns an endpoint function that calls the method
-// "delete" of service "service".
+// "delete" of service "servicex".
 func NewDeleteEndpoint(s Service, authJWTFn security.AuthJWTFunc) goa.Endpoint {
 	return func(ctx context.Context, req any) (any, error) {
 		p := req.(*DeletePayload)

@@ -1,4 +1,4 @@
-// Copyright 2025 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
+// Copyright 2026 Commonwealth Scientific and Industrial Research Organisation (CSIRO) ABN 41 687 119 230
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,25 +20,25 @@ import (
 	goa "goa.design/goa/v3/pkg"
 )
 
-// ServiceListRT is the viewed result type that is projected based on a view.
-type ServiceListRT struct {
+// XServiceListRT is the viewed result type that is projected based on a view.
+type XServiceListRT struct {
 	// Type to project
-	Projected *ServiceListRTView
+	Projected *XServiceListRTView
 	// View to render
 	View string
 }
 
-// ServiceListRTView is a type that runs validations on a projected type.
-type ServiceListRTView struct {
+// XServiceListRTView is a type that runs validations on a projected type.
+type XServiceListRTView struct {
 	// Services
-	Items []*ServiceListItemView
+	Items []*XServiceListItemView
 	// Time at which this list was valid
 	AtTime *string
 	Links  []*LinkTView
 }
 
-// ServiceListItemView is a type that runs validations on a projected type.
-type ServiceListItemView struct {
+// XServiceListItemView is a type that runs validations on a projected type.
+type XServiceListItemView struct {
 	// ID
 	ID *string
 	// Optional customer provided name
@@ -67,9 +67,9 @@ type LinkTView struct {
 }
 
 var (
-	// ServiceListRTMap is a map indexing the attribute names of ServiceListRT by
+	// XServiceListRTMap is a map indexing the attribute names of XServiceListRT by
 	// view name.
-	ServiceListRTMap = map[string][]string{
+	XServiceListRTMap = map[string][]string{
 		"default": {
 			"items",
 			"at-time",
@@ -78,21 +78,21 @@ var (
 	}
 )
 
-// ValidateServiceListRT runs the validations defined on the viewed result type
-// ServiceListRT.
-func ValidateServiceListRT(result *ServiceListRT) (err error) {
+// ValidateXServiceListRT runs the validations defined on the viewed result
+// type XServiceListRT.
+func ValidateXServiceListRT(result *XServiceListRT) (err error) {
 	switch result.View {
 	case "default", "":
-		err = ValidateServiceListRTView(result.Projected)
+		err = ValidateXServiceListRTView(result.Projected)
 	default:
 		err = goa.InvalidEnumValueError("view", result.View, []any{"default"})
 	}
 	return
 }
 
-// ValidateServiceListRTView runs the validations defined on ServiceListRTView
-// using the "default" view.
-func ValidateServiceListRTView(result *ServiceListRTView) (err error) {
+// ValidateXServiceListRTView runs the validations defined on
+// XServiceListRTView using the "default" view.
+func ValidateXServiceListRTView(result *XServiceListRTView) (err error) {
 	if result.Items == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("items", "result"))
 	}
@@ -104,7 +104,7 @@ func ValidateServiceListRTView(result *ServiceListRTView) (err error) {
 	}
 	for _, e := range result.Items {
 		if e != nil {
-			if err2 := ValidateServiceListItemView(e); err2 != nil {
+			if err2 := ValidateXServiceListItemView(e); err2 != nil {
 				err = goa.MergeErrors(err, err2)
 			}
 		}
@@ -122,9 +122,9 @@ func ValidateServiceListRTView(result *ServiceListRTView) (err error) {
 	return
 }
 
-// ValidateServiceListItemView runs the validations defined on
-// ServiceListItemView.
-func ValidateServiceListItemView(result *ServiceListItemView) (err error) {
+// ValidateXServiceListItemView runs the validations defined on
+// XServiceListItemView.
+func ValidateXServiceListItemView(result *XServiceListItemView) (err error) {
 	if result.ID == nil {
 		err = goa.MergeErrors(err, goa.MissingFieldError("id", "result"))
 	}
@@ -135,7 +135,7 @@ func ValidateServiceListItemView(result *ServiceListItemView) (err error) {
 		err = goa.MergeErrors(err, goa.MissingFieldError("href", "result"))
 	}
 	if result.ID != nil {
-		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatUUID))
+		err = goa.MergeErrors(err, goa.ValidateFormat("result.id", *result.ID, goa.FormatURI))
 	}
 	if result.PublishedAt != nil {
 		err = goa.MergeErrors(err, goa.ValidateFormat("result.published-at", *result.PublishedAt, goa.FormatDateTime))
