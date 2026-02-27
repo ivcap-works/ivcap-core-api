@@ -21,21 +21,6 @@ func ListPackagePath() string {
 	return "/1/packages/list"
 }
 
-// PullPackagePath returns the URL path to the package service pull HTTP endpoint.
-func PullPackagePath() string {
-	return "/1/packages/pull"
-}
-
-// PushPackagePath returns the URL path to the package service push HTTP endpoint.
-func PushPackagePath() string {
-	return "/1/packages/push"
-}
-
-// StatusPackagePath returns the URL path to the package service status HTTP endpoint.
-func StatusPackagePath() string {
-	return "/1/packages/status"
-}
-
 // RemovePackagePath returns the URL path to the package service remove HTTP endpoint.
 func RemovePackagePath() string {
 	return "/1/packages/remove"
